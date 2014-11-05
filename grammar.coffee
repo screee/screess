@@ -1,5 +1,7 @@
 Jison = require("jison")
 
+rule = (token, name = token) -> [token, "return #{name}"]
+
 grammar =
 
   comment: "ScreeSS is a CSS-like language that compiles into MapBox GL JSON stylesheets."
@@ -19,8 +21,8 @@ grammar =
       ["\\[", "return '['"]
       ["\\]", "return ']'"]
       [";", "return ';'"]
-      ["=", "return '='"]
 
+      ["=", "return '='"]
       [">=", "return '>='"]
       ["<=", "return '<='"]
       [">", "return '>'"]
@@ -29,17 +31,17 @@ grammar =
       ["in", "return 'IN'"]
       ["!in", "return 'NOT_IN'"]
 
+      ["\\+", "return '+'"]
+      ["-", "return '-'"]
+      ["\\*", "return '*'"]
+      ["\\/", "return '/'"]
+
       ["and", "return 'AND'"]
       ["&&", "return 'AND'"]
       ["or", "return 'OR'"]
       ["\\|\\|", "return 'OR'"]
       ["not", "return 'NOT'"]
       ["!", "return 'NOT'"]
-
-      ["\\+", "return '+'"]
-      ["-", "return '-'"]
-      ["\\*", "return '*'"]
-      ["\\/", "return '/'"]
 
       ["\\s+", "/* skip whitespace */"]
 
