@@ -1603,8 +1603,7 @@ module.exports = (function() {
 
     __initializer = (function() {
       var _;
-      require('./utilities');
-      _ = require('underscore');
+      _ = require('./utilities');
       this.GlobalScope = require('./scopes/GlobalScope');
       this.ColorValue = require('./values/ColorValue');
       this.LiteralExpression = require('./expressions/LiteralExpression');

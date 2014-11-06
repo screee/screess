@@ -1,19 +1,19 @@
-Color = require "../utilities/color"
+_ = require '../utilities'
 Value = require "./Value"
 assert = require "assert"
 
 module.exports = class ColorValue extends Value
 
   @hex: (hex) ->
-    [r, g, b] = Color.hex2rgb(hex)
+    [r, g, b] = _.hex2rgb(hex)
     @rgba(r, g, b, 1)
 
   @hsva: (h, s, v, a) ->
-    [r, g, b] = Color.hsv2rgb(h, s, v)
+    [r, g, b] = _.hsv2rgb(h, s, v)
     @rgba(r, g, b, a)
 
   @hsla: (h, s, l, a) ->
-    [r, g, b] = Color.hsl2rgb(h, s, l)
+    [r, g, b] = _.hsl2rgb(h, s, l)
     @rgba(r, g, b, a)
 
   @rgba: (red, green, blue, alpha) ->

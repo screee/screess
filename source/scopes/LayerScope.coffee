@@ -1,5 +1,5 @@
 ClassScope = require('./ClassScope')
-_ = require('underscore')
+_ = require('../utilities')
 
 module.exports = class LayerScope extends require("./Scope")
   selector: null
@@ -14,8 +14,8 @@ module.exports = class LayerScope extends require("./Scope")
   evaluate: ->
     output = paint: @evaluateRules()
 
-    _.extend(output, Object.mapKeys(
-      Object.map(@classScopes, (name, scope) => scope.evaluate(@)),
+    _.extend(output, _.objectMapKeys(
+      _.objectMap(@classScopes, (name, scope) => scope.evaluate(@)),
       (name, evaluated) -> "paint.#{name}"
     ))
 

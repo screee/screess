@@ -1,6 +1,6 @@
 Value = require "../values/value"
 assert = require "assert"
-_ = require "underscore"
+_ = require "../utilities"
 
 module.exports = class Scope
 

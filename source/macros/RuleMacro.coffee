@@ -1,5 +1,5 @@
 { literal } = require("../expressions/LiteralExpression")
-_ = require "underscore"
+_ = require "../utilities"
 
 module.exports = class RuleMacro
 

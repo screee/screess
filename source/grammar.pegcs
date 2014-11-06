@@ -1,6 +1,5 @@
 {
-  require './utilities'
-  _ = require 'underscore'
+  _ = require './utilities'
 
   @GlobalScope = require('./scopes/GlobalScope')
 
