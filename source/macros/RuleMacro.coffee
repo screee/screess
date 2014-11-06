@@ -15,7 +15,7 @@ module.exports = class RuleMacro
 
     _.extend(
       @scope.valueMacros,
-      Object.zip(@argNames, argValues.map(literal))
+      _.objectZip(@argNames, argValues.map(literal))
     )
 
     rules = {}

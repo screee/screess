@@ -1,6 +1,6 @@
 Expression = require('../expressions/Expression')
 {literal} = require('../expressions/LiteralExpression')
-
+_ = require("../utilities")
 Scope = require('../scopes/Scope')
 
 module.exports = class ValueMacro
@@ -15,7 +15,7 @@ module.exports = class ValueMacro
       @body.apply({}, argValues)
 
     else if @body instanceof Expression
-      scopeValueMacros = Object.zip(@argNames, argValues.map(literal))
+      scopeValueMacros = _.objectZip(@argNames, argValues.map(literal))
       scope = new Scope(parentScope, scopeValueMacros)
       @body.evaluate(scope)
     else

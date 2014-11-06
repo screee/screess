@@ -28,10 +28,10 @@ module.exports = class Scope
   getRuleMacro: (name) ->
     @ruleMacros[name] || @parent?.getRuleMacro(name)
 
-  evaluateRules: ->
+  evaluateRules: (rules = @rules) ->
     output = {}
 
-    for name, expressions of @rules
+    for name, expressions of rules
       values = expressions.map (expression) => expression.evaluate(@)
 
       if (scopeMacro = @getRuleMacro(name))

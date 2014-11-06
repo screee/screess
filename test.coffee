@@ -10,7 +10,8 @@ foo(test1 test2) = {
 
 yellow(test) = test
 
-#test[@length = 4 && @length < 2] {
+#test {
+  $type: 5
   .test {
     doesitwork: yellow(21)
   }

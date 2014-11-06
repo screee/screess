@@ -39,6 +39,7 @@ statements = w (statement w)*
 statement =
   valueMacroDefinition /
   rule /
+  metaRule /
   layerScope /
   classScope /
   ruleMacroDefinition
@@ -49,6 +50,9 @@ scope = (w "{" w body:statements w "}" w { @popScope() })
 
 rule =
   name:identifier w ":" w expressions:expressions s { @scope.addRule(name, expressions) }
+
+metaRule =
+  "$" name:identifier w ":" w expressions:expressions s { @scope.addMetaRule(name, expressions) }
 
 valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments w "=" w body:expression s
