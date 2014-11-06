@@ -1,16 +1,18 @@
-parser = require("./dist/parser.js")
+parser = require("./source/parser")
 util = require("util")
 
 source = """
 
-foo(test1 test2) {
+foo(test1 test2) = {
   one: test1
   two: test2
 }
 
-#test {
+yellow(test) = test
+
+#test[@length = 4 && @length < 2] {
   .test {
-    foo: 1 2
+    doesitwork: yellow(21)
   }
 }
 

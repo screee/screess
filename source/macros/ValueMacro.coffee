@@ -1,3 +1,8 @@
+Expression = require('../expressions/Expression')
+{literal} = require('../expressions/LiteralExpression')
+
+Scope = require('../scopes/Scope')
+
 module.exports = class ValueMacro
   constructor: (@name, @argNames, @body) ->
 
@@ -6,7 +11,12 @@ module.exports = class ValueMacro
     if argValues.length != @argNames.length
       throw "Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}"
 
-    args = Object.zip(@argNames, argValues.map(makeLiteral))
-    scope = new MacroScope(parentScope, args)
+    if @body instanceof Function
+      @body.apply({}, argValues)
 
-    @body.evaluate(scope)
+    else if @body instanceof Expression
+      scopeValueMacros = Object.zip(@argNames, argValues.map(literal))
+      scope = new Scope(parentScope, scopeValueMacros)
+      @body.evaluate(scope)
+    else
+      throw "Value macro bodies must be Expressions or JavaScript functions"

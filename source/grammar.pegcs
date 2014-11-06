@@ -1,12 +1,19 @@
 {
-  require 'sugar'
+  require './utilities'
+  _ = require 'underscore'
 
-  @ScreeSS = require '../source/screess'
+  @GlobalScope = require('./scopes/GlobalScope')
 
-  @globalScope = @scope = new @ScreeSS.GlobalScope()
+  @ColorValue = require('./values/ColorValue')
+
+  @LiteralExpression = require('./expressions/LiteralExpression')
+  @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
+  @AttributeReferenceExpression = require('./expressions/AttributeReferenceExpression')
+
+  @globalScope = @scope = new @GlobalScope()
   @stack = []
 
-  @literal = (value) => new @ScreeSS.LiteralExpression(value)
+  {@literal} = @LiteralExpression
 
   @pushScope = (scope) ->
     @stack.push(@scope)
@@ -24,7 +31,7 @@ s = ("\n" / "\r" / ";" / !.) w { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                             Statements                                     //
+//                            Scopes and Statements                           //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +60,7 @@ valueMacroDefinitionArguments =
   "" { return [] }
 
 ruleMacroDefinition =
-  (name:identifier args:ruleMacroDefinitionArguments { @pushScope(@scope.addRuleMacro(name, args)) }) scope
+  (name:identifier args:ruleMacroDefinitionArguments w "=" w { @pushScope(@scope.addRuleMacro(name, args)) }) scope
 
 ruleMacroDefinitionArguments =
   "(" head:identifier tail:(w identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
@@ -61,26 +68,40 @@ ruleMacroDefinitionArguments =
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                             Expressions                                    //
+//                             Value Expression                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-expressions = head:expression tail:(" "+ expression)* { [head].concat(tail.map (e) -> e[1]) }
+expressions =
+  head:expression tail:(" "+ expression)* { [head].concat(tail.map (e) -> e[1]) }
 
-expression = number / boolean / valueMacroReference
+expression =
+  numberExpression /
+  booleanExpression /
+  valueMacroReferenceExpression /
+  attributeReferenceExpression /
+  colorExpression
 
-boolean = "true" { @literal true } / "false" { @literal false }
+booleanExpression =
+  "true" { @literal true } / "false" { @literal false }
 
-number =
-  before:integer? "." after:([0-9]+) { @literal before + parseFloat("." + after.join("")) } /
-  integer
+numberExpression =
+  before:integerExpression? "." after:([0-9]+) { @literal before + parseFloat("." + after.join("")) } /
+  integerExpression
 
-integer =
+integerExpression =
   head:[1-9] tail:[0-9]* { @literal parseInt(head + tail.join("")) } /
-  "0" { 0 }
+  "0" { @literal 0 }
 
-valueMacroReference = name:identifier args:valueMacroReferenceArguments { new @ScreeSS.ValueMacroReferenceExpression(name, args) }
+valueMacroReferenceExpression =
+  name:identifier args:valueMacroReferenceExpressionArguments { new @ValueMacroReferenceExpression(name, args) }
 
-valueMacroReferenceArguments =
-  "(" head:expression tail:(w expression)* ")" { [head].concat(tail.map (e) -> e[3] ) } /
+valueMacroReferenceExpressionArguments =
+  "(" head:expression tail:(w expression)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { [] }
+
+attributeReferenceExpression =
+  "@" name:identifier { new @AttributeReferenceExpression(name) }
+
+colorExpression =
+  "#" color:[0-9a-f]+ { @literal @ColorValue.hex(color.join("")) }

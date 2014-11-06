@@ -1,4 +1,6 @@
-module.exports = class LiteralExpression extends require('./Expression')
+Expression = require('./Expression')
+
+module.exports = class LiteralExpression extends Expression
   constructor: (@value) ->
   evaluate: (scope) -> @value
 

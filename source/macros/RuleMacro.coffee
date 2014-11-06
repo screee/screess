@@ -5,7 +5,7 @@ module.exports = class RuleMacro
 
   # TODO allow for subclasses, sublayers?
 
-  constructor: (parentScope, @name, @argNames) ->
+  constructor: (parentScope, @name, @argNames, @body = null) ->
     ClassScope = require("../scopes/ClassScope")
     @scope = new ClassScope(parentScope)
 
@@ -18,4 +18,12 @@ module.exports = class RuleMacro
       Object.zip(@argNames, argValues.map(literal))
     )
 
-    @scope.evaluateRules()
+    rules = {}
+
+    _.extend(
+      rules,
+      @scope.evaluateRules(),
+      @body?.apply({}, argValues)
+    )
+
+    rules

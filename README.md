@@ -3,7 +3,6 @@
  - [ ] Documentation
  - [ ] Unit tests
 
- - [ ] Scope Macros
  - [ ] Function Values DSL
  - [ ] Source DSL
  - [ ] String Interpolation
@@ -12,4 +11,8 @@
 
  - [ ] Create ACE Syntax Mode
  - [ ] Create Sublime Syntax Mode
- - [ ] Remove Dependency on Underscore
+ - [ ] Remove Dependency on Sugar.js
+ - [ ] Consolodate Scope Classes into one class
+
+ - [ ] Create seperate evaluateRule and evaluateSelector contexts
+ - [ ] Look for strong typing library

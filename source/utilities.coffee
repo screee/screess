@@ -17,3 +17,4 @@ Object.zip = (keys, values) ->
   for i in [0...keys.length]
     output[keys[i]] = values[i]
   output
+

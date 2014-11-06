@@ -141,17 +141,23 @@ module.exports = (function() {
         peg$c59 = "0",
         peg$c60 = { type: "literal", value: "0", description: "\"0\"" },
         peg$c61 = function() {return (function() {
-          return 0;
+          return this.literal(0);
         }).apply(__initializer);
         },
         peg$c62 = function(name, args) {return (function() {
-          return new this.ScreeSS.ValueMacroReferenceExpression(name, args);
+          return new this.ValueMacroReferenceExpression(name, args);
         }).apply(__initializer);
         },
-        peg$c63 = function(head, tail) {return (function() {
-          return [head].concat(tail.map(function(e) {
-            return e[3];
-          }));
+        peg$c63 = "@",
+        peg$c64 = { type: "literal", value: "@", description: "\"@\"" },
+        peg$c65 = function(name) {return (function() {
+          return new this.AttributeReferenceExpression(name);
+        }).apply(__initializer);
+        },
+        peg$c66 = /^[0-9a-f]/,
+        peg$c67 = { type: "class", value: "[0-9a-f]", description: "[0-9a-f]" },
+        peg$c68 = function(color) {return (function() {
+          return this.literal(this.ColorValue.hex(color.join("")));
         }).apply(__initializer);
         },
 
@@ -977,7 +983,7 @@ module.exports = (function() {
     }
 
     function peg$parseruleMacroDefinition() {
-      var s0, s1, s2, s3;
+      var s0, s1, s2, s3, s4, s5, s6;
 
       s0 = peg$currPos;
       s1 = peg$currPos;
@@ -985,9 +991,33 @@ module.exports = (function() {
       if (s2 !== peg$FAILED) {
         s3 = peg$parseruleMacroDefinitionArguments();
         if (s3 !== peg$FAILED) {
-          peg$reportedPos = s1;
-          s2 = peg$c45(s2, s3);
-          s1 = s2;
+          s4 = peg$parsew();
+          if (s4 !== peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 61) {
+              s5 = peg$c35;
+              peg$currPos++;
+            } else {
+              s5 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c36); }
+            }
+            if (s5 !== peg$FAILED) {
+              s6 = peg$parsew();
+              if (s6 !== peg$FAILED) {
+                peg$reportedPos = s1;
+                s2 = peg$c45(s2, s3);
+                s1 = s2;
+              } else {
+                peg$currPos = s1;
+                s1 = peg$c1;
+              }
+            } else {
+              peg$currPos = s1;
+              s1 = peg$c1;
+            }
+          } else {
+            peg$currPos = s1;
+            s1 = peg$c1;
+          }
         } else {
           peg$currPos = s1;
           s1 = peg$c1;
@@ -1203,18 +1233,24 @@ module.exports = (function() {
     function peg$parseexpression() {
       var s0;
 
-      s0 = peg$parsenumber();
+      s0 = peg$parsenumberExpression();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseboolean();
+        s0 = peg$parsebooleanExpression();
         if (s0 === peg$FAILED) {
-          s0 = peg$parsevalueMacroReference();
+          s0 = peg$parsevalueMacroReferenceExpression();
+          if (s0 === peg$FAILED) {
+            s0 = peg$parseattributeReferenceExpression();
+            if (s0 === peg$FAILED) {
+              s0 = peg$parsecolorExpression();
+            }
+          }
         }
       }
 
       return s0;
     }
 
-    function peg$parseboolean() {
+    function peg$parsebooleanExpression() {
       var s0, s1;
 
       s0 = peg$currPos;
@@ -1249,11 +1285,11 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsenumber() {
+    function peg$parsenumberExpression() {
       var s0, s1, s2, s3, s4;
 
       s0 = peg$currPos;
-      s1 = peg$parseinteger();
+      s1 = peg$parseintegerExpression();
       if (s1 === peg$FAILED) {
         s1 = peg$c52;
       }
@@ -1305,13 +1341,13 @@ module.exports = (function() {
         s0 = peg$c1;
       }
       if (s0 === peg$FAILED) {
-        s0 = peg$parseinteger();
+        s0 = peg$parseintegerExpression();
       }
 
       return s0;
     }
 
-    function peg$parseinteger() {
+    function peg$parseintegerExpression() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
@@ -1372,13 +1408,13 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalueMacroReference() {
+    function peg$parsevalueMacroReferenceExpression() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
       s1 = peg$parseidentifier();
       if (s1 !== peg$FAILED) {
-        s2 = peg$parsevalueMacroReferenceArguments();
+        s2 = peg$parsevalueMacroReferenceExpressionArguments();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
           s1 = peg$c62(s1, s2);
@@ -1395,7 +1431,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalueMacroReferenceArguments() {
+    function peg$parsevalueMacroReferenceExpressionArguments() {
       var s0, s1, s2, s3, s4, s5, s6;
 
       s0 = peg$currPos;
@@ -1453,7 +1489,7 @@ module.exports = (function() {
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c63(s2, s3);
+              s1 = peg$c42(s2, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1484,17 +1520,99 @@ module.exports = (function() {
       return s0;
     }
 
+    function peg$parseattributeReferenceExpression() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      if (input.charCodeAt(peg$currPos) === 64) {
+        s1 = peg$c63;
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c64); }
+      }
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parseidentifier();
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c65(s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c1;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c1;
+      }
+
+      return s0;
+    }
+
+    function peg$parsecolorExpression() {
+      var s0, s1, s2, s3;
+
+      s0 = peg$currPos;
+      if (input.charCodeAt(peg$currPos) === 35) {
+        s1 = peg$c21;
+        peg$currPos++;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c22); }
+      }
+      if (s1 !== peg$FAILED) {
+        s2 = [];
+        if (peg$c66.test(input.charAt(peg$currPos))) {
+          s3 = input.charAt(peg$currPos);
+          peg$currPos++;
+        } else {
+          s3 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c67); }
+        }
+        if (s3 !== peg$FAILED) {
+          while (s3 !== peg$FAILED) {
+            s2.push(s3);
+            if (peg$c66.test(input.charAt(peg$currPos))) {
+              s3 = input.charAt(peg$currPos);
+              peg$currPos++;
+            } else {
+              s3 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c67); }
+            }
+          }
+        } else {
+          s2 = peg$c1;
+        }
+        if (s2 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c68(s2);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c1;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c1;
+      }
+
+      return s0;
+    }
+
     var __initializer;
 
     __initializer = (function() {
-      var _this = this;
-      require('sugar');
-      this.ScreeSS = require('../source/screess');
-      this.globalScope = this.scope = new this.ScreeSS.GlobalScope();
+      var _;
+      require('./utilities');
+      _ = require('underscore');
+      this.GlobalScope = require('./scopes/GlobalScope');
+      this.ColorValue = require('./values/ColorValue');
+      this.LiteralExpression = require('./expressions/LiteralExpression');
+      this.ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression');
+      this.AttributeReferenceExpression = require('./expressions/AttributeReferenceExpression');
+      this.globalScope = this.scope = new this.GlobalScope();
       this.stack = [];
-      this.literal = function(value) {
-        return new _this.ScreeSS.LiteralExpression(value);
-      };
+      this.literal = this.LiteralExpression.literal;
       this.pushScope = function(scope) {
         this.stack.push(this.scope);
         return this.scope = scope;
