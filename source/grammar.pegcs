@@ -4,10 +4,10 @@
   @GlobalScope = require('./scopes/GlobalScope')
 
   @ColorValue = require('./values/ColorValue')
+  @AttributeReferenceValue = require('./values/AttributeReferenceValue')
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
-  @AttributeReferenceExpression = require('./expressions/AttributeReferenceExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -17,16 +17,18 @@
   @pushScope = (scope) ->
     @stack.push(@scope)
     @scope = scope
+
   @popScope = ->
     @scope = @stack.pop()
 }
 
-global = statements { @globalScope.evaluate() }
+global = statements { @globalScope.toMGLGlobalScope() }
 
 identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
 
-w =  (("\n" / "\r" / "\t" / " ")* / !.) { null }
-s = ("\n" / "\r" / ";" / !.) w { null }
+whitespace =  (("\n" / "\r" / "\t" / " ")* / !.) { null }
+statementSeperator = ("\n" / "\r" / ";" / !.) whitespace { null }
+argumentSeperator = (("\n" / "\r" / "\t" / " ")+ / !.) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -34,7 +36,7 @@ s = ("\n" / "\r" / ";" / !.) w { null }
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statements = w (statement w)*
+statements = whitespace (statement whitespace)*
 
 statement =
   valueMacroDefinition /
@@ -46,27 +48,30 @@ statement =
 
 layerScope = ("#" name:identifier { @pushScope(@scope.addLayerScope(name)) }) scope
 classScope = ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scope
-scope = (w "{" w body:statements w "}" w { @popScope() })
+scope = (whitespace "{" whitespace body:statements whitespace "}" whitespace { @popScope() })
 
-rule =
-  name:identifier w ":" w expressions:expressions s { @scope.addRule(name, expressions) }
+filterRule =
+  "$filter" whitespace ":" whitespace expressions: statementSeperator { @scope.setFilter(name, expressions) }
 
 metaRule =
-  "$" name:identifier w ":" w expressions:expressions s { @scope.addMetaRule(name, expressions) }
+  "$" name:identifier whitespace ":" whitespace expressions:expressions statementSeperator { @scope.addMetaRule(name, expressions) }
+
+rule =
+  name:identifier whitespace ":" whitespace expressions:expressions statementSeperator { @scope.addRule(name, expressions) }
 
 valueMacroDefinition =
-  name:identifier args:valueMacroDefinitionArguments w "=" w body:expression s
+  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:expression statementSeperator
   { @scope.addValueMacro(name, args, body) }
 
 valueMacroDefinitionArguments =
-  "(" head:identifier tail:(w identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:identifier tail:(whitespace identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
 
 ruleMacroDefinition =
-  (name:identifier args:ruleMacroDefinitionArguments w "=" w { @pushScope(@scope.addRuleMacro(name, args)) }) scope
+  (name:identifier args:ruleMacroDefinitionArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scope
 
 ruleMacroDefinitionArguments =
-  "(" head:identifier tail:(w identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:identifier tail:(argumentSeperator identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,11 +105,11 @@ valueMacroReferenceExpression =
   name:identifier args:valueMacroReferenceExpressionArguments { new @ValueMacroReferenceExpression(name, args) }
 
 valueMacroReferenceExpressionArguments =
-  "(" head:expression tail:(w expression)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:expression tail:(argumentSeperator expression)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { [] }
 
 attributeReferenceExpression =
-  "@" name:identifier { new @AttributeReferenceExpression(name) }
+  "@" name:identifier { @literal new @AttributeReferenceValue(name) }
 
 colorExpression =
   "#" color:[0-9a-f]+ { @literal @ColorValue.hex(color.join("")) }

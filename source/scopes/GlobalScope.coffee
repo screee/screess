@@ -1,10 +1,11 @@
+Scope = require("./Scope")
 _ = require("../utilities")
 LayerScope = require('./LayerScope')
 Globals = require('../globals')
 ValueMacro = require('../macros/ValueMacro')
 RuleMacro = require('../macros/RuleMacro')
 
-module.exports = class GlobalScope extends require("./Scope")
+module.exports = class GlobalScope extends Scope
 
   layerScopes: {}
 
@@ -20,5 +21,6 @@ module.exports = class GlobalScope extends require("./Scope")
   addLayerScope: (name, scope) ->
     @layerScopes[name] = new LayerScope(@)
 
-  evaluate: ->
-    layers: _.objectMap @layerScopes, (name, layer) -> layer.evaluate()
+  toMGLGlobalScope: ->
+    layers: _.objectMap @layerScopes, (name, layer) ->
+      layer.toMGLLayerScope()

@@ -1,7 +1,10 @@
-Expression = require('./Expression')
+Expression = require("./Expression")
 
 module.exports = class LiteralExpression extends Expression
-  constructor: (@value) ->
-  evaluate: (scope) -> @value
 
   @literal: (value) -> new LiteralExpression(value)
+
+  constructor: (@value) ->
+
+  toMGLRuleValue: (scope) -> super(scope, @value)
+  toMGLFilterValue: (scope) -> super(scope, @value)

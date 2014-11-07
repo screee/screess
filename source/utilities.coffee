@@ -14,6 +14,13 @@ _.mixin
       output[filter(key, value)] = value
     output
 
+  objectMapKeysValues: (input, filter) ->
+    output = {}
+    for inputKey, inputValue of input
+      [outputKey, outputValue] = filter(inputKey, inputValue)
+      output[outputKey] = outputValue
+    output
+
   objectZip: (keys, values) ->
     output = {}
     for i in [0...keys.length]

@@ -28,20 +28,17 @@ module.exports = class Scope
   getRuleMacro: (name) ->
     @ruleMacros[name] || @parent?.getRuleMacro(name)
 
-  evaluateRules: (rules = @rules) ->
+  toMGLRules: (rules = @rules) ->
     output = {}
 
     for name, expressions of rules
-      values = expressions.map (expression) => expression.evaluate(@)
+      values = expressions.map (expression) => expression.toMGLRuleValue(@)
 
       if (scopeMacro = @getRuleMacro(name))
-        _.extend(output, scopeMacro.evaluate(values))
+        _.extend(output, scopeMacro.toMGLScope(values))
       else
         assert values.length == 1
         output[name] = values[0]
 
-    for name, value of output
-      if value.evaluate
-        output[name] = value.evaluate()
-
     output
+

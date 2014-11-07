@@ -10,6 +10,4 @@ module.exports =
     rgb: (r,g,b) -> ColorValue.rgba(r,g,b,1)
     rgba: (r,g,b,a) -> ColorValue.rgba(r,g,b,a)
 
-  ruleMacros:
-
-    doesitwork: (a) -> itworks: a
+  ruleMacros: {}

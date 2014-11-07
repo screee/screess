@@ -5,13 +5,13 @@
 
  - [ ] Function Values DSL
  - [ ] Source DSL
- - [ ] String Interpolation
+ - [ ] Compile-time mathematical operations
+ - [ ] Filters
+ - [ ] Create Layer Widcard Scope
+ - [ ] Create Source Wildcard Scope
 
  - [ ] Standard Library
+ - [ ] Strings -> String Interpolation
 
- - [ ] Create ACE Syntax Mode
- - [ ] Create Sublime Syntax Mode
- - [ ] Consolodate Scope Classes into one class
-
- - [ ] Create seperate evaluateRule and evaluateSelector contexts
  - [ ] Ensure all errors have line numbers
+ - [ ] Check rules against GL spec

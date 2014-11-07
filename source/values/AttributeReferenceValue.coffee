@@ -1,6 +1,3 @@
-_ = require '../utilities'
-assert = require "assert"
-
 module.exports = class ColorValue
 
   @hex: (hex) ->
@@ -18,7 +15,8 @@ module.exports = class ColorValue
   @rgba: (red, green, blue, alpha) ->
     new ColorValue("PRIVATE", red, green, blue, alpha)
 
-  constructor: (flag, @red, @green, @blue, @alpha) ->
-    assert(flag = "PRIVATE")
+  constructor: (@red, @green, @blue, @alpha) ->
 
-  toMGLRuleValue: -> "rgba(#{@red}, #{@green}, #{@blue}, #{@alpha})"
+  toMGLRuleValue: -> "{#{@name}}"
+
+  toMGLFilterValue: -> @name
