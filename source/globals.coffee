@@ -26,7 +26,7 @@ module.exports =
       else if options.filter
         new StringValue("line")
       else
-        console.log(options)
+        throw new Error("The use of 'line' is ambigious in this context")
 
 
 
