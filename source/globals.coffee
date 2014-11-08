@@ -20,6 +20,7 @@ module.exports =
     raster: (scope, options) -> new StringValue("raster")
     background: (scope, options) -> new StringValue("background")
 
+    # Line may refer to the layer paint type or the layer geometry type
     line: (scope, options) ->
       if options.rule == "type" && options.meta
         new StringValue("LineString")
@@ -27,7 +28,5 @@ module.exports =
         new StringValue("line")
       else
         throw new Error("The use of 'line' is ambigious in this context")
-
-
 
   ruleMacros: {}

@@ -9,3 +9,8 @@
  - [ ] String Interpolation
  - [ ] Ensure all errors have line numbers
  - [ ] Check rules against GL spec
+ - [ ] Conditional statements against literal values and meta rules
+ - [ ] Simplify filter expressions
+ - [ ] Rename tileSize to tile-size
+ - [ ] Named arguments for macros
+ - [ ] Optional arguments for macros

@@ -8,13 +8,15 @@
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @LiteralValue = require("./values/LiteralValue")
   @StringValue = require("./values/StringValue")
-  @ArrayValue = require("./values/Arr")
+  @ArrayValue = require("./values/ArrayValue")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
   @ComparisonOperatorExpression = require('./expressions/ComparisonOperatorExpression')
   @TypeCheckOperatorExpression = require('./expressions/TypeCheckOperatorExpression')
   @BooleanLogicExpression = require('./expressions/BooleanLogicExpression')
+  @SetOperatorExpression = require('./expressions/SetOperatorExpression')
+  @NotOperatorExpression = require('./expressions/NotOperatorExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -61,7 +63,7 @@ ruleMacroDefinitionArguments =
   "" { return [] }
 
 scope =
-  (whitespace "{" whitespace body:statements whitespace "}" { @popScope() })
+  (whitespace "{" body:statements "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -69,7 +71,7 @@ scope =
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statements = whitespace (statement whitespace)*
+statements = whitespace (statement (statementSeperator statement)* statementSeperator? whitespace)?
 
 statement =
   sourceRule /
@@ -83,19 +85,19 @@ statement =
   sourceScope
 
 sourceRule =
-  "$source:" whitespace "&" source:identifier statementSeperator { @scope.setSource(source) }
+  "$source:" whitespace "&" source:identifier { @scope.setSource(source) }
 
 filterRule =
- "$filter:" whitespace expression:filterExpression statementSeperator { @scope.setFilter(expression) }
+ "$filter:" whitespace expression:filterExpression { @scope.setFilter(expression) }
 
 metaRule =
-  "$" name:identifier ":" whitespace expressions:valueExpressions statementSeperator { @scope.addMetaRule(name, expressions) }
+  "$" name:identifier ":" whitespace expressions:valueExpressions { @scope.addMetaRule(name, expressions) }
 
 rule =
-  name:identifier ":" whitespace expressions:valueExpressions statementSeperator { @scope.addRule(name, expressions) }
+  name:identifier ":" whitespace expressions:valueExpressions { @scope.addRule(name, expressions) }
 
 valueMacroDefinition =
-  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression statementSeperator { @scope.addValueMacro(name, args, body) }
+  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression { @scope.addValueMacro(name, args, body) }
 
 valueMacroDefinitionArguments =
   "(" head:identifier tail:(whitespace identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
@@ -112,16 +114,21 @@ valueMacroDefinitionArguments =
 /////////////////////////////////////////////
 
 filterExpression =
+  notOperatorFilterExpression /
   booleanLogicFilterExpression /
   leafFilterExpression
 
 booleanLogicFilterExpression =
   whitespace left:leafFilterExpression whitespace operator:("||" / "&&") whitespace right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
 
+notOperatorFilterExpression =
+  "!" whitespace expression:filterExpression { new @NotOperatorExpression(expression) }
+
 // Leaf Filter Expressions
 
 leafFilterExpression =
   groupFilterExpression /
+  setOperatorFilterExpression /
   comparisonOperatorFilterExpression /
   typeCheckOperatorFilterExpression
 
@@ -136,6 +143,7 @@ comparisonOperatorFilterExpression =
 
 setOperatorFilterExpression =
   whitespace left:valueExpression whitespace operator:("in" / "!in") whitespace right:valueExpression { new @SetOperatorExpression(left, operator, right) }
+
 
 /////////////////////////////////////////////
 //           Value Expression              //

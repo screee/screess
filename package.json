@@ -1,0 +1,20 @@
+{
+  "name": "screess",
+  "description": "A stylesheet language that compiles down to a MapBox GL stylesheet",
+  "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
+  "dependencies": {
+    "pegjs": ""
+  },
+
+  "devDependencies": {
+    "coffee-script": "",
+    "mocha": "",
+    "pegjs-coffee-plugin": ""
+  },
+
+  "scripts": {
+    "build": "pegjs --plugin pegjs-coffee-plugin source/grammar.pegcs source/parser.js",
+    "test": "npm run build && mocha --compilers coffee:coffee-script/register tests"
+  }
+
+}
