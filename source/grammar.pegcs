@@ -49,6 +49,9 @@ layerScope =
 classScope =
   ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scope
 
+sourceScope =
+  ("&" name:identifier { @pushScope(@scope.addSourceScope(name)) }) scope
+
 ruleMacroDefinition =
   (name:identifier args:ruleMacroDefinitionArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scope
 
@@ -68,13 +71,18 @@ scope =
 statements = whitespace (statement whitespace)*
 
 statement =
+  sourceRule /
   filterRule /
   valueMacroDefinition /
   rule /
   metaRule /
   layerScope /
   classScope /
-  ruleMacroDefinition
+  ruleMacroDefinition /
+  sourceScope
+
+sourceRule =
+  "$source:" whitespace "&" source:identifier statementSeperator { @scope.setSource(source) }
 
 filterRule =
  "$filter:" whitespace expression:filterExpression statementSeperator { @scope.setFilter(expression) }

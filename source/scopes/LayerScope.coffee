@@ -6,12 +6,22 @@ module.exports = class LayerScope extends Scope
   selector: null
 
   addMetaRule: (name, expressions) ->
+    if @metaRules[name] then throw new Error("Duplicate entries for metarule '#{name}'")
     @metaRules[name] = expressions
 
   addClassScope: (name) ->
-    @classScopes[name] = new ClassScope(@)
+    if @classScopes[name]
+      @classScopes[name]
+    else
+      @classScopes[name] = new ClassScope(@)
 
-  setFilter: (@filterExpression) ->
+  setFilter: (filterExpression) ->
+    if @filterExpression then throw new Error("Duplicate filters")
+    @filterExpression = filterExpression
+
+  setSource: (source) ->
+    if @source then throw new Error("Duplicate sources")
+    @source = source
 
   constructor: (parent) ->
     super(parent)
@@ -23,6 +33,7 @@ module.exports = class LayerScope extends Scope
 
     filterOptions = _.extend(filter: true, meta: true, rule: "filter", options)
     metaFilterRule = filter: @filterExpression?.toMGLFilter(@, filterOptions)
+    metaSourceRule = source: @source
 
     metaRules = @toMGLRules(_.extend(meta:true, options), @metaRules)
 
@@ -33,4 +44,4 @@ module.exports = class LayerScope extends Scope
       (name, scope) => ["paint.#{name}", scope.toMGLClassScope(options)]
     )
 
-    _.extend(metaRules, paintRules, paintClassRules, metaFilterRule)
+    _.extend(metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)
