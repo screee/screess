@@ -8,6 +8,7 @@
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @LiteralValue = require("./values/LiteralValue")
   @StringValue = require("./values/StringValue")
+  @ArrayValue = require("./values/ArrayValue")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
@@ -35,7 +36,7 @@ identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
 
 whitespace =  (("\n" / "\r" / "\t" / " ")* / !.) { null }
 statementSeperator = ("\n" / "\r" / ";" / !.) whitespace { null }
-argumentSeperator = (("\n" / "\r" / "\t" / " ")+ / !.) { null }
+argumentSeperator = (("\t" / " ")+ / !.) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -60,7 +61,7 @@ ruleMacroDefinitionArguments =
   "" { return [] }
 
 scope =
-  (whitespace "{" whitespace body:statements whitespace "}" whitespace { @popScope() })
+  (whitespace "{" whitespace body:statements whitespace "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -105,8 +106,6 @@ valueMacroDefinitionArguments =
 //                                 Expression                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-expression = filterExpression / valueExpression
 
 /////////////////////////////////////////////
 //           Filter Expression             //
@@ -167,25 +166,29 @@ value =
   numberValue /
   attributeReferenceValue /
   colorValue /
-  stringValue
+  stringValue /
+  arrayValue
+
+arrayValue =
+  "[" expressions:valueExpressions "]" { return new @ArrayValue(expressions) }
 
 stringValue =
-  whitespace "\"" body:[^\"]* "\"" { new @StringValue(body.join("")) }
+  "\"" body:[^\"]* "\"" { new @StringValue(body.join("")) }
 
 booleanValue =
-  whitespace "true" { @literalValue true } /
-  whitespace "false" { @literalValue false }
+  "true" { @literalValue true } /
+  "false" { @literalValue false }
 
 numberValue =
-  whitespace before:numberValueInteger? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
-  whitespace number:numberValueInteger { @literalValue number }
+  before:numberValueInteger? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
+  number:numberValueInteger { @literalValue number }
 
 numberValueInteger =
   head:[1-9] tail:[0-9]* { parseInt(head + tail.join("")) } /
   "0" { 0 }
 
 attributeReferenceValue =
-  whitespace "@" name:identifier { new @AttributeReferenceValue(name) }
+  "@" name:identifier { new @AttributeReferenceValue(name) }
 
 colorValue =
-  whitespace "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }
+  "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }

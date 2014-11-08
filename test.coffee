@@ -3,24 +3,9 @@ util = require("util")
 
 source = """
 
-&foo {
-  bar: 6
-}
-
 #test {
-  $type: line
-  $filter: is line
-  $source: &foo
-
-  line-width: 5
-
-  .night {
-    color: "red"
-  }
+  test: [1 2]
 }
-
-transition-duration: 5
-transition-delay: 6
 
 """
 

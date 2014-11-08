@@ -41,6 +41,9 @@ module.exports = class GlobalScope extends Scope
       duration: rules["transition-delay"]
       delay: rules["transition-duration"]
 
+    delete rules["transition-delay"]
+    delete rules["transition-duration"]
+
     _.extend(rules, {
       version: 6
       layers: layers
