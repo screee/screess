@@ -4,7 +4,7 @@ util = require("util")
 source = """
 
 #test {
-  test: [1 2]
+  $filter: 5 in [1,2,3]
 }
 
 """

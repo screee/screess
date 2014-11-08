@@ -8,13 +8,13 @@
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @LiteralValue = require("./values/LiteralValue")
   @StringValue = require("./values/StringValue")
-  @ArrayValue = require("./values/ArrayValue")
+  @ArrayValue = require("./values/Arr")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
-  @ComparisonExpression = require('./expressions/ComparisonExpression')
-  @TypeCheckExpression = require('./expressions/TypeCheckExpression')
-  @BooleanExpression = require('./expressions/BooleanExpression')
+  @ComparisonOperatorExpression = require('./expressions/ComparisonOperatorExpression')
+  @TypeCheckOperatorExpression = require('./expressions/TypeCheckOperatorExpression')
+  @BooleanLogicExpression = require('./expressions/BooleanLogicExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -112,27 +112,30 @@ valueMacroDefinitionArguments =
 /////////////////////////////////////////////
 
 filterExpression =
-  booleanFilterExpression /
+  booleanLogicFilterExpression /
   leafFilterExpression
 
-booleanFilterExpression =
-  whitespace left:leafFilterExpression whitespace operator:("||" / "&&") whitespace right:filterExpression { new @BooleanExpression(operator, [left, right]) }
+booleanLogicFilterExpression =
+  whitespace left:leafFilterExpression whitespace operator:("||" / "&&") whitespace right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
 
 // Leaf Filter Expressions
 
 leafFilterExpression =
   groupFilterExpression /
-  comparisonFilterExpression /
-  typeCheckFilterExpression
+  comparisonOperatorFilterExpression /
+  typeCheckOperatorFilterExpression
 
 groupFilterExpression =
   whitespace "(" expression:filterExpression ")" { return expression }
 
-typeCheckFilterExpression =
-  whitespace "is" whitespace type:valueExpression { new @TypeCheckExpression(type) } /
+typeCheckOperatorFilterExpression =
+  whitespace "is" whitespace type:valueExpression { new @TypeCheckOperatorExpression(type) } /
 
-comparisonFilterExpression =
-  whitespace left:valueExpression whitespace operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace right:valueExpression { new @ComparisonExpression(left, operator, right) }
+comparisonOperatorFilterExpression =
+  whitespace left:valueExpression whitespace operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
+
+setOperatorFilterExpression =
+  whitespace left:valueExpression whitespace operator:("in" / "!in") whitespace right:valueExpression { new @SetOperatorExpression(left, operator, right) }
 
 /////////////////////////////////////////////
 //           Value Expression              //
