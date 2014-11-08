@@ -11,7 +11,7 @@ module.exports = class RuleMacro
 
   toMGLScope: (argValues, options) ->
     if argValues.length != @argNames.length
-      throw "Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}"
+      throw new Error("Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}")
 
     args = _.objectZip(@argNames, argValues.map(literal))
     _.extend(@scope.valueMacros, args)

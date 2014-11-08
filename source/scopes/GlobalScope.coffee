@@ -12,11 +12,13 @@ module.exports = class GlobalScope extends Scope
   constructor: ->
     super()
 
+    # TODO move this logic to the Macro classes
     for name, fn of Globals.valueMacros
-      @valueMacros[name] = new ValueMacro(name, [0...fn.length], fn)
+      @valueMacros[name] = new ValueMacro(name, [0...fn.length - 2], fn)
 
+    # TODO move this logic to the Macro classes
     for name, fn of Globals.ruleMacros
-      @ruleMacros[name] = new RuleMacro(@, name, [0...fn.length], fn)
+      @ruleMacros[name] = new RuleMacro(@, name, [0...fn.length - 2], fn)
 
   addLayerScope: (name, scope) ->
     @layerScopes[name] = new LayerScope(@)

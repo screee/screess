@@ -1,4 +1,5 @@
 {
+  require 'coffee-script'
   _ = require './utilities'
 
   @GlobalScope = require('./scopes/GlobalScope')
@@ -6,9 +7,13 @@
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @LiteralValue = require("./values/LiteralValue")
+  @StringValue = require("./values/StringValue")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
+  @ComparisonExpression = require('./expressions/ComparisonExpression')
+  @TypeCheckExpression = require('./expressions/TypeCheckExpression')
+  @BooleanExpression = require('./expressions/BooleanExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -63,6 +68,7 @@ scope =
 statements = whitespace (statement whitespace)*
 
 statement =
+  filterRule /
   valueMacroDefinition /
   rule /
   metaRule /
@@ -70,14 +76,14 @@ statement =
   classScope /
   ruleMacroDefinition
 
-// filterRule =
-//  "$filter" whitespace ":" whitespace filterExpression:filterExpression statementSeperator { @scope.setFilter(filterExpression) }
+filterRule =
+ "$filter:" whitespace expression:filterExpression statementSeperator { @scope.setFilter(expression) }
 
 metaRule =
-  "$" name:identifier whitespace ":" whitespace expressions:valueExpressions statementSeperator { @scope.addMetaRule(name, expressions) }
+  "$" name:identifier ":" whitespace expressions:valueExpressions statementSeperator { @scope.addMetaRule(name, expressions) }
 
 rule =
-  name:identifier whitespace ":" whitespace expressions:valueExpressions statementSeperator { @scope.addRule(name, expressions) }
+  name:identifier ":" whitespace expressions:valueExpressions statementSeperator { @scope.addRule(name, expressions) }
 
 valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression statementSeperator { @scope.addValueMacro(name, args, body) }
@@ -92,8 +98,39 @@ valueMacroDefinitionArguments =
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////
+//           Filter Expression             //
+/////////////////////////////////////////////
+
+filterExpression =
+  booleanFilterExpression /
+  leafFilterExpression
+
+booleanFilterExpression =
+  whitespace left:leafFilterExpression whitespace operator:("||" / "&&") whitespace right:filterExpression { new @BooleanExpression(operator, [left, right]) }
+
+// Leaf Filter Expressions
+
+leafFilterExpression =
+  groupFilterExpression /
+  comparisonFilterExpression /
+  typeCheckFilterExpression
+
+groupFilterExpression =
+  whitespace "(" expression:filterExpression ")" { return expression }
+
+typeCheckFilterExpression =
+  whitespace "is" whitespace type:valueExpression { new @TypeCheckExpression(type) } /
+
+comparisonFilterExpression =
+  whitespace left:valueExpression whitespace operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace right:valueExpression { new @ComparisonExpression(left, operator, right) }
+
+/////////////////////////////////////////////
+//           Value Expression              //
+/////////////////////////////////////////////
+
 valueExpressions =
-  head:valueExpression tail:(" "+ valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+  head:valueExpression tail:(argumentSeperator valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
 
 valueExpression =
   valueMacroReferenceValueExpression /
@@ -119,24 +156,26 @@ value =
   booleanValue /
   numberValue /
   attributeReferenceValue /
-  colorValue
+  colorValue /
+  stringValue
+
+stringValue =
+  whitespace "\"" body:[^\"]* "\"" { new @StringValue(body.join("")) }
 
 booleanValue =
-  "true" { @literalValue true } /
-  "false" { @literalValue false }
+  whitespace "true" { @literalValue true } /
+  whitespace "false" { @literalValue false }
 
 numberValue =
-  before: numberValueInteger? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
-  number: numberValueInteger { @literalValue number }
+  whitespace before:numberValueInteger? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
+  whitespace number:numberValueInteger { @literalValue number }
 
 numberValueInteger =
   head:[1-9] tail:[0-9]* { parseInt(head + tail.join("")) } /
   "0" { 0 }
 
 attributeReferenceValue =
-  "@" name:identifier { new @AttributeReferenceValue(name) }
+  whitespace "@" name:identifier { new @AttributeReferenceValue(name) }
 
 colorValue =
-  "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }
-
-
+  whitespace "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }

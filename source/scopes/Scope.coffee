@@ -23,7 +23,7 @@ module.exports = class Scope
   getValueMacro: (name) ->
     @valueMacros[name] || \
       @parent?.getValueMacro(name) || \
-      throw "Macro '#{name}' not found"
+      throw new Error("Macro '#{name}' not found")
 
   getRuleMacro: (name) ->
     @ruleMacros[name] || @parent?.getRuleMacro(name)
@@ -33,6 +33,7 @@ module.exports = class Scope
 
     for name, expressions of rules
       values = expressions.map (expression) =>
+        options = _.extend(rule:name, options)
         expression.toValue(@, options).toMGLValue(options)
 
       if (scopeMacro = @getRuleMacro(name))

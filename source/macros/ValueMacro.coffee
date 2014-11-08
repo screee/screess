@@ -9,13 +9,13 @@ module.exports = class ValueMacro
 
   toValue: (parentScope, argValues, options) ->
     if argValues.length != @argNames.length
-      throw ("Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}")
+      throw new Error("Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}")
 
     if @body instanceof Function
-      @literalValue @body.apply({}, argValues, options)
+      @body.apply({}, argValues.concat([scope, options]))
     else if @body instanceof Expression
       scopeValueMacros = _.objectZip(@argNames, argValues.map(literalExpression))
       scope = new Scope(parentScope, scopeValueMacros)
       @body.toValue(scope, options)
     else
-      throw "Value macro bodies must be an Expression or a JavaScript functions"
+      throw new Error("Value macro bodies must be an Expression or a JavaScript functions")

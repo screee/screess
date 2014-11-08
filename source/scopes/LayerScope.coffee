@@ -21,8 +21,8 @@ module.exports = class LayerScope extends Scope
   toMGLLayerScope: (options) ->
     options = _.extend(scope: "layer", options)
 
-    metaFilterRule = if @filterExpression then filter: @filterExpression.toMGLFilter() else null
-    metaRules = @toMGLRules(options, @metaRules)
+    metaFilterRule = if @filterExpression then filter: @filterExpression.toMGLFilter(@, options) else null
+    metaRules = @toMGLRules(_.extend(meta:true, options), @metaRules)
     paintRules = paint: @toMGLRules(options, @rules)
     paintClassRules = _.objectMapKeysValues(
       @classScopes,
