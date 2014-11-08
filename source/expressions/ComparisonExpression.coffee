@@ -8,8 +8,6 @@ module.exports = class ComparisonExpression extends Expression
   constructor: (@left, @operator, @right) ->
 
   toMGLFilter: (scope, options) ->
-    options = _.extend(filter: true, options)
-
     lvalue = @left.toValue(scope, options)
     rvalue = @right.toValue(scope, options)
 
