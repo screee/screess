@@ -22,7 +22,7 @@ module.exports = class LayerScope extends Scope
     options = _.extend(scope: "layer", options)
 
     filterOptions = _.extend(filter: true, meta: true, rule: "filter", options)
-    metaFilterRule = filter: @filterExpression?.toMGLFilter(@, filterOptions)}
+    metaFilterRule = filter: @filterExpression?.toMGLFilter(@, filterOptions)
 
     metaRules = @toMGLRules(_.extend(meta:true, options), @metaRules)
     paintRules = paint: @toMGLRules(options, @rules)
