@@ -11,19 +11,22 @@ module.exports = class LayerScope extends Scope
   addClassScope: (name) ->
     @classScopes[name] = new ClassScope(@)
 
-  setFilter: (@filter) ->
+  setFilter: (@filterExpression) ->
 
   constructor: (parent) ->
     super(parent)
     @classScopes = {}
     @metaRules = {}
 
-  toMGLLayerScope: ->
-    metaRules = @toMGLRules(@metaRules)
+  toMGLLayerScope: (options) ->
+    options = _.extend(scope: "layer", options)
 
-    paintRules = paint: @toMGLRules()
+    metaFilterRule = if @filterExpression then filter: @filterExpression.toMGLFilter() else null
+    metaRules = @toMGLRules(options, @metaRules)
+    paintRules = paint: @toMGLRules(options, @rules)
+    paintClassRules = _.objectMapKeysValues(
+      @classScopes,
+      (name, scope) => ["paint.#{name}", scope.toMGLClassScope(options)]
+    )
 
-    paintClassRules = _.objectMapKeysValues @classScopes, (name, scope) =>
-      ["paint.#{name}", scope.toMGLClassScope()]
-
-    _.extend(metaRules, paintRules, paintClassRules)
+    _.extend(metaRules, paintRules, paintClassRules, metaFilterRule)

@@ -9,16 +9,10 @@ module.exports = class RuleMacro
     ClassScope = require("../scopes/ClassScope")
     @scope = new ClassScope(parentScope)
 
-  toMGLScope: (argValues) ->
+  toMGLScope: (argValues, options) ->
     if argValues.length != @argNames.length
       throw "Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}"
 
-    _.extend(
-      @scope.valueMacros,
-      _.objectZip(@argNames, argValues.map(literal))
-    )
-
-    _.extend(
-      @scope.evaluateRules(),
-      @body?.apply({}, argValues)
-    )
+    args = _.objectZip(@argNames, argValues.map(literal))
+    _.extend(@scope.valueMacros, args)
+    _.extend(@scope.evaluateRules(), @body?.apply({}, argValues))

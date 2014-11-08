@@ -21,6 +21,10 @@ module.exports = class GlobalScope extends Scope
   addLayerScope: (name, scope) ->
     @layerScopes[name] = new LayerScope(@)
 
-  toMGLGlobalScope: ->
-    layers: _.objectMap @layerScopes, (name, layer) ->
-      layer.toMGLLayerScope()
+  toMGLGlobalScope: (options) ->
+    options = _.extend(scope: "global", options)
+
+    layers = layers: _.objectMap @layerScopes, (name, layer) -> layer.toMGLLayerScope(options)
+    globals = @toMGLRules(options, @rules)
+
+    _.extend(layers, globals)

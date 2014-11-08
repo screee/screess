@@ -1,3 +1,2 @@
 module.exports = class Value
-  toMGLRuleValue: -> @toMGLValue()
-  toMGLFilterValue: -> @toMGLValue()
+  toMGLValue: (options) -> throw "Abstract method"

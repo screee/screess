@@ -1,3 +1,4 @@
+Value = require "./Value"
 _ = require '../utilities'
 assert = require "assert"
 
@@ -21,4 +22,6 @@ module.exports = class ColorValue
   constructor: (flag, @red, @green, @blue, @alpha) ->
     assert(flag = "PRIVATE")
 
-  toMGLRuleValue: -> "rgba(#{@red}, #{@green}, #{@blue}, #{@alpha})"
+  toMGLValue: (options) ->
+    assert !options.filter
+    "rgba(#{@red}, #{@green}, #{@blue}, #{@alpha})"
