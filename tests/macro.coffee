@@ -33,4 +33,10 @@ describe "macro", ->
       """
       assert.equal stylesheet.layers.layer.bar, 17
 
+    it "should apply recursively", ->
+      stylesheet = parse """
+        foo(baz) = baz
+        #layer { $bar: foo(foo(17)) }
+      """
+
   describe "rule macro", ->
