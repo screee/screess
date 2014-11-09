@@ -1,4 +1,4 @@
-{ literal } = require("../expressions/LiteralExpression")
+{ literalExpression } = require("../expressions/LiteralExpression")
 _ = require "../utilities"
 
 module.exports = class RuleMacro
@@ -13,6 +13,12 @@ module.exports = class RuleMacro
     if argValues.length != @argNames.length
       throw new Error("Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}")
 
-    args = _.objectZip(@argNames, argValues.map(literal))
+    args = _.objectZip(@argNames, argValues.map(literalExpression))
     _.extend(@scope.valueMacros, args)
-    _.extend(@scope.evaluateRules(), @body?.apply({}, argValues))
+
+    console.log @scope.toMGLRules(options, @scope.rules)
+
+    _.extend(
+      @scope.toMGLRules(options, @scope.rules),
+      @body?.apply({}, argValues)
+    )

@@ -52,14 +52,13 @@ module.exports = class Scope
 
     for name, expressions of rules
       values = expressions.map (expression) =>
-        options = _.extend(rule:name, options)
-        expression.toValue(@, options).toMGLValue(options)
+        expression.toValue(@, _.extend(rule: name, options))
 
       if (scopeMacro = @getRuleMacro(name))
-        _.extend(output, scopeMacro.toMGLScope(values))
+        _.extend(output, scopeMacro.toMGLScope(values, options))
       else
         assert values.length == 1
-        output[name] = values[0]
+        output[name] = values[0].toMGLValue(_.extend(rule: name, options))
 
     output
 
