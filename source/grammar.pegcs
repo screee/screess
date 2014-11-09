@@ -38,7 +38,7 @@ identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
 
 whitespace =  (("\n" / "\r" / "\t" / " ")* / !.) { null }
 statementSeperator = ("\n" / "\r" / ";" / !.) whitespace { null }
-argumentSeperator = (("\t" / " ")+ / !.) { null }
+argumentSeperator = ((("\t" / " ")* "," ("\t" / " ")*) / ("\t" / " ")+) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -46,23 +46,29 @@ argumentSeperator = (("\t" / " ")+ / !.) { null }
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+scope =
+  layerScope /
+  classScope /
+  sourceScope /
+  ruleMacroDefinitionScope
+
 layerScope =
-  ("#" name:identifier { @pushScope(@scope.addLayerScope(name)) }) scope
+  ("#" name:identifier { @pushScope(@scope.addLayerScope(name)) }) scopeBody
 
 classScope =
-  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scope
+  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
 
 sourceScope =
-  ("&" name:identifier { @pushScope(@scope.addSourceScope(name)) }) scope
+  ("&" name:identifier { @pushScope(@scope.addSourceScope(name)) }) scopeBody
 
-ruleMacroDefinition =
-  (name:identifier args:ruleMacroDefinitionArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scope
+ruleMacroDefinitionScope =
+  (name:identifier args:ruleMacroDefinitionScopeArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scopeBody
 
-ruleMacroDefinitionArguments =
+ruleMacroDefinitionScopeArguments =
   "(" head:identifier tail:(argumentSeperator identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
 
-scope =
+scopeBody =
   (whitespace "{" body:statements "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,10 +85,7 @@ statement =
   valueMacroDefinition /
   rule /
   metaRule /
-  layerScope /
-  classScope /
-  ruleMacroDefinition /
-  sourceScope
+  scope
 
 sourceRule =
   "$source:" whitespace "&" source:identifier { @scope.setSource(source) }
@@ -100,7 +103,7 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression { @scope.addValueMacro(name, args, body) }
 
 valueMacroDefinitionArguments =
-  "(" head:identifier tail:(whitespace identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:identifier tail:(argumentSeperator identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +136,7 @@ leafFilterExpression =
   typeCheckOperatorFilterExpression
 
 groupFilterExpression =
-  whitespace "(" expression:filterExpression ")" { return expression }
+  whitespace "(" expression:filterExpression ")" { expression }
 
 typeCheckOperatorFilterExpression =
   whitespace "is" whitespace type:valueExpression { new @TypeCheckOperatorExpression(type) } /
@@ -153,8 +156,8 @@ valueExpressions =
   head:valueExpression tail:(argumentSeperator valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
 
 valueExpression =
-  valueMacroReferenceValueExpression /
-  literalValueExpression
+  literalValueExpression /
+  valueMacroReferenceValueExpression
 
 valueMacroReferenceValueExpression =
   name:identifier args:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, args) }

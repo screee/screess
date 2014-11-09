@@ -31,9 +31,11 @@ module.exports = class LayerScope extends Scope
   toMGLLayerScope: (options) ->
     options = _.extend(scope: "layer", options)
 
-    filterOptions = _.extend(filter: true, meta: true, rule: "filter", options)
-
-    metaFilterRule = if @filter then filter: @filterExpression?.toMGLFilter(@, filterOptions) else null
+    if @filterExpression
+      filterOptions = _.extend(filter: true, meta: true, rule: "filter", options)
+      metaFilterRule = {filter: @filterExpression?.toMGLFilter(@, filterOptions)}
+    else
+      metaFilterRule = null
 
     if @source
       if !@getSourceScope(@source) then throw "Unknown source '#{@source}'"

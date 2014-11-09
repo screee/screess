@@ -5,11 +5,29 @@ it "should mark the stylesheet as version 6", ->
   assert.deepEqual parse("").version, 6
 
 describe "sources", ->
-  it "should put sources in the stylesheet", ->
-    stylesheet = parse '&test { foo: "bar" }'
-    assert.deepEqual stylesheet.sources, {test: {foo: "bar"}}
+  it "should be in the stylesheet", ->
+    stylesheet = parse '&test { }'
+    assert stylesheet.sources.test
 
-  it "should allow sources to be referenced by layers", ->
+  it "should respect rules", ->
+    stylesheet = parse '&test { foo: "bar" }'
+    assert.equal stylesheet.sources.test.foo, "bar"
+
+describe "layers", ->
+
+  it "should be in the stylesheet", ->
+    stylesheet = parse '#test {}'
+    assert stylesheet.layers.test
+
+  it "should respect paint rules", ->
+    stylesheet = parse '#test { foo: "bar" }'
+    assert.equal stylesheet.layers.test.paint.foo, "bar"
+
+  it "should respect meta rules", ->
+    stylesheet = parse '#test { $foo: "bar" }'
+    assert.equal stylesheet.layers.test.foo, "bar"
+
+    it "should respect its source", ->
     stylesheet = parse """
       &source { foo: "bar" }
       #layer { $source: &source }
@@ -23,8 +41,6 @@ describe "sources", ->
         #layer { $source: &notsource }
       """
 
-describe "layers", ->
-
-  it "should put layers in the stylesheet", ->
-    stylesheet = parse '#test { foo: "bar" }'
-    assert.deepEqual stylesheet.layers, {test: {paint: {foo: "bar"}}}
+  it "should respect its filter", ->
+    stylesheet = parse '#test { $filter: @name == "foo" }'
+    assert stylesheet.layers.test.filter

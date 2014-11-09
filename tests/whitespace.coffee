@@ -1,5 +1,6 @@
 {parse} = require("../source/parser")
 assert = require("assert")
+_ = require("../source/utilities")
 
 describe "whitespace", ->
   zero = test: {paint: { }}
@@ -65,3 +66,7 @@ describe "whitespace", ->
       }
     '''
     assert.deepEqual stylesheet.layers, one
+
+  # it "should allow for multiple scopes on the same line", ->
+  #   stylesheet = parse "#foo {} #bar {}"
+  #   assert.deepEqual _.keys(stylesheet.layers), ["foo", "bar"]
