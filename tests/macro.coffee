@@ -5,24 +5,38 @@ describe "macro", ->
 
   describe "value", ->
 
-    # it "should apply recursively", ->
-    #   stylesheet = parse """
-    #     foo(baz) = baz
-    #     #layer { $bar: foo(foo(17)) }
-    #   """
-    #   assert.equal stylesheet.layers.layer.bar, 17
-
-    # it "should respect a macro without arguments", ->
-    #   stylesheet = parse """
-    #     foo = 17
-    #     #layer { $bar: foo }
-    #   """
-    #   assert.equal stylesheet.layers.layer.bar, 17
+    it "should respect a macro without arguments", ->
+      stylesheet = parse """
+        foo = 17
+        #layer { $bar: foo }
+      """
+      assert.equal stylesheet.layers.layer.bar, 17
 
     it "should respect a macro with a positional argument", ->
       stylesheet = parse """
         foo(baz) = baz
         #layer { $bar: foo(17) }
+      """
+      assert.equal stylesheet.layers.layer.bar, 17
+
+    it "should respect a macro with a named argument", ->
+      stylesheet = parse """
+        foo(baz) = baz
+        #layer { $bar: foo(baz:17) }
+      """
+      assert.equal stylesheet.layers.layer.bar, 17
+
+    it "should respect a macro with positional and named arguments", ->
+      stylesheet = parse """
+        foo(foo bar) = bar
+        #layer { $bar: foo(bar:17 10) }
+      """
+      assert.equal stylesheet.layers.layer.bar, 17
+
+    it "should apply recursively", ->
+      stylesheet = parse """
+        foo(baz) = baz
+        #layer { $bar: foo(foo(17)) }
       """
       assert.equal stylesheet.layers.layer.bar, 17
 

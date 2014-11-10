@@ -17,7 +17,7 @@ module.exports = class ValueMacro
     new ValueMacro(name, argDefinitions, body)
 
   constructor: (@name, @argDefinitions, @body) ->
-    @argDefinitionsMap = _.objectMap @argDefinitions, (argDefinition, index) ->
+    @argDefinitionsMap = _.objectMap @argDefinitions, (index, argDefinition) ->
       [argDefinition.name, _.extend(argDefinition, index:index)]
 
   matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
@@ -27,16 +27,12 @@ module.exports = class ValueMacro
 
     indicies = _.times(@argDefinitions.length - 1, -> false)
 
-    # Ensure arg values has no names not included in argDefinitions
-    return false if _.any(_.difference(
-      _.pluck(argValues, 'name'),
-      _.pluck(@argDefinitions, 'name')
-    ))
-
     # Identify named arguments
     for argValue in argValues
       if argValue.name
-        indicies[@argDefinitionMap[argValue.name].index] = true
+        argDefinition = @argDefinitionsMap[argValue.name]
+        return false unless argDefinition
+        indicies[argDefinition.index] = true
 
     # Identify positional arguments
     positionalIndex = -1
