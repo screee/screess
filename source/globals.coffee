@@ -5,23 +5,25 @@ module.exports =
 
   valueMacros:
 
-    hsv: (h, s, v, a, scope, options) -> ColorValue.hsla(h,s,v,1)
-    hsva: (h, s, v, a, scope, options) -> ColorValue.hsla(h,s,v,a)
-    hsl: (h, s, l, scope, options) -> ColorValue.hsla(h,s,l,1)
-    hsla: (h, s, l, a, scope, options) -> ColorValue.hsla(h,s,l,a)
-    rgb: (r, g, b, scope, options) -> ColorValue.rgba(r,g,b,1)
-    rgba: (r, g, b, a, scope, options) -> ColorValue.rgba(r,g,b,a)
+    # TODO retrofit to new args system
 
-    polygon: (scope, options) -> new StringValue("Polygon")
-    point: (scope, options) -> new StringValue("Point")
+    hsv: (args, scope, options) -> ColorValue.hsla(args[0], args[1], args[2], 1)
+    hsva: (args, scope, options) -> ColorValue.hsla(args[0], args[1], args[2], args[3])
+    hsl: (args, scope, options) -> ColorValue.hsla(args[0], args[1], args[2], 1)
+    hsla: (args, scope, options) -> ColorValue.hsla(args[0], args[1], args[2], args[3])
+    rgb: (args, scope, options) -> ColorValue.rgba(args[0], args[1], args[2], 1)
+    rgba: (args, scope, options) -> ColorValue.rgba(args[0], args[1], args[2], args[3])
 
-    fill: (scope, options) -> new StringValue("fill")
-    symbol: (scope, options) -> new StringValue("symbol")
-    raster: (scope, options) -> new StringValue("raster")
-    background: (scope, options) -> new StringValue("background")
+    polygon: (args, scope, options) -> new StringValue("Polygon")
+    point: (args, scope, options) -> new StringValue("Point")
+
+    fill: (args, scope, options) -> new StringValue("fill")
+    symbol: (args, scope, options) -> new StringValue("symbol")
+    raster: (args, scope, options) -> new StringValue("raster")
+    background: (args, scope, options) -> new StringValue("background")
 
     # Line may refer to the layer paint type or the layer geometry type
-    line: (scope, options) ->
+    line: (args, scope, options) ->
       if options.rule == "type" && options.meta
         new StringValue("LineString")
       else if options.filter
