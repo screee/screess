@@ -1,6 +1,6 @@
 {
   require 'coffee-script'
-  _ = require './utilities'
+  @_ = require './utilities'
 
   @GlobalScope = require('./scopes/GlobalScope')
 
@@ -9,6 +9,7 @@
   @LiteralValue = require("./values/LiteralValue")
   @StringValue = require("./values/StringValue")
   @ArrayValue = require("./values/ArrayValue")
+  @FunctionValue = require("./values/FunctionValue")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
@@ -103,8 +104,12 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression { @scope.addValueMacro(name, args, body) }
 
 valueMacroDefinitionArguments =
-  "(" head:identifier tail:(argumentSeperator identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:valueMacroDefinitionArgument tail:(argumentSeperator valueMacroDefinitionArgument)* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { return [] }
+
+valueMacroDefinitionArgument =
+  name:identifier { name: name } /
+  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression: expression }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -160,11 +165,15 @@ valueExpression =
   valueMacroReferenceValueExpression
 
 valueMacroReferenceValueExpression =
-  name:identifier args:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, args) }
+  name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
 
 valueMacroReferenceValueExpressionArguments =
-  "(" head:valueExpression tail:(argumentSeperator valueExpression)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:valueMacroReferenceValueExpressionArgument tail:(argumentSeperator valueMacroReferenceValueExpressionArgument)* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { [] }
+
+valueMacroReferenceValueExpressionArgument =
+  name:identifier whitespace ":" whitespace expression:valueExpression { name: name, expression: expression } /
+  expression:valueExpression { { expression: expression } }
 
 literalValueExpression =
   value:value { @literalExpression value }
@@ -206,3 +215,4 @@ attributeReferenceValue =
 
 colorValue =
   "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }
+

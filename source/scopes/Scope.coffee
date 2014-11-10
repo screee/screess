@@ -10,8 +10,10 @@ _ = require "../utilities"
 
 module.exports = class Scope
 
-  constructor: (@parent, @valueMacros = {}, @ruleMacros = {}) ->
+  constructor: (@parent) ->
     @rules = {}
+    @valueMacros = {}
+    @ruleMacros = {}
     @sourceScopes = {}
 
   addSourceScope: (name, scope) ->
@@ -23,10 +25,10 @@ module.exports = class Scope
     if @rules[name] then throw new Error("Duplicate entries for rule '#{name}'")
     @rules[name] = expressions
 
-  addValueMacro: (name, args, body) ->
+  addValueMacro: (name, args, expressions) ->
     if @valueMacros[name] then throw new Error("Duplicate entries value macro '#{name}'")
     ValueMacro = require "../macros/ValueMacro"
-    @valueMacros[name] = new ValueMacro(name, args, body)
+    @valueMacros[name] = ValueMacro.createFromExpressions(name, args, expressions)
 
   addRuleMacro: (name, args) ->
     if @ruleMacros[name] then throw new Error("Duplicate entries rule macro '#{name}'")
@@ -38,9 +40,9 @@ module.exports = class Scope
   getSourceScope: (name) ->
     @sourceScopes[name] || @parent?.getSourceScope(name)
 
-  getValueMacro: (name) ->
-    @valueMacros[name] || \
-      @parent?.getValueMacro(name) || \
+  getValueMacro: (name, argValues) ->
+    _.find(@valueMacros, (valueMacro) -> valueMacro.matches(name, argValues)) || \
+      @parent?.getValueMacro(name, argValues) || \
       throw new Error("Macro '#{name}' not found")
 
   getRuleMacro: (name) ->

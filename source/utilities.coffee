@@ -2,23 +2,25 @@ module.exports = _ = require "underscore"
 
 _.mixin
 
-  objectMap: (input, filter) ->
+  objectMapValues: (input, filter) ->
     output = {}
-    for key, value of input
+    _.each input, (value, key) ->
       output[key] = filter(key, value)
     output
 
   objectMapKeys: (input, filter) ->
     output = {}
-    for key, value of input
+    _.each input, (value, key) ->
       output[filter(key, value)] = value
     output
 
-  objectMapKeysValues: (input, filter) ->
+  objectMap: (input, filter) ->
     output = {}
-    for inputKey, inputValue of input
+
+    _.each input, (inputValue, inputKey) ->
       [outputKey, outputValue] = filter(inputKey, inputValue)
       output[outputKey] = outputValue
+
     output
 
   objectZip: (keys, values) ->
@@ -26,6 +28,8 @@ _.mixin
     for i in [0...keys.length]
       output[keys[i]] = values[i]
     output
+
+  none: -> return !_.some.apply(_, arguments)
 
 `
 /**

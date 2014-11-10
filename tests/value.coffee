@@ -67,3 +67,5 @@ describe "value", ->
 
     it "should parse an empty string", ->
       assert.equal parseValue('""'), ""
+
+  describe "function value", ->

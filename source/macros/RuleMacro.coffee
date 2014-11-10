@@ -16,8 +16,6 @@ module.exports = class RuleMacro
     args = _.objectZip(@argNames, argValues.map(literalExpression))
     _.extend(@scope.valueMacros, args)
 
-    console.log @scope.toMGLRules(options, @scope.rules)
-
     _.extend(
       @scope.toMGLRules(options, @scope.rules),
       @body?.apply({}, argValues)

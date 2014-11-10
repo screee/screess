@@ -14,3 +14,4 @@
  - [ ] Rename tileSize to tile-size
  - [ ] Named arguments for macros
  - [ ] Optional arguments for macros
+ - [ ] Allow multiple return values to be passed from one macro to another

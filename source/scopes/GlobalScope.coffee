@@ -14,11 +14,12 @@ module.exports = class GlobalScope extends Scope
 
     # TODO move this logic to the Macro classes
     for name, fn of Globals.valueMacros
-      @valueMacros[name] = new ValueMacro(name, [0...fn.length - 2], fn)
+      @valueMacros[name] = ValueMacro.createFromFunction(name, null, fn)
 
     # TODO move this logic to the Macro classes
     for name, fn of Globals.ruleMacros
       @ruleMacros[name] = new RuleMacro(@, name, [0...fn.length - 2], fn)
+
 
   addLayerScope: (name, scope) ->
     if @layerScopes[name] then throw new Error("Duplicate entries for layer scope '#{name}'")
@@ -27,8 +28,8 @@ module.exports = class GlobalScope extends Scope
   toMGLGlobalScope: (options) ->
     options = _.extend(scope: "global", options)
 
-    layers = _.objectMap @layerScopes, (name, layer) -> layer.toMGLLayerScope(options)
-    sources = _.objectMap @sourceScopes, (name, source) -> source.toMGLSourceScope(options)
+    layers = _.objectMapValues @layerScopes, (name, layer) -> layer.toMGLLayerScope(options)
+    sources = _.objectMapValues @sourceScopes, (name, source) -> source.toMGLSourceScope(options)
     rules = @toMGLRules(options, @rules)
 
     transition =

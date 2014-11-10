@@ -10,10 +10,7 @@ module.exports = class LayerScope extends Scope
     @metaRules[name] = expressions
 
   addClassScope: (name) ->
-    if @classScopes[name]
-      @classScopes[name]
-    else
-      @classScopes[name] = new ClassScope(@)
+    @classScopes[name] ||= new ClassScope(@)
 
   setFilter: (filterExpression) ->
     if @filterExpression then throw new Error("Duplicate filters")
@@ -47,9 +44,9 @@ module.exports = class LayerScope extends Scope
 
     paintRules = paint: @toMGLRules(options, @rules)
 
-    paintClassRules = _.objectMapKeysValues(
+    paintClassRules = _.objectMap(
       @classScopes,
-      (name, scope) => ["paint.#{name}", scope.toMGLClassScope(options)]
+      (scope, name) => ["paint.#{name}", scope.toMGLClassScope(options)]
     )
 
     _.extend(metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)
