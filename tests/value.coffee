@@ -1,4 +1,4 @@
-{parse} = require("../source/parser")
+{parse} = require("../source/main")
 assert = require("assert")
 
 describe "value", ->

@@ -2,6 +2,13 @@
   "name": "screess",
   "description": "A stylesheet language that compiles down to a MapBox GL stylesheet",
   "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
+  "main": "compiled/main",
+
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/screemaps/screess.git"
+  },
+
   "dependencies": {
     "pegjs": ""
   },
@@ -9,12 +16,17 @@
   "devDependencies": {
     "coffee-script": "",
     "mocha": "",
-    "pegjs-coffee-plugin": ""
+    "pegjs-coffee-plugin": "",
+    "browserify": "",
+    "coffeeify": ""
   },
 
   "scripts": {
-    "build": "pegjs --plugin pegjs-coffee-plugin --allowed-start-rules global,valueExpression,ruleMacroDefinitionScopeArguments,valueMacroDefinitionArguments source/grammar.pegcs source/parser.js",
-    "test": "npm run build && mocha --compilers coffee:coffee-script/register tests",
+    "prepublish": "npm run build-pegjs && npm run build-coffee && npm run build-browser",
+    "build-browser": "browserify source/main.coffee --transform coffeeify --outfile compiled.browser.js --debug",
+    "build-coffee": "coffee --compile --output compiled source && cp source/parser.js compiled/parser.js",
+    "build-pegjs": "pegjs --plugin pegjs-coffee-plugin --allowed-start-rules global,valueExpression,ruleMacroDefinitionScopeArguments,valueMacroDefinitionArguments source/parser.pegcs source/parser.js",
+    "test": "npm run build-pegjs && mocha --compilers coffee:coffee-script/register tests",
     "test-debug": "npm run build && open http://127.0.0.1:8080/debug?port=5858 && mocha --debug-brk --compilers coffee:coffee-script/register tests"
   }
 
