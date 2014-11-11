@@ -42,7 +42,7 @@ whitespaceStrong = "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
 statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
 argumentSeperator = (((whitespaceWeak)* "," (whitespaceWeak)*) / (whitespaceWeak)+) { null }
-argumentStrongSeperator = ((whitespace* "," whitespace*) / whitespace+) { null }
+argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -103,7 +103,7 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
-  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentStrongSeperator valueMacroDefinitionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
+  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { return [] }
 
 valueMacroDefinitionArgument =
@@ -155,8 +155,15 @@ setOperatorFilterExpression =
 //           Value Expression              //
 /////////////////////////////////////////////
 
-valueExpressions =
+valueExpressionsWeak =
   head:valueExpression tail:(argumentSeperator valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+
+valueExpressionsStrong =
+  head:valueExpression tail:(argumentSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+
+valueExpressions =
+  valueExpressionsWeak /
+  "(" whitespace* expressions:valueExpressionsStrong whitespace* ")" { expressions }
 
 valueExpression =
   literalValueExpression /
@@ -167,7 +174,7 @@ valueMacroReferenceValueExpression =
   name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
 
 valueMacroReferenceValueExpressionArguments =
-  "(" whitespace* head:valueMacroReferenceValueExpressionArgument tail:(argumentStrongSeperator valueMacroReferenceValueExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
+  "(" whitespace* head:valueMacroReferenceValueExpressionArgument tail:(argumentSeperatorStrong valueMacroReferenceValueExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { [] }
 
 valueMacroReferenceValueExpressionArgument =
@@ -194,7 +201,7 @@ value =
   arrayValue
 
 arrayValue =
-  "[" expressions:valueExpressions "]" { return new @ArrayValue(expressions) }
+  "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { return new @ArrayValue(expressions) }
 
 booleanValue =
   "true" { @literalValue true } /

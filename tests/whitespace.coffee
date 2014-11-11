@@ -81,3 +81,27 @@ describe "whitespace", ->
       }
     """
     assert.deepEqual stylesheet.sources.test, name: "test", bar: "baz"
+
+  it "should allow for an array's values to span multiple lines", ->
+    stylesheet = parse """
+      #layer {
+        $test: [
+          1
+          2
+        ]
+      }
+    """
+    assert.deepEqual stylesheet.layers.layer.test, [1, 2]
+
+  it "should allow for a rule's values to span multiple lines within parenthesis", ->
+    stylesheet = parse """
+      test(one, two, three) = { test: two }
+      #layer {
+        $test: (
+          0
+          17
+          0
+        )
+      }
+    """
+    assert.deepEqual stylesheet.layers.layer.test, 17
