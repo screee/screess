@@ -64,8 +64,6 @@ describe "value macro", ->
       """
       assert.equal stylesheet.layers.layer.bar, 17
 
-    it "should evaluate optional arguments in the macro's scope"
-
   describe "argument matching", ->
 
     it "should match by number of positional arguments", ->
@@ -93,13 +91,6 @@ describe "value macro", ->
       assert.equal stylesheet.layers.layer.bar, 17
 
   describe "scope", ->
-
-    # it "should shadow another value macro", ->
-    #   stylesheet = parse """
-    #     identity(one) = identity(one)
-    #     #layer { $bar: outer }
-    #   """
-    #   assert.equal stylesheet.layers.layer.bar, 17
 
     it "should apply recursively in arguments", ->
       stylesheet = parse """
