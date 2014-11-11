@@ -1,22 +1,22 @@
 { literalExpression } = require("../expressions/LiteralExpression")
 Scope  = require '../scopes/Scope'
 _ = require "../utilities"
+assert = require "assert"
 
 module.exports = class RuleMacro
 
   # TODO allow for subclasses, sublayers?
 
-  constructor: (parentScope, @name, @argNames, @body = null) ->
+  constructor: (@parentScope, @name, @argDefinitions, @body = null) ->
     ClassScope = require("../scopes/ClassScope")
-    @scope = new ClassScope(parentScope)
+    @scope = new ClassScope(@parentScope)
+
+    @argLengthMin = _.count @argDefinitions, (argDefinition) -> !argDefinition.expression
+    @argLengthMax = @argDefinitions.length
 
   toMGLScope: (argValues, options) ->
-    if argValues.length != @argNames.length
-      throw new Error("Expecting #{@argNames.length} arguments for macro '#{@name}', got #{argValues.length}")
+    args = @processArgs(argValues, @parentScope, options)
 
-    args = _.objectZip(@argNames, argValues.map(literalExpression))
-
-    # TODO create new scope
     scope = new Scope(@scope)
     for name, value of args
       scope.addValueMacro(name, [], [literalExpression(value)])
@@ -26,5 +26,25 @@ module.exports = class RuleMacro
       @body?.apply({}, argValues)
     )
 
-  matches: (name, argValues) ->
-    name == @name
+  matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
+
+  matchesArgValues: (argValues) ->
+    argValues.length <= @argLengthMax && argValues.length >= @argLengthMin
+
+  processArgs: (argValues, scope, options) ->
+    assert @matchesArgValues(argValues)
+
+    args = {}
+
+    positionaIndex = 0
+    for argValue in argValues
+      argDefinition = @argDefinitions[positionaIndex++]
+      args[argDefinition.name] = argValue
+
+    while positionaIndex < @argDefinitions.length
+      argDefinition = @argDefinitions[positionaIndex++]
+      args[argDefinition.name] = argDefinition.expression.toValue(scope, options)
+
+    console.log args
+
+    args

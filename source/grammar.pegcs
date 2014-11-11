@@ -66,8 +66,12 @@ ruleMacroDefinitionScope =
   (name:identifier args:ruleMacroDefinitionScopeArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scopeBody
 
 ruleMacroDefinitionScopeArguments =
-  "(" head:identifier tail:(argumentSeperator identifier)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" head:ruleMacroDefinitionScopeArgument tail:(argumentSeperator ruleMacroDefinitionScopeArgument)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
+
+ruleMacroDefinitionScopeArgument =
+  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression:expression } /
+  name:identifier { name: name }
 
 scopeBody =
   (whitespace "{" body:statements "}" { @popScope() })

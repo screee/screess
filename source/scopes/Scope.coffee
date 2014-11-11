@@ -53,7 +53,7 @@ module.exports = class Scope
       values = _.flatten _.map expressions, (expression) =>
         expression.toValues(@, _.extend(rule: name, options))
 
-      if (ruleMacro = @getRuleMacro(name))
+      if (ruleMacro = @getRuleMacro(name, values))
         _.extend(output, ruleMacro.toMGLScope(values, options))
       else
         if values.length != 1

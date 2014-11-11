@@ -60,6 +60,7 @@ module.exports = class ValueMacro
     assert _.isArray(values)
     return values
 
+  # TODO this scope shoud come from the place the macro is defined
   processArgs: (argValues, scope, options) ->
     args = {}
 

@@ -40,6 +40,8 @@ _.mixin
 
     false
 
+  count: -> _.countBy.apply(_, arguments)[true]
+
 `
 /**
  * Converts an RGB color value to HSL. Conversion formula

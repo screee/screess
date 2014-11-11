@@ -57,12 +57,14 @@ describe "value macro", ->
       """
       assert.equal stylesheet.layers.layer.bar, 17
 
-    it "should evaluate overriding an optional argument", ->
+    it "should override an optional argument", ->
       stylesheet = parse """
         foo(one, two = 0) = two
         #layer { $bar: foo(0, 17) }
       """
       assert.equal stylesheet.layers.layer.bar, 17
+
+    it "should evaluate optional arguments in the macro's scope"
 
   describe "argument matching", ->
 

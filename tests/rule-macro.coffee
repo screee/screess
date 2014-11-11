@@ -35,6 +35,11 @@ describe "rule macro", ->
     """
     assert.equal stylesheet.layers.layer.paint.foo, "bar"
 
+  it "should respect default arguments", ->
+    stylesheet = parse """
+      rule(one, two=17) = { foo: two }
+      #layer { rule: 0 }
+    """
+    assert.equal stylesheet.layers.layer.paint.foo, 17
 
-
-
+  it "should evaluate optional arguments in the macro's scope"
