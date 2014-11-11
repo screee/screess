@@ -8,48 +8,47 @@ module.exports =
 
   valueMacros:
 
-    # TODO add arg definitions
+    source: (source, options) ->
+      name = source.name?.toMGLValue(options) || _.uniq()
+      options.globalScope.addSource(name, source)
+      [new LiteralValue(name)]
 
+    identity: (args, options) -> _.map args, _.identity
 
-    identity: (args, scope, options) -> _.map args, _.identity
-
-    hsv: (args, scope, options) ->
+    hsv: (args, options) ->
       [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsva: (args, scope, options) ->
+    hsva: (args, options) ->
       [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    hsl: (args, scope, options) ->
+    hsl: (args, options) ->
       [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsla: (args, scope, options) ->
+    hsla: (args, options) ->
       [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    rgb: (args, scope, options) ->
+    rgb: (args, options) ->
       [ColorValue.rgba(args['0'], args['1'], args['2'], 1)]
-    rgba: (args, scope, options) ->
+    rgba: (args, options) ->
       [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
 
-    polygon: (args, scope, options) ->
+    polygon: (args, options) ->
       [new LiteralValue("Polygon")]
-    point: (args, scope, options) ->
+    point: (args, options) ->
       [new LiteralValue("Point")]
 
-    fill: (args, scope, options) ->
+    fill: (args, options) ->
       [new LiteralValue("fill")]
-    symbol: (args, scope, options) ->
+    symbol: (args, options) ->
       [new LiteralValue("symbol")]
-    raster: (args, scope, options) ->
+    raster: (args, options) ->
       [new LiteralValue("raster")]
-    background: (args, scope, options) ->
+    background: (args, options) ->
       [new LiteralValue("background")]
 
     # Line may refer to the layer paint type or the layer geometry type
-    line: (args, scope, options) ->
-      if options.rule == "type" && options.meta
-        new LiteralValue("LineString")
-      else if options.filter
-        new LiteralValue("line")
-      else
-        throw new Error("The use of 'line' is ambigious in this context")
+    line: (args, options) ->
+      if options.rule == "type" && options.meta then new LiteralValue("LineString")
+      else if options.filter then new LiteralValue("line")
+      else throw new Error("The use of 'line' is ambigious in this context")
 
-    'function': (args, scope, options) ->
+    'function': (args, options) ->
       stops = []
       for key, value of args
         if key == "base" then continue

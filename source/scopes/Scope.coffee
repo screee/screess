@@ -15,12 +15,8 @@ module.exports = class Scope
     @rules = {}
     @valueMacros = []
     @ruleMacros = []
-    @sourceScopes = {}
 
-  addSourceScope: (name, scope) ->
-    SourceScope = require('./SourceScope')
-    if @sourceScopes[name] then throw new Error("Duplicate entries for source scope '#{name}'")
-    @sourceScopes[name] = new SourceScope(@)
+  getGlobalScope: -> @parent.getGlobalScope()
 
   addRule: (name, expressions) ->
     if @rules[name] then throw new Error("Duplicate entries for rule '#{name}'")

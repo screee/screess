@@ -70,3 +70,14 @@ describe "whitespace", ->
   # it "should allow for multiple scopes on the same line", ->
   #   stylesheet = parse "#foo {} #bar {}"
   #   assert.deepEqual _.keys(stylesheet.layers), ["foo", "bar"]
+
+  it "should allow for a value macro's arguments to span multiple lines", ->
+    stylesheet = parse """
+      #layer {
+        $source: source(
+          name: "test"
+          bar: "baz"
+        )
+      }
+    """
+    assert.deepEqual stylesheet.sources.test, name: "test", bar: "baz"

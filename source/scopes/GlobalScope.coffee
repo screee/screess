@@ -7,6 +7,14 @@ RuleMacro = require('../macros/RuleMacro')
 
 module.exports = class GlobalScope extends Scope
 
+  constructor: ->
+    super()
+    @layerScopes = {}
+    @sources = {}
+
+  addSource: (name, source) ->
+    @sources[name] = source
+
   getValueMacro: (name, argValues) ->
     if macro = super
       macro
@@ -21,20 +29,19 @@ module.exports = class GlobalScope extends Scope
     # for name, fn of Globals.ruleMacros
     #   @ruleMacros.push new RuleMacro(@, name, [0...fn.length - 2], fn)
 
-  constructor: ->
-    super()
-    @layerScopes = {}
+  getGlobalScope: -> @
 
   addLayerScope: (name, scope) ->
     if @layerScopes[name] then throw new Error("Duplicate entries for layer scope '#{name}'")
     @layerScopes[name] = new LayerScope(@)
 
   toMGLGlobalScope: (options) ->
-    options = _.extend(scope: "global", options)
+    options = _.extend(scope: "global", globalScope: @, options)
 
     layers = _.objectMapValues @layerScopes, (name, layer) -> layer.toMGLLayerScope(options)
-    sources = _.objectMapValues @sourceScopes, (name, source) -> source.toMGLSourceScope(options)
     rules = @toMGLRules(options, @rules)
+    sources = _.objectMapValues @sources, (name, source) ->
+      _.objectMapValues(source, (key, value) -> value.toMGLValue(options))
 
     transition =
       duration: rules["transition-delay"]

@@ -37,9 +37,12 @@ global = statements { @globalScope.toMGLGlobalScope() }
 
 identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
 
-whitespace =  (("\n" / "\r" / "\t" / " ")* / !.) { null }
-statementSeperator = ("\n" / "\r" / ";" / !.) whitespace { null }
-argumentSeperator = ((("\t" / " ")* "," ("\t" / " ")*) / ("\t" / " ")+) { null }
+whitespaceWeak = " " / "\t" { null }
+whitespaceStrong = "\n" / "\r" { null }
+whitespace = whitespaceStrong / whitespaceWeak { null }
+statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
+argumentSeperator = (((whitespaceWeak)* "," (whitespaceWeak)*) / (whitespaceWeak)+) { null }
+argumentStrongSeperator = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -50,7 +53,6 @@ argumentSeperator = ((("\t" / " ")* "," ("\t" / " ")*) / ("\t" / " ")+) { null }
 scope =
   layerScope /
   classScope /
-  sourceScope /
   ruleMacroDefinitionScope
 
 layerScope =
@@ -59,22 +61,19 @@ layerScope =
 classScope =
   ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
 
-sourceScope =
-  ("&" name:identifier { @pushScope(@scope.addSourceScope(name)) }) scopeBody
-
 ruleMacroDefinitionScope =
-  (name:identifier args:ruleMacroDefinitionScopeArguments whitespace "=" whitespace { @pushScope(@scope.addRuleMacro(name, args)) }) scopeBody
+  (name:identifier args:ruleMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addRuleMacro(name, args)) }) scopeBody
 
 ruleMacroDefinitionScopeArguments =
-  "(" head:ruleMacroDefinitionScopeArgument tail:(argumentSeperator ruleMacroDefinitionScopeArgument)* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" whitespace* head:ruleMacroDefinitionScopeArgument tail:(argumentSeperator ruleMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { return [] }
 
 ruleMacroDefinitionScopeArgument =
-  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression:expression } /
+  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
   name:identifier { name: name }
 
 scopeBody =
-  (whitespace "{" body:statements "}" { @popScope() })
+  (whitespace* "{" body:statements "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -82,37 +81,33 @@ scopeBody =
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statements = whitespace (statement (statementSeperator statement)* statementSeperator? whitespace)?
+statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)?
 
 statement =
-  sourceRule /
   filterRule /
+  metaRule /
   valueMacroDefinition /
   rule /
-  metaRule /
   scope
 
-sourceRule =
-  "$source:" whitespace "&" source:identifier { @scope.setSource(source) }
-
 filterRule =
- "$filter:" whitespace expression:filterExpression { @scope.setFilter(expression) }
+ "$filter:" whitespace* expression:filterExpression { @scope.setFilter(expression) }
 
 metaRule =
-  "$" name:identifier ":" whitespace expressions:valueExpressions { @scope.addMetaRule(name, expressions) }
+  "$" name:identifier ":" whitespace* expressions:valueExpressions { @scope.addMetaRule(name, expressions) }
 
 rule =
-  name:identifier ":" whitespace expressions:valueExpressions { @scope.addRule(name, expressions) }
+  name:identifier ":" whitespace* expressions:valueExpressions { @scope.addRule(name, expressions) }
 
 valueMacroDefinition =
-  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
+  name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
-  "(" head:valueMacroDefinitionArgument tail:(argumentSeperator valueMacroDefinitionArgument)* ")" { [head].concat(@_.pluck(tail, 1) ) } /
+  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentStrongSeperator valueMacroDefinitionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { return [] }
 
 valueMacroDefinitionArgument =
-  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression: expression } /
+  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
   name:identifier { name: name }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,10 +126,10 @@ filterExpression =
   leafFilterExpression
 
 booleanLogicFilterExpression =
-  whitespace left:leafFilterExpression whitespace operator:("||" / "&&") whitespace right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
+  whitespace* left:leafFilterExpression whitespace* operator:("||" / "&&") whitespace* right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorFilterExpression =
-  "!" whitespace expression:filterExpression { new @NotOperatorExpression(expression) }
+  "!" whitespace* expression:filterExpression { new @NotOperatorExpression(expression) }
 
 // Leaf Filter Expressions
 
@@ -145,16 +140,16 @@ leafFilterExpression =
   typeCheckOperatorFilterExpression
 
 groupFilterExpression =
-  whitespace "(" expression:filterExpression ")" { expression }
+  whitespace* "(" expression:filterExpression ")" { expression }
 
 typeCheckOperatorFilterExpression =
-  whitespace "is" whitespace type:valueExpression { new @TypeCheckOperatorExpression(type) } /
+  whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) } /
 
 comparisonOperatorFilterExpression =
-  whitespace left:valueExpression whitespace operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
+  whitespace* left:valueExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
 
 setOperatorFilterExpression =
-  whitespace left:valueExpression whitespace operator:("in" / "!in") whitespace right:valueExpression { new @SetOperatorExpression(left, operator, right) }
+  whitespace* left:valueExpression whitespace* operator:("in" / "!in") whitespace* right:valueExpression { new @SetOperatorExpression(left, operator, right) }
 
 /////////////////////////////////////////////
 //           Value Expression              //
@@ -172,11 +167,11 @@ valueMacroReferenceValueExpression =
   name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
 
 valueMacroReferenceValueExpressionArguments =
-  "(" head:valueMacroReferenceValueExpressionArgument tail:(argumentSeperator valueMacroReferenceValueExpressionArgument)* ")" { [head].concat(@_.pluck(tail, 1) ) } /
+  "(" whitespace* head:valueMacroReferenceValueExpressionArgument tail:(argumentStrongSeperator valueMacroReferenceValueExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { [] }
 
 valueMacroReferenceValueExpressionArgument =
-  name:(identifier / integer) whitespace ":" whitespace expression:valueExpression { name: name, expression: expression } /
+  name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression } /
   expression:valueExpression { { expression: expression } }
 
 stringExpression =
