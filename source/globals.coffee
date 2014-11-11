@@ -10,6 +10,12 @@ module.exports =
 
     source: (source, options) ->
       name = source.name?.toMGLValue(options) || _.uniq()
+      delete source.name
+
+      if source["tile-size"]
+        source.tileSize = source["tile-size"]
+        delete source["tile-size"]
+
       options.globalScope.addSource(name, source)
       [new LiteralValue(name)]
 

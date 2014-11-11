@@ -11,8 +11,16 @@ describe "sources", ->
         $source: source(name: "test" bar: "baz")
       }
     """
-    assert.deepEqual stylesheet.sources.test, name: "test", bar: "baz"
+    assert.deepEqual stylesheet.sources.test, bar: "baz"
     assert.equal stylesheet.layers.layer.source, "test"
+
+  it "should rename tile-size to tileSize", ->
+    stylesheet = parse """
+      #layer {
+        $source: source(name: "test", tile-size: 17)
+      }
+    """
+    assert.deepEqual stylesheet.sources.test.tileSize, 17
 
 describe "layers", ->
 

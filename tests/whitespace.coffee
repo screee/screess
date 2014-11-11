@@ -69,14 +69,15 @@ describe "whitespace", ->
 
   it "should allow for a value macro's arguments to span multiple lines", ->
     stylesheet = parse """
+      second(one two) = two
       #layer {
-        $source: source(
-          name: "test"
-          bar: "baz"
+        $test: second(
+          0
+          17
         )
       }
     """
-    assert.deepEqual stylesheet.sources.test, name: "test", bar: "baz"
+    assert.equal stylesheet.layers.layer.test, 17
 
   it "should allow for an array's values to span multiple lines", ->
     stylesheet = parse """
