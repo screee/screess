@@ -13,7 +13,7 @@
   },
 
   "scripts": {
-    "build": "pegjs --plugin pegjs-coffee-plugin source/grammar.pegcs source/parser.js",
+    "build": "pegjs --plugin pegjs-coffee-plugin --allowed-start-rules global,valueExpression,ruleMacroDefinitionScopeArguments,valueMacroDefinitionArguments source/grammar.pegcs source/parser.js",
     "test": "npm run build && mocha --compilers coffee:coffee-script/register tests",
     "test-debug": "npm run build && open http://127.0.0.1:8080/debug?port=5858 && mocha --debug-brk --compilers coffee:coffee-script/register tests"
   }

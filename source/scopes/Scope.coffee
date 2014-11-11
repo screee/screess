@@ -12,8 +12,8 @@ module.exports = class Scope
 
   constructor: (@parent) ->
     @rules = {}
-    @valueMacros = {}
-    @ruleMacros = {}
+    @valueMacros = []
+    @ruleMacros = []
     @sourceScopes = {}
 
   addSourceScope: (name, scope) ->
@@ -26,40 +26,38 @@ module.exports = class Scope
     @rules[name] = expressions
 
   addValueMacro: (name, args, expressions) ->
-    if @valueMacros[name] then throw new Error("Duplicate entries value macro '#{name}'")
+    assert _.isArray(expressions)
     ValueMacro = require "../macros/ValueMacro"
-    @valueMacros[name] = ValueMacro.createFromExpressions(name, args, expressions)
+    macro = ValueMacro.createFromExpressions(name, args, expressions)
+    @valueMacros.push(macro)
 
   addRuleMacro: (name, args) ->
-    if @ruleMacros[name] then throw new Error("Duplicate entries rule macro '#{name}'")
     RuleMacro = require "../macros/RuleMacro"
     macro = new RuleMacro(@, name, args)
-    @ruleMacros[name] = macro
+    @ruleMacros.push(macro)
     macro.scope
 
   getSourceScope: (name) ->
     @sourceScopes[name] || @parent?.getSourceScope(name)
 
   getValueMacro: (name, argValues) ->
-    _.find(@valueMacros, (valueMacro) -> valueMacro.matches(name, argValues)) || \
-      @parent?.getValueMacro(name, argValues) || \
-      throw new Error("Macro '#{name}' not found")
+    _.find(@valueMacros, (valueMacro) -> valueMacro.matches(name, argValues)) || @parent?.getValueMacro(name, argValues)
 
-  getRuleMacro: (name) ->
-    @ruleMacros[name] || @parent?.getRuleMacro(name)
-
+  getRuleMacro: (name, argValues) ->
+    _.find(@ruleMacros, (ruleMacro) -> ruleMacro.matches(name, argValues)) || @parent?.getRuleMacro(name, argValues)
 
   toMGLRules: (options, rules) ->
     output = {}
 
     for name, expressions of rules
-      values = expressions.map (expression) =>
-        expression.toValue(@, _.extend(rule: name, options))
+      values = _.flatten _.map expressions, (expression) =>
+        expression.toValues(@, _.extend(rule: name, options))
 
-      if (scopeMacro = @getRuleMacro(name))
-        _.extend(output, scopeMacro.toMGLScope(values, options))
+      if (ruleMacro = @getRuleMacro(name))
+        _.extend(output, ruleMacro.toMGLScope(values, options))
       else
-        assert values.length == 1
+        if values.length != 1
+          throw new Error("Cannot apply #{values.length} args to primitive rule '#{name}'")
         output[name] = values[0].toMGLValue(_.extend(rule: name, options))
 
     output

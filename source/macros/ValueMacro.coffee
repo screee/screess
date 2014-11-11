@@ -6,12 +6,16 @@ assert = require 'assert'
 
 module.exports = class ValueMacro
 
+  @createFromExpression: (name, argDefinitions, expression) ->
+    @createFromExpressions(name, argDefinitions, [expression])
+
   @createFromExpressions: (name, argDefinitions, expressions) ->
+    assert _.isArray(expressions)
     @createFromFunction name, argDefinitions, (args, parentScope, options) ->
       scope = new Scope(parentScope)
       for name, value of args
-        scope.addValueMacro(name, [], literalExpression(value))
-      expressions.toValue(scope, options)
+        scope.addValueMacro(name, [], [literalExpression(value)])
+      expression.toValue(scope, options) for expression in expressions
 
   @createFromFunction: (name, argDefinitions, body) ->
     new ValueMacro(name, argDefinitions, body)
@@ -50,9 +54,11 @@ module.exports = class ValueMacro
 
     _.all(indicies)
 
-  toValue: (scope, argValues, options) ->
+  toValues: (scope, argValues, options) ->
     args = @processArgs(argValues, scope, options)
-    @body(args, scope, options)
+    values = @body(args, scope, options)
+    assert _.isArray(values)
+    return values
 
   processArgs: (argValues, scope, options) ->
     args = {}
@@ -60,7 +66,8 @@ module.exports = class ValueMacro
     if !@argDefinitions
       positionalIndex = 0
       for argValue in argValues
-        args[argValue.name || positionalIndex++] = argValue.value
+        for value in argValue.values
+          args[argValue.name || positionalIndex++] = value
 
     else
       assert @matchesArgValues(argValues)
@@ -74,21 +81,24 @@ module.exports = class ValueMacro
             @argDefinitions,
             (argDefinition) -> argDefinition.name == argValue.name
           )
-          args[argDefinition.name] = argValue.value
+          assert.equal argValue.values.length, 1
+          args[argDefinition.name] = argValue.values[0]
 
       # Extract positional arguments
       positionalIndex = -1
       for argValue in argValues
         if !argValue.name
-          null while args[@argDefinitions[++positionalIndex]?.name] && positionalIndex < @argDefinitions.length
-          argDefinition = @argDefinitions[positionalIndex++]
-          assert(argDefinition)
-          args[argDefinition.name] = argValue.value
+          for value in argValue.values
+            # Advance positionalIndex to the next unused positional argument
+            null while args[@argDefinitions[++positionalIndex]?.name] && positionalIndex < @argDefinitions.length
+            argDefinition = @argDefinitions[positionalIndex]
+            assert(argDefinition)
+            args[argDefinition.name] = value
 
       # Extract default arguments
       for argDefinition in @argDefinitions
         if !args[argDefinition.name]
-          args[argDefinition.name] = argDefinition.value
+          args[argDefinition.name] = argDefinition.expression.toValue(scope, options)
 
     args
 

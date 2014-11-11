@@ -5,10 +5,16 @@ _ = require("../utilities")
 
 module.exports = class ValueMacroReferenceExpression extends Expression
 
-  constructor: (@name, @args) ->
+  constructor: (@name, @argExpressions) ->
 
-  toValue: (scope, options) ->
-    args = @args.map (arg) ->
-      _.extend(value: arg.expression.toValue(scope, options), arg)
+  toValues: (scope, options) ->
+    args = @argExpressions.map (arg) ->
+      _.extend(
+        values: arg.expression.toValues(scope, options),
+        arg
+      )
 
-    scope.getValueMacro(@name, args).toValue(scope, args, options)
+    if macro = scope.getValueMacro(@name, args)
+      macro.toValues(scope, args, options)
+    else
+      throw new Error("Could not find value macro '#{@name}'")

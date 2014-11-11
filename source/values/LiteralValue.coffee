@@ -5,3 +5,4 @@ module.exports = class LiteralValue extends Value
 
   constructor: (@value) ->
   toMGLValue: -> @value
+  toLiteralValue: -> @value

@@ -65,7 +65,33 @@ describe "value", ->
     it "should parse", ->
       assert.equal parseValue('"foo"'), "foo"
 
+    it "should parse with literal values interpolated", ->
+      assert.equal parseValue('"test #{7} test"'), "test 7 test"
+
+    it "should parse with attribute reference values interpolated", ->
+      assert.equal parseValue('"test #{@foo} test"'), "test {foo} test"
+
     it "should parse an empty string", ->
       assert.equal parseValue('""'), ""
 
   describe "function value", ->
+
+    it "should apply with a base", ->
+      assert.deepEqual(
+        parseValue('function(base:0.5 0:100 5:50 10:25)'),
+        stops: [[0, 100], [5, 50], [10, 25]], base:0.5
+      )
+
+    it "should apply without a base", ->
+      assert.deepEqual(
+        parseValue('function(0:100 5:50 10:25)'),
+        stops: [[0, 100], [5, 50], [10, 25]]
+      )
+
+  describe "color", ->
+
+    it "should parse hex", ->
+      assert.equal parseValue('#fff'), "rgba(255, 255, 255, 1)"
+
+    it "should parse a color function", ->
+      assert.equal parseValue('rgba(4 3 2, 1)'), "rgba(4, 3, 2, 1)"

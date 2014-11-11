@@ -10,6 +10,7 @@ module.exports = class SetOperatorExoression extends Expression
 
   toMGLFilter: (scope, options) ->
     lvalue = @left.toValue(scope, options)
+    # TODO allow for multiple rvalues
     rvalue = @right.toValue(scope, options)
 
     assert lvalue instanceof AttributeReferenceValue

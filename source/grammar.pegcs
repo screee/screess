@@ -7,11 +7,11 @@
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @LiteralValue = require("./values/LiteralValue")
-  @StringValue = require("./values/StringValue")
   @ArrayValue = require("./values/ArrayValue")
   @FunctionValue = require("./values/FunctionValue")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
+  @StringExpression = require("./expressions/StringExpression")
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
   @ComparisonOperatorExpression = require('./expressions/ComparisonOperatorExpression')
   @TypeCheckOperatorExpression = require('./expressions/TypeCheckOperatorExpression')
@@ -101,15 +101,15 @@ rule =
   name:identifier ":" whitespace expressions:valueExpressions { @scope.addRule(name, expressions) }
 
 valueMacroDefinition =
-  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace body:valueExpression { @scope.addValueMacro(name, args, body) }
+  name:identifier args:valueMacroDefinitionArguments whitespace "=" whitespace expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
   "(" head:valueMacroDefinitionArgument tail:(argumentSeperator valueMacroDefinitionArgument)* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { return [] }
 
 valueMacroDefinitionArgument =
-  name:identifier { name: name } /
-  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression: expression }
+  name:identifier whitespace "=" whitespace expression:valueExpression { name: name, expression: expression } /
+  name:identifier { name: name }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -152,7 +152,6 @@ comparisonOperatorFilterExpression =
 setOperatorFilterExpression =
   whitespace left:valueExpression whitespace operator:("in" / "!in") whitespace right:valueExpression { new @SetOperatorExpression(left, operator, right) }
 
-
 /////////////////////////////////////////////
 //           Value Expression              //
 /////////////////////////////////////////////
@@ -162,7 +161,8 @@ valueExpressions =
 
 valueExpression =
   literalValueExpression /
-  valueMacroReferenceValueExpression
+  valueMacroReferenceValueExpression /
+  stringExpression
 
 valueMacroReferenceValueExpression =
   name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
@@ -172,8 +172,11 @@ valueMacroReferenceValueExpressionArguments =
   "" { [] }
 
 valueMacroReferenceValueExpressionArgument =
-  name:identifier whitespace ":" whitespace expression:valueExpression { name: name, expression: expression } /
+  name:(identifier / integer) whitespace ":" whitespace expression:valueExpression { name: name, expression: expression } /
   expression:valueExpression { { expression: expression } }
+
+stringExpression =
+  "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) }
 
 literalValueExpression =
   value:value { @literalExpression value }
@@ -189,24 +192,20 @@ value =
   numberValue /
   attributeReferenceValue /
   colorValue /
-  stringValue /
   arrayValue
 
 arrayValue =
   "[" expressions:valueExpressions "]" { return new @ArrayValue(expressions) }
-
-stringValue =
-  "\"" body:[^\"]* "\"" { new @StringValue(body.join("")) }
 
 booleanValue =
   "true" { @literalValue true } /
   "false" { @literalValue false }
 
 numberValue =
-  before:numberValueInteger? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
-  number:numberValueInteger { @literalValue number }
+  before:integer? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
+  number:integer { @literalValue number }
 
-numberValueInteger =
+integer =
   head:[1-9] tail:[0-9]* { parseInt(head + tail.join("")) } /
   "0" { 0 }
 

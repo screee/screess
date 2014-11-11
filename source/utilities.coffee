@@ -31,6 +31,15 @@ _.mixin
 
   none: -> return !_.some.apply(_, arguments)
 
+  is: (object, klass) ->
+    return true if object instanceof klass
+
+    while object.__super__?
+      return true if object.__super__ is klass::
+      object = object.__super__.constructor
+
+    false
+
 `
 /**
  * Converts an RGB color value to HSL. Conversion formula
