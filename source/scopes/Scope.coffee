@@ -11,6 +11,7 @@ _ = require "../utilities"
 module.exports = class Scope
 
   constructor: (@parent) ->
+    assert !@parent || _.is(@parent, Scope)
     @rules = {}
     @valueMacros = []
     @ruleMacros = []
@@ -28,7 +29,7 @@ module.exports = class Scope
   addValueMacro: (name, args, expressions) ->
     assert _.isArray(expressions)
     ValueMacro = require "../macros/ValueMacro"
-    macro = ValueMacro.createFromExpressions(name, args, expressions)
+    macro = ValueMacro.createFromExpressions(name, args, @, expressions)
     @valueMacros.push(macro)
 
   addRuleMacro: (name, args) ->

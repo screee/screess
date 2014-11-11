@@ -15,6 +15,6 @@ module.exports = class ValueMacroReferenceExpression extends Expression
       )
 
     if macro = scope.getValueMacro(@name, args)
-      macro.toValues(scope, args, options)
+      macro.toValues(args, options)
     else
       throw new Error("Could not find value macro '#{@name}'")

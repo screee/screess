@@ -45,6 +45,4 @@ module.exports = class RuleMacro
       argDefinition = @argDefinitions[positionaIndex++]
       args[argDefinition.name] = argDefinition.expression.toValue(scope, options)
 
-    console.log args
-
     args

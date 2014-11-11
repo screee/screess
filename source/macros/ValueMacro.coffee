@@ -6,21 +6,22 @@ assert = require 'assert'
 
 module.exports = class ValueMacro
 
-  @createFromExpression: (name, argDefinitions, expression) ->
-    @createFromExpressions(name, argDefinitions, [expression])
+  @createFromExpression: (name, argDefinitions, parentScope, expression) ->
+    @createFromExpressions(name, argDefinitions, parentScope, [expression])
 
-  @createFromExpressions: (name, argDefinitions, expressions) ->
+  @createFromExpressions: (name, argDefinitions, parentScope, expressions) ->
     assert _.isArray(expressions)
-    @createFromFunction name, argDefinitions, (args, parentScope, options) ->
+    @createFromFunction name, argDefinitions, parentScope, (args, options) ->
       scope = new Scope(parentScope)
       for name, value of args
         scope.addValueMacro(name, [], [literalExpression(value)])
       expression.toValue(scope, options) for expression in expressions
 
-  @createFromFunction: (name, argDefinitions, body) ->
-    new ValueMacro(name, argDefinitions, body)
+  @createFromFunction: (name, argDefinitions, parentScope, body) ->
+    new ValueMacro(name, argDefinitions, parentScope, body)
 
-  constructor: (@name, @argDefinitions, @body) ->
+  constructor: (@name, @argDefinitions, @parentScope, @body) ->
+    assert _.is(@parentScope, Scope)
     @argDefinitionsMap = _.objectMap @argDefinitions, (index, argDefinition) ->
       [argDefinition.name, _.extend(argDefinition, index:index)]
 
@@ -54,14 +55,14 @@ module.exports = class ValueMacro
 
     _.all(indicies)
 
-  toValues: (scope, argValues, options) ->
-    args = @processArgs(argValues, scope, options)
-    values = @body(args, scope, options)
+  toValues: (argValues, options) ->
+    args = @processArgs(argValues, options)
+    values = @body(args, options)
     assert _.isArray(values)
     return values
 
   # TODO this scope shoud come from the place the macro is defined
-  processArgs: (argValues, scope, options) ->
+  processArgs: (argValues, options) ->
     args = {}
 
     if !@argDefinitions
@@ -99,7 +100,7 @@ module.exports = class ValueMacro
       # Extract default arguments
       for argDefinition in @argDefinitions
         if !args[argDefinition.name]
-          args[argDefinition.name] = argDefinition.expression.toValue(scope, options)
+          args[argDefinition.name] = argDefinition.expression.toValue(@parentScope, options)
 
     args
 

@@ -11,7 +11,7 @@ module.exports = class GlobalScope extends Scope
     if macro = super
       macro
     else if fn = Globals.valueMacros[name]
-      ValueMacro.createFromFunction(name, null, fn)
+      ValueMacro.createFromFunction(name, null, @, fn)
     else
       null
 

@@ -108,6 +108,14 @@ describe "value macro", ->
       """
       assert.equal stylesheet.layers.layer.bar, 17
 
+    it "should apply other value macros to optional arguments", ->
+      stylesheet = parse """
+        inner = 17
+        outer(value=inner) = value
+        #layer { $bar: outer }
+      """
+      assert.equal stylesheet.layers.layer.bar, 17
+
     it "should apply other value macros", ->
       stylesheet = parse """
         inner = 17
