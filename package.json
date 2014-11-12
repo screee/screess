@@ -1,8 +1,11 @@
 {
+  "version": "0.1.0",
   "name": "screess",
   "description": "A stylesheet language that compiles down to a MapBox GL stylesheet",
   "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
+
   "main": "compiled/node/main",
+  "bin": {"screess": "bin/screess"},
 
   "repository" : {
     "type" : "git",
@@ -11,7 +14,8 @@
 
   "dependencies": {
     "pegjs": "",
-    "coffee-script": ""
+    "coffee-script": "",
+    "commander": ""
   },
 
   "devDependencies": {
