@@ -16,18 +16,19 @@ module.exports = class GlobalScope extends Scope
     @sources[name] = source
 
   getValueMacro: (name, argValues) ->
-    if macro = super
-      macro
-    else if fn = Globals.valueMacros[name]
+    super || @getGlobalValueMacro(name, argValues)
+
+  getRuleMacro: (name, argValues) ->
+    super || @getGlobalRuleMacro(name, argValues)
+
+  getGlobalRuleMacro: (name, argValues) ->
+    # TODO
+
+  getGlobalValueMacro: (name, argValues) ->
+    if fn = Globals.valueMacros[name]
       ValueMacro.createFromFunction(name, null, @, fn)
     else
       null
-
-  getRuleMacro: (name, argValues) ->
-    super
-    # # TODO move this logic to the Macro classes
-    # for name, fn of Globals.ruleMacros
-    #   @ruleMacros.push new RuleMacro(@, name, [0...fn.length - 2], fn)
 
   getGlobalScope: -> @
 

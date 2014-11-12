@@ -87,8 +87,8 @@ statement =
   filterRule /
   metaRule /
   valueMacroDefinition /
-  rule /
-  scope
+  scope /
+  rule
 
 filterRule =
  "$filter:" whitespace* expression:filterExpression { @scope.setFilter(expression) }
@@ -97,7 +97,8 @@ metaRule =
   "$" name:identifier ":" whitespace* expressions:valueExpressions { @scope.addMetaRule(name, expressions) }
 
 rule =
-  name:identifier ":" whitespace* expressions:valueExpressions { @scope.addRule(name, expressions) }
+  name:identifier ":" whitespace* expressions:valueExpressions { @scope.addRule(name, expressions) } /
+  name:identifier { @scope.addRule(name, []) }
 
 valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }

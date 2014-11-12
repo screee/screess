@@ -5,6 +5,13 @@ describe "rule macro", ->
 
   describe "arguments", ->
 
+    it "should apply a rule macro with no arguments", ->
+      stylesheet = parse """
+        rule = { foo: "bar" }
+        #layer { rule }
+      """
+      assert.equal stylesheet.layers[0].paint.foo, "bar"
+
     it "should accept arguments", ->
       stylesheet = parse """
         second(one, two) = { foo: two }

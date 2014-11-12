@@ -29,7 +29,8 @@ module.exports = class RuleMacro
   matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
 
   matchesArgValues: (argValues) ->
-    argValues.length <= @argLengthMax && argValues.length >= @argLengthMin
+    argLength = argValues.length
+    argLength <= @argLengthMax && argLength >= @argLengthMin
 
   processArgs: (argValues, scope, options) ->
     assert @matchesArgValues(argValues)

@@ -40,7 +40,7 @@ _.mixin
 
     false
 
-  count: -> _.countBy.apply(_, arguments)[true]
+  count: -> _.countBy.apply(_, arguments)[true] || 0
 
 `
 /**

@@ -4,6 +4,8 @@ ScreeSS is a high level stylesheet language that compiles down to a [Mapbox GL s
 
 ## Writing a ScreeSS Stylesheet
 
+**NOTE: ** Some features in this tutorial are not yet implemented.
+
 Create a layer called "water"
 ```
 #water { }
@@ -28,10 +30,9 @@ Properties beginning with a `$`, called "meta-properties", configure the layer i
   $source: source(
     type: vector
     url: "mapbox://mapbox.mapbox-streets-v5"
-    layer: "water"
   )
+  $source-layer: "water"
   $type: fill
-
 }
 ```
 
@@ -59,6 +60,8 @@ Properties of the object being filtered or styled are prefixed with an `@`, as i
 Supported meta-properties, as documented in the [Mapbox GL style spec](https://www.mapbox.com/mapbox-gl-style-spec/), are
 
  - `$source`
+ - `$source-layer`
+ - `$layers`
  - `$minzoom`
  - `$maxzoom`
  - `$interactive`
