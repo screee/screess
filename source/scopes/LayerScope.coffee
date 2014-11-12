@@ -20,7 +20,7 @@ module.exports = class LayerScope extends Scope
     if @source then throw new Error("Duplicate sources")
     @source = source
 
-  constructor: (parent) ->
+  constructor: (@name, parent) ->
     super(parent)
     @classScopes = {}
     @metaRules = {}
@@ -41,7 +41,6 @@ module.exports = class LayerScope extends Scope
       metaSourceRule = null
 
     metaRules = @toMGLRules(_.extend(meta:true, options), @metaRules)
-
     paintRules = paint: @toMGLRules(options, @rules)
 
     paintClassRules = _.objectMap(
@@ -49,4 +48,4 @@ module.exports = class LayerScope extends Scope
       (scope, name) => ["paint.#{name}", scope.toMGLClassScope(options)]
     )
 
-    _.extend(metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)
+    _.extend(id: @name, metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)

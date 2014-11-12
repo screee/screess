@@ -5,7 +5,7 @@ describe "filters", ->
 
   parseFilter = (filter) ->
     stylesheet = parse "#layer { $filter: #{filter} }"
-    stylesheet.layers.layer.filter
+    stylesheet.layers[0].filter
 
   describe "comparison operator", ->
     for operator in ["==", ">=", "<=", "<", ">", "!="]

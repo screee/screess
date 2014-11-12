@@ -3,9 +3,9 @@ assert = require("assert")
 _ = require("../source/utilities")
 
 describe "whitespace", ->
-  zero = test: {paint: { }}
-  one = test: {paint: { foo: "bar" }}
-  two = test: {paint: { foo: "bar"; baz: "qux" }}
+  zero = [{id: "test", paint: { }}]
+  one = [{id: "test", paint: { foo: "bar" }}]
+  two = [{id: "test", paint: { foo: "bar"; baz: "qux" }}]
 
   it "should allow for an empty scope", ->
     stylesheet = parse '#test {}'
@@ -77,7 +77,7 @@ describe "whitespace", ->
         )
       }
     """
-    assert.equal stylesheet.layers.layer.test, 17
+    assert.equal stylesheet.layers[0].test, 17
 
   it "should allow for an array's values to span multiple lines", ->
     stylesheet = parse """
@@ -88,7 +88,7 @@ describe "whitespace", ->
         ]
       }
     """
-    assert.deepEqual stylesheet.layers.layer.test, [1, 2]
+    assert.deepEqual stylesheet.layers[0].test, [1, 2]
 
   it "should allow for a rule's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
@@ -100,4 +100,4 @@ describe "whitespace", ->
         )
       }
     """
-    assert.deepEqual stylesheet.layers.layer.test, 17
+    assert.deepEqual stylesheet.layers[0].test, 17

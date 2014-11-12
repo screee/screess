@@ -12,7 +12,7 @@ describe "sources", ->
       }
     """
     assert.deepEqual stylesheet.sources.test, bar: "baz"
-    assert.equal stylesheet.layers.layer.source, "test"
+    assert.equal stylesheet.layers[0].source, "test"
 
   it "should rename tile-size to tileSize", ->
     stylesheet = parse """
@@ -26,15 +26,15 @@ describe "layers", ->
 
   it "should be in the stylesheet", ->
     stylesheet = parse '#test {}'
-    assert stylesheet.layers.test
+    assert stylesheet.layers[0]
 
   it "should respect paint rules", ->
     stylesheet = parse '#test { foo: "bar" }'
-    assert.equal stylesheet.layers.test.paint.foo, "bar"
+    assert.equal stylesheet.layers[0].paint.foo, "bar"
 
   it "should respect meta rules", ->
     stylesheet = parse '#test { $foo: "bar" }'
-    assert.equal stylesheet.layers.test.foo, "bar"
+    assert.equal stylesheet.layers[0].foo, "bar"
 
   it "should throw an error if an unknown source is referenced", ->
     assert.throws ->
@@ -45,4 +45,4 @@ describe "layers", ->
 
   it "should respect its filter", ->
     stylesheet = parse '#test { $filter: @name == "foo" }'
-    assert stylesheet.layers.test.filter
+    assert stylesheet.layers[0].filter

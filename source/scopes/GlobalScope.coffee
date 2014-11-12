@@ -33,12 +33,12 @@ module.exports = class GlobalScope extends Scope
 
   addLayerScope: (name, scope) ->
     if @layerScopes[name] then throw new Error("Duplicate entries for layer scope '#{name}'")
-    @layerScopes[name] = new LayerScope(@)
+    @layerScopes[name] = new LayerScope(name, @)
 
   toMGLGlobalScope: (options) ->
     options = _.extend(scope: "global", globalScope: @, options)
 
-    layers = _.objectMapValues @layerScopes, (name, layer) -> layer.toMGLLayerScope(options)
+    layers = _.map @layerScopes, (layer) -> layer.toMGLLayerScope(options)
     rules = @toMGLRules(options, @rules)
     sources = _.objectMapValues @sources, (name, source) ->
       _.objectMapValues(source, (key, value) -> value.toMGLValue(options))

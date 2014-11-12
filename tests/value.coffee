@@ -6,13 +6,13 @@ describe "value", ->
   parseValue = (value, options = {}) ->
     if options.filterLvalue
       stylesheet = parse "#layer { $filter: #{value} == 1 }"
-      stylesheet.layers.layer.filter[1]
+      stylesheet.layers[0].filter[1]
     else if options.filterRvalue
       stylesheet = parse "#layer { $filter: @test == #{value} }"
-      stylesheet.layers.layer.filter[2]
+      stylesheet.layers[0].filter[2]
     else
       stylesheet = parse "#layer { foo: #{value} }"
-      stylesheet.layers.layer.paint.foo
+      stylesheet.layers[0].paint.foo
 
   describe "array", ->
 
