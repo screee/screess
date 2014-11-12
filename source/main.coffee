@@ -1,4 +1,4 @@
 if module.exports
-  module.exports = require("../compiled/parser")
+  module.exports = require("./parser")
 else if window
-  window.ScreeSS = require("../compiled/parser")
+  window.ScreeSS = require("./parser")
