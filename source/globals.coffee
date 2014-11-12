@@ -34,19 +34,23 @@ module.exports =
     rgba: (args, options) ->
       [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
 
-    polygon: (args, options) ->
-      [new LiteralValue("Polygon")]
-    point: (args, options) ->
-      [new LiteralValue("Point")]
+    # Object Types
+    # 'line' is included below
+    polygon: (args, options) -> [new LiteralValue("Polygon")]
+    point: (args, options) -> [new LiteralValue("Point")]
 
-    fill: (args, options) ->
-      [new LiteralValue("fill")]
-    symbol: (args, options) ->
-      [new LiteralValue("symbol")]
-    raster: (args, options) ->
-      [new LiteralValue("raster")]
-    background: (args, options) ->
-      [new LiteralValue("background")]
+    # Source Types
+    vector: (args, options) -> [new LiteralValue("vector")]
+    raster: (args, options) -> [new LiteralValue("raster")]
+    geojson: (args, options) -> [new LiteralValue("geojson")]
+    video: (args, options) -> [new LiteralValue("video")]
+
+    # Layer Renderer Types
+    # 'line' is included below
+    fill: (args, options) -> [new LiteralValue("fill")]
+    symbol: (args, options) -> [new LiteralValue("symbol")]
+    raster: (args, options) -> [new LiteralValue("raster")]
+    background: (args, options) -> [new LiteralValue("background")]
 
     # Line may refer to the layer paint type or the layer geometry type
     line: (args, options) ->
