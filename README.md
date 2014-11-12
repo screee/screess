@@ -157,11 +157,24 @@ water(depth=0) = darken(#2491dd, depth)
 ### Property Macros
 
 Sets of properties may be reused by assigning them to a property macro
-
-fill-color-water(depth=0) {
+```
+fill-water(depth) {
   color = darken(#2491dd, depth)
 
   fill-color: color
   fill-antialias: true
   fill-outline-color: darken(color, 0.1)
 }
+
+#water {
+  $source: source(
+    type: vector
+    url: "mapbox://mapbox.mapbox-streets-v5"
+    layer: "water"
+  )
+  $type: fill
+  $filter: is polygon && @area > 1000
+
+  fill-water: 0
+}
+```
