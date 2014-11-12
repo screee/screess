@@ -33,6 +33,7 @@ _.mixin
 
   is: (object, klass) ->
     return true if object instanceof klass
+    return false if !object
 
     while object.__super__?
       return true if object.__super__ is klass::

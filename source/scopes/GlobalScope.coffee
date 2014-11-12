@@ -5,6 +5,8 @@ Globals = require('../globals')
 ValueMacro = require('../macros/ValueMacro')
 RuleMacro = require('../macros/RuleMacro')
 
+{literalValue} = require('../values/LiteralValue')
+
 module.exports = class GlobalScope extends Scope
 
   constructor: ->
@@ -16,7 +18,12 @@ module.exports = class GlobalScope extends Scope
     @sources[name] = source
 
   getValueMacro: (name, argValues) ->
-    super || @getGlobalValueMacro(name, argValues)
+    if macro = super
+      macro
+    else if macro = @getGlobalValueMacro(name, argValues)
+      macro
+    else if argValues.length == 0
+      ValueMacro.createFromValue(name, @, literalValue(name))
 
   getRuleMacro: (name, argValues) ->
     super || @getGlobalRuleMacro(name, argValues)

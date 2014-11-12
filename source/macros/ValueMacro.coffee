@@ -6,6 +6,9 @@ assert = require 'assert'
 
 module.exports = class ValueMacro
 
+  @createFromValue: (name, scope, value) ->
+    @createFromExpression(name, null, scope, literalExpression(value))
+
   @createFromExpression: (name, argDefinitions, parentScope, expression) ->
     @createFromExpressions(name, argDefinitions, parentScope, [expression])
 

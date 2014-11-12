@@ -3,6 +3,12 @@ assert = require("assert")
 
 describe "value macro", ->
 
+  it "should turn into a literal string if undefined", ->
+    stylesheet = parse """
+      #layer { $bar: baz }
+    """
+    assert.equal stylesheet.layers[0].bar, "baz"
+
   describe "return values", ->
 
     it "should return one value", ->

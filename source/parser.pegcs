@@ -66,7 +66,7 @@ ruleMacroDefinitionScope =
 
 ruleMacroDefinitionScopeArguments =
   "(" whitespace* head:ruleMacroDefinitionScopeArgument tail:(argumentSeperator ruleMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
-  "" { return [] }
+  "" { [] }
 
 ruleMacroDefinitionScopeArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
