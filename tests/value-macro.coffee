@@ -19,7 +19,6 @@ describe "value macro", ->
       assert.equal stylesheet.layers[0].bar, 17
 
     it "should return multiple values to another value macro", ->
-      debugger
       stylesheet = parse """
         identity(one two) = one two
         second(one two three) = two
