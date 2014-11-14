@@ -7,23 +7,13 @@ describe "rule macro", ->
 
     it "should shadow a rule macro in an enclosing scope", ->
       stylesheet = parse """
-        rule = { foo: 17 }
+        rule(value) = { foo: value }
         #layer {
-          rule = { rule }
+          rule = { rule: 17 }
           rule
         }
       """
       assert.equal stylesheet.layers[0].paint.foo, 17
-
-    # it "should shadow a rule macro in the same scope", ->
-    #   stylesheet = parse """
-    #     rule(value) = { foo: value }
-    #     rule(value) = { rule(17) }
-    #     #layer { rule(0) }
-    #   """
-    #   assert.equal stylesheet.layers[0].paint.foo, "bar"
-
-
 
   describe "arguments", ->
 

@@ -3,6 +3,18 @@ assert = require("assert")
 
 describe "value macro", ->
 
+  describe "shadowing", ->
+
+    it "should shadow a value macro in an enclosing scope", ->
+      stylesheet = parse """
+        test(value) = value
+        #layer {
+          test = test(17)
+          foo: test
+        }
+      """
+      assert.equal stylesheet.layers[0].paint.foo, 17
+
   it "should turn into a literal string if undefined", ->
     stylesheet = parse """
       #layer { $bar: baz }
@@ -73,7 +85,6 @@ describe "value macro", ->
   describe "argument matching", ->
 
     it "should match by number of positional arguments", ->
-      debugger
       stylesheet = parse """
         foo(one) = one
         foo(one, two) = two
