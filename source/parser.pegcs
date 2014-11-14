@@ -40,8 +40,9 @@ identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
 whitespaceWeak = " " / "\t" { null }
 whitespaceStrong = "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
+
 statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
-argumentSeperator = (((whitespaceWeak)* "," (whitespaceWeak)*) / (whitespaceWeak)+) { null }
+argumentSeperatorWeak = (((whitespaceWeak)* "," (whitespaceWeak)*) / (whitespaceWeak)+) { null }
 argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +66,7 @@ propertyMacroDefinitionScope =
   (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
 
 propertyMacroDefinitionScopeArguments =
-  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperator propertyMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { [] }
 
 propertyMacroDefinitionScopeArgument =
@@ -122,34 +123,34 @@ valueMacroDefinitionArgument =
 /////////////////////////////////////////////
 
 filterExpression =
-  notOperatorFilterExpression /
-  booleanLogicFilterExpression /
-  leafFilterExpression
+  notOperatorExpression /
+  booleanLogicExpression /
+  leafExpression
 
-booleanLogicFilterExpression =
-  whitespace* left:leafFilterExpression whitespace* operator:("||" / "&&") whitespace* right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
+booleanLogicExpression =
+  whitespace* left:leafExpression whitespace* operator:("||" / "&&") whitespace* right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
 
-notOperatorFilterExpression =
+notOperatorExpression =
   "!" whitespace* expression:filterExpression { new @NotOperatorExpression(expression) }
 
 // Leaf Filter Expressions
 
-leafFilterExpression =
-  groupFilterExpression /
-  setOperatorFilterExpression /
-  comparisonOperatorFilterExpression /
-  typeCheckOperatorFilterExpression
+leafExpression =
+  groupExpression /
+  setOperatorExpression /
+  comparisonOperatorExpression /
+  typeCheckOperatorExpression
 
-groupFilterExpression =
+groupExpression =
   whitespace* "(" expression:filterExpression ")" { expression }
 
-typeCheckOperatorFilterExpression =
+typeCheckOperatorExpression =
   whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) } /
 
-comparisonOperatorFilterExpression =
+comparisonOperatorExpression =
   whitespace* left:valueExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
 
-setOperatorFilterExpression =
+setOperatorExpression =
   whitespace* left:valueExpression whitespace* operator:("in" / "!in") whitespace* right:valueExpression { new @SetOperatorExpression(left, operator, right) }
 
 /////////////////////////////////////////////
@@ -157,7 +158,7 @@ setOperatorFilterExpression =
 /////////////////////////////////////////////
 
 valueExpressionsWeak =
-  head:valueExpression tail:(argumentSeperator valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+  head:valueExpression tail:(argumentSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
 
 valueExpressionsStrong =
   head:valueExpression tail:(argumentSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
