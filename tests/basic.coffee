@@ -28,11 +28,11 @@ describe "layers", ->
     stylesheet = parse '#test {}'
     assert stylesheet.layers[0]
 
-  it "should respect paint rules", ->
+  it "should respect paint properties", ->
     stylesheet = parse '#test { foo: "bar" }'
     assert.equal stylesheet.layers[0].paint.foo, "bar"
 
-  it "should respect meta rules", ->
+  it "should respect meta properties", ->
     stylesheet = parse '#test { $foo: "bar" }'
     assert.equal stylesheet.layers[0].foo, "bar"
 

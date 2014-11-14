@@ -28,7 +28,7 @@
     "prepublish": "npm run build",
 
     "build": "npm run build-pegjs && npm run build-coffee && npm run build-browser",
-    "build-pegjs": "pegjs --plugin pegjs-coffee-plugin --allowed-start-rules global,valueExpression,ruleMacroDefinitionScopeArguments,valueMacroDefinitionArguments source/parser.pegcs source/parser.js",
+    "build-pegjs": "pegjs --plugin pegjs-coffee-plugin --allowed-start-rules global,valueExpression,propertyMacroDefinitionScopeArguments,valueMacroDefinitionArguments source/parser.pegcs source/parser.js",
     "build-coffee": "coffee --compile --output compiled/node source && cp source/parser.js compiled/node/parser.js",
     "build-browser": "browserify --outfile compiled/browser.js compiled/node/main.js",
 

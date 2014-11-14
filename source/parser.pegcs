@@ -53,7 +53,7 @@ argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 scope =
   layerScope /
   classScope /
-  ruleMacroDefinitionScope
+  propertyMacroDefinitionScope
 
 layerScope =
   ("#" name:identifier { @pushScope(@scope.addLayerScope(name)) }) scopeBody
@@ -61,14 +61,14 @@ layerScope =
 classScope =
   ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
 
-ruleMacroDefinitionScope =
-  (name:identifier args:ruleMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addRuleMacro(name, args)) }) scopeBody
+propertyMacroDefinitionScope =
+  (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
 
-ruleMacroDefinitionScopeArguments =
-  "(" whitespace* head:ruleMacroDefinitionScopeArgument tail:(argumentSeperator ruleMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
+propertyMacroDefinitionScopeArguments =
+  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperator propertyMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
   "" { [] }
 
-ruleMacroDefinitionScopeArgument =
+propertyMacroDefinitionScopeArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
   name:identifier { name: name }
 
@@ -84,21 +84,21 @@ scopeBody =
 statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)?
 
 statement =
-  filterRule /
-  metaRule /
+  filterProperty /
+  metaProperty /
   valueMacroDefinition /
   scope /
-  rule
+  property
 
-filterRule =
+filterProperty =
  "$filter:" whitespace* expression:filterExpression { @scope.setFilter(expression) }
 
-metaRule =
-  "$" name:identifier ":" whitespace* expressions:valueExpressions { @scope.addMetaRule(name, expressions) }
+metaProperty =
+  "$" name:identifier ":" whitespace* expressions:valueExpressions { @scope.addMetaProperty(name, expressions) }
 
-rule =
-  name:identifier ":" whitespace* expressions:valueExpressions { @scope.addRule(name, expressions) } /
-  name:identifier { @scope.addRule(name, []) }
+property =
+  name:identifier ":" whitespace* expressions:valueExpressions { @scope.addProperty(name, expressions) } /
+  name:identifier { @scope.addProperty(name, []) }
 
 valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }

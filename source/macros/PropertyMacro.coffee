@@ -3,7 +3,7 @@ Scope  = require '../scopes/Scope'
 _ = require "../utilities"
 assert = require "assert"
 
-module.exports = class RuleMacro
+module.exports = class PropertyMacro
 
   # TODO allow for subclasses, sublayers?
 
@@ -22,7 +22,7 @@ module.exports = class RuleMacro
       scope.addValueMacro(name, [], [literalExpression(value)])
 
     _.extend(
-      scope.toMGLRules(options, @scope.rules),
+      scope.toMGLProperties(options, @scope.properties),
       @body?.apply({}, argValues)
     )
 

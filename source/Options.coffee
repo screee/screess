@@ -9,8 +9,8 @@ module.exports = class Options
 
   constructor: ->
     @valueMacroStack = []
-    @ruleMacroStack = []
+    @propertyMacroStack = []
     @scopeStack = []
     @filters = 0
-    @rule = null
-    @isMetaRule = false
+    @property = null
+    @isMetaProperty = false

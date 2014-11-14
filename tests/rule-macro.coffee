@@ -1,26 +1,26 @@
 {parse} = require("../source/main")
 assert = require("assert")
 
-describe "rule macro", ->
+describe "property macro", ->
 
   describe "shadowing", ->
 
-    it "should shadow a rule macro in an enclosing scope", ->
+    it "should shadow a property macro in an enclosing scope", ->
       stylesheet = parse """
-        rule(value) = { foo: value }
+        property(value) = { foo: value }
         #layer {
-          rule = { rule: 17 }
-          rule
+          property = { property: 17 }
+          property
         }
       """
       assert.equal stylesheet.layers[0].paint.foo, 17
 
   describe "arguments", ->
 
-    it "should apply a rule macro with no arguments", ->
+    it "should apply a property macro with no arguments", ->
       stylesheet = parse """
-        rule = { foo: "bar" }
-        #layer { rule }
+        property = { foo: "bar" }
+        #layer { property }
       """
       assert.equal stylesheet.layers[0].paint.foo, "bar"
 
@@ -31,7 +31,7 @@ describe "rule macro", ->
       """
       assert.equal stylesheet.layers[0].paint.foo, "bar"
 
-    it "should accept multiple return values from a rule macro", ->
+    it "should accept multiple return values from a property macro", ->
       stylesheet = parse """
         args = "baz" "bar"
         second(one, two) = { foo: two }
@@ -41,12 +41,12 @@ describe "rule macro", ->
 
   it "should apply value macros", ->
     stylesheet = parse """
-      rule(value) = { foo: identity(value) }
-      #layer { rule: "bar" }
+      property(value) = { foo: identity(value) }
+      #layer { property: "bar" }
     """
     assert.equal stylesheet.layers[0].paint.foo, "bar"
 
-  it "should apply other rule macros", ->
+  it "should apply other property macros", ->
     stylesheet = parse """
       inner(value) = { foo: value }
       outer(value) = { inner: value }
@@ -56,16 +56,16 @@ describe "rule macro", ->
 
   it "should respect default arguments", ->
     stylesheet = parse """
-      rule(one, two=17) = { foo: two }
-      #layer { rule: 0 }
+      property(one, two=17) = { foo: two }
+      #layer { property: 0 }
     """
     assert.equal stylesheet.layers[0].paint.foo, 17
 
-  it "should select a rule macro by the number of arguments supplied", ->
+  it "should select a property macro by the number of arguments supplied", ->
     stylesheet = parse """
-      rule = { foo: 0 }
-      rule(value) = { foo: value }
-      #layer { rule: 17 }
+      property = { foo: 0 }
+      property(value) = { foo: value }
+      #layer { property: 17 }
     """
     assert.equal stylesheet.layers[0].paint.foo, 17
 

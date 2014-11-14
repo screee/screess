@@ -17,7 +17,7 @@
 
     ClassScope.prototype.toMGLClassScope = function(options) {
       options.scopeStack.push(this);
-      this.toMGLRules(options, this.rules);
+      this.toMGLProperties(options, this.properties);
       return options.scopeStack.pop();
     };
 

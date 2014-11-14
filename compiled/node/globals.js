@@ -53,7 +53,7 @@
         return [new LiteralValue("Point")];
       },
       line: function(args, options) {
-        if (options.rule === "type" && options.isMetaRule) {
+        if (options.property === "type" && options.isMetaProperty) {
           return new LiteralValue("LineString");
         } else if (options.isFilter()) {
           return new LiteralValue("line");

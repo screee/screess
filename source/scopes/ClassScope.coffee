@@ -5,5 +5,5 @@ module.exports = class ClassScope extends Scope
 
   toMGLClassScope: (options) ->
     options.scopeStack.push(@)
-    @toMGLRules(options, @rules)
+    @toMGLProperties(options, @properties)
     options.scopeStack.pop()

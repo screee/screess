@@ -12,15 +12,15 @@ module.exports = class Scope
 
   constructor: (@parent) ->
     assert !@parent || _.is(@parent, Scope)
-    @rules = {}
+    @properties = {}
     @valueMacros = []
-    @ruleMacros = []
+    @propertyMacros = []
 
   getGlobalScope: -> @parent.getGlobalScope()
 
-  addRule: (name, expressions) ->
-    if @rules[name] then throw new Error("Duplicate entries for rule '#{name}'")
-    @rules[name] = expressions
+  addProperty: (name, expressions) ->
+    if @properties[name] then throw new Error("Duplicate entries for property '#{name}'")
+    @properties[name] = expressions
 
   addValueMacro: (name, args, body) ->
     ValueMacro = require "../macros/ValueMacro"
@@ -31,10 +31,10 @@ module.exports = class Scope
       macro = ValueMacro.createFromFunction(name, args, @, body)
     @valueMacros.unshift(macro)
 
-  addRuleMacro: (name, args, body) ->
-    RuleMacro = require "../macros/RuleMacro"
-    macro = new RuleMacro(@, name, args, body)
-    @ruleMacros.unshift(macro)
+  addPropertyMacro: (name, args, body) ->
+    PropertyMacro = require "../macros/PropertyMacro"
+    macro = new PropertyMacro(@, name, args, body)
+    @propertyMacros.unshift(macro)
     macro.scope
 
   getSourceScope: (name) ->
@@ -47,31 +47,31 @@ module.exports = class Scope
 
     @parent?.getValueMacro(name, argValues, options)
 
-  getRuleMacro: (name, argValues, options) ->
-    for macro in @ruleMacros
-      if macro.matches(name, argValues) && !_.contains(options.ruleMacroStack, macro)
+  getPropertyMacro: (name, argValues, options) ->
+    for macro in @propertyMacros
+      if macro.matches(name, argValues) && !_.contains(options.propertyMacroStack, macro)
         return macro
 
-    @parent?.getRuleMacro(name, argValues, options)
+    @parent?.getPropertyMacro(name, argValues, options)
 
-  toMGLRules: (options, rules) ->
+  toMGLProperties: (options, properties) ->
     output = {}
 
-    for name, expressions of rules
-      options.rule = name
+    for name, expressions of properties
+      options.property = name
       values = _.flatten _.map expressions, (expression) =>
         expression.toValues(@, options)
 
-      if (ruleMacro = @getRuleMacro(name, values, options))
-        options.ruleMacroStack.push ruleMacro
-        _.extend(output, ruleMacro.toMGLScope(values, options))
-        options.ruleMacroStack.pop()
+      if (propertyMacro = @getPropertyMacro(name, values, options))
+        options.propertyMacroStack.push propertyMacro
+        _.extend(output, propertyMacro.toMGLScope(values, options))
+        options.propertyMacroStack.pop()
       else
         if values.length != 1
-          throw new Error("Cannot apply #{values.length} args to primitive rule '#{name}'")
+          throw new Error("Cannot apply #{values.length} args to primitive property '#{name}'")
         output[name] = values[0].toMGLValue(options)
 
-      options.rule = null
+      options.property = null
 
     output
 

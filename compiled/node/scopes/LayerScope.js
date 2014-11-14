@@ -15,11 +15,11 @@
 
     LayerScope.prototype.selector = null;
 
-    LayerScope.prototype.addMetaRule = function(name, expressions) {
-      if (this.metaRules[name]) {
-        throw new Error("Duplicate entries for metarule '" + name + "'");
+    LayerScope.prototype.addMetaProperty = function(name, expressions) {
+      if (this.metaProperties[name]) {
+        throw new Error("Duplicate entries for metaproperty '" + name + "'");
       }
-      return this.metaRules[name] = expressions;
+      return this.metaProperties[name] = expressions;
     };
 
     LayerScope.prototype.addClassScope = function(name) {
@@ -45,42 +45,42 @@
       this.name = name;
       LayerScope.__super__.constructor.call(this, parent);
       this.classScopes = {};
-      this.metaRules = {};
+      this.metaProperties = {};
     }
 
     LayerScope.prototype.toMGLLayerScope = function(options) {
-      var metaFilterRule, metaRules, metaSourceRule, paintClassRules, paintRules, _ref;
+      var metaFilterProperty, metaProperties, metaSourceProperty, paintClassProperties, paintProperties, _ref;
       options.scopeStack.push(this);
       if (this.filterExpression) {
         options.pushFilter();
         options.meta = true;
-        options.rule = "filter";
-        metaFilterRule = {
+        options.property = "filter";
+        metaFilterProperty = {
           filter: (_ref = this.filterExpression) != null ? _ref.toMGLFilter(this, options) : void 0
         };
         options.popFilter();
         options.meta = false;
-        options.rule = null;
+        options.property = null;
       } else {
-        metaFilterRule = null;
+        metaFilterProperty = null;
       }
       if (this.source) {
         if (!this.getSourceScope(this.source)) {
           throw "Unknown source '" + this.source + "'";
         }
-        metaSourceRule = {
+        metaSourceProperty = {
           source: this.source
         };
       } else {
-        metaSourceRule = null;
+        metaSourceProperty = null;
       }
       options.meta = true;
-      metaRules = this.toMGLRules(options, this.metaRules);
+      metaProperties = this.toMGLProperties(options, this.metaProperties);
       options.meta = false;
-      paintRules = {
-        paint: this.toMGLRules(options, this.rules)
+      paintProperties = {
+        paint: this.toMGLProperties(options, this.properties)
       };
-      paintClassRules = _.objectMap(this.classScopes, (function(_this) {
+      paintClassProperties = _.objectMap(this.classScopes, (function(_this) {
         return function(scope, name) {
           return ["paint." + name, scope.toMGLClassScope(options)];
         };
@@ -88,7 +88,7 @@
       options.scopeStack.pop();
       return _.extend({
         id: this.name
-      }, metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule);
+      }, metaProperties, paintProperties, paintClassProperties, metaFilterProperty, metaSourceProperty);
     };
 
     return LayerScope;

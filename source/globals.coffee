@@ -33,7 +33,7 @@ module.exports =
     polygon: -> [new LiteralValue("Polygon")]
     point: -> [new LiteralValue("Point")]
     line: (args, options) ->
-      if options.rule == "type" && options.isMetaRule
+      if options.property == "type" && options.isMetaProperty
         new LiteralValue("LineString")
       else if options.isFilter()
         new LiteralValue("line")

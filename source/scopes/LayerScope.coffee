@@ -5,9 +5,9 @@ _ = require('../utilities')
 module.exports = class LayerScope extends Scope
   selector: null
 
-  addMetaRule: (name, expressions) ->
-    if @metaRules[name] then throw new Error("Duplicate entries for metarule '#{name}'")
-    @metaRules[name] = expressions
+  addMetaProperty: (name, expressions) ->
+    if @metaProperties[name] then throw new Error("Duplicate entries for metaproperty '#{name}'")
+    @metaProperties[name] = expressions
 
   addClassScope: (name) ->
     @classScopes[name] ||= new ClassScope(@)
@@ -23,7 +23,7 @@ module.exports = class LayerScope extends Scope
   constructor: (@name, parent) ->
     super(parent)
     @classScopes = {}
-    @metaRules = {}
+    @metaProperties = {}
 
   toMGLLayerScope: (options) ->
     options.scopeStack.push(@)
@@ -31,33 +31,33 @@ module.exports = class LayerScope extends Scope
     if @filterExpression
       options.pushFilter()
       options.meta = true
-      options.rule = "filter"
+      options.property = "filter"
 
-      metaFilterRule = {filter: @filterExpression?.toMGLFilter(@, options)}
+      metaFilterProperty = {filter: @filterExpression?.toMGLFilter(@, options)}
 
       options.popFilter()
       options.meta = false
-      options.rule = null
+      options.property = null
     else
-      metaFilterRule = null
+      metaFilterProperty = null
 
     if @source
       if !@getSourceScope(@source) then throw "Unknown source '#{@source}'"
-      metaSourceRule = source: @source
+      metaSourceProperty = source: @source
     else
-      metaSourceRule = null
+      metaSourceProperty = null
 
     options.meta = true
-    metaRules = @toMGLRules(options, @metaRules)
+    metaProperties = @toMGLProperties(options, @metaProperties)
     options.meta = false
 
-    paintRules = paint: @toMGLRules(options, @rules)
+    paintProperties = paint: @toMGLProperties(options, @properties)
 
-    paintClassRules = _.objectMap(
+    paintClassProperties = _.objectMap(
       @classScopes,
       (scope, name) => ["paint.#{name}", scope.toMGLClassScope(options)]
     )
 
     options.scopeStack.pop()
 
-    _.extend(id: @name, metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)
+    _.extend(id: @name, metaProperties, paintProperties, paintClassProperties, metaFilterProperty, metaSourceProperty)

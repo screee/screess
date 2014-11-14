@@ -12,20 +12,20 @@
     function Scope(parent) {
       this.parent = parent;
       assert(!this.parent || _.is(this.parent, Scope));
-      this.rules = {};
+      this.properties = {};
       this.valueMacros = [];
-      this.ruleMacros = [];
+      this.propertyMacros = [];
     }
 
     Scope.prototype.getGlobalScope = function() {
       return this.parent.getGlobalScope();
     };
 
-    Scope.prototype.addRule = function(name, expressions) {
-      if (this.rules[name]) {
-        throw new Error("Duplicate entries for rule '" + name + "'");
+    Scope.prototype.addProperty = function(name, expressions) {
+      if (this.properties[name]) {
+        throw new Error("Duplicate entries for property '" + name + "'");
       }
-      return this.rules[name] = expressions;
+      return this.properties[name] = expressions;
     };
 
     Scope.prototype.addValueMacro = function(name, args, body) {
@@ -39,11 +39,11 @@
       return this.valueMacros.unshift(macro);
     };
 
-    Scope.prototype.addRuleMacro = function(name, args, body) {
-      var RuleMacro, macro;
-      RuleMacro = require("../macros/RuleMacro");
-      macro = new RuleMacro(this, name, args, body);
-      this.ruleMacros.unshift(macro);
+    Scope.prototype.addPropertyMacro = function(name, args, body) {
+      var PropertyMacro, macro;
+      PropertyMacro = require("../macros/PropertyMacro");
+      macro = new PropertyMacro(this, name, args, body);
+      this.propertyMacros.unshift(macro);
       return macro.scope;
     };
 
@@ -64,40 +64,40 @@
       return (_ref1 = this.parent) != null ? _ref1.getValueMacro(name, argValues, options) : void 0;
     };
 
-    Scope.prototype.getRuleMacro = function(name, argValues, options) {
+    Scope.prototype.getPropertyMacro = function(name, argValues, options) {
       var macro, _i, _len, _ref, _ref1;
-      _ref = this.ruleMacros;
+      _ref = this.propertyMacros;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         macro = _ref[_i];
-        if (macro.matches(name, argValues) && !_.contains(options.ruleMacroStack, macro)) {
+        if (macro.matches(name, argValues) && !_.contains(options.propertyMacroStack, macro)) {
           return macro;
         }
       }
-      return (_ref1 = this.parent) != null ? _ref1.getRuleMacro(name, argValues, options) : void 0;
+      return (_ref1 = this.parent) != null ? _ref1.getPropertyMacro(name, argValues, options) : void 0;
     };
 
-    Scope.prototype.toMGLRules = function(options, rules) {
-      var expressions, name, output, ruleMacro, values;
+    Scope.prototype.toMGLProperties = function(options, properties) {
+      var expressions, name, output, propertyMacro, values;
       output = {};
-      for (name in rules) {
-        expressions = rules[name];
-        options.rule = name;
+      for (name in properties) {
+        expressions = properties[name];
+        options.property = name;
         values = _.flatten(_.map(expressions, (function(_this) {
           return function(expression) {
             return expression.toValues(_this, options);
           };
         })(this)));
-        if ((ruleMacro = this.getRuleMacro(name, values, options))) {
-          options.ruleMacroStack.push(ruleMacro);
-          _.extend(output, ruleMacro.toMGLScope(values, options));
-          options.ruleMacroStack.pop();
+        if ((propertyMacro = this.getPropertyMacro(name, values, options))) {
+          options.propertyMacroStack.push(propertyMacro);
+          _.extend(output, propertyMacro.toMGLScope(values, options));
+          options.propertyMacroStack.pop();
         } else {
           if (values.length !== 1) {
-            throw new Error("Cannot apply " + values.length + " args to primitive rule '" + name + "'");
+            throw new Error("Cannot apply " + values.length + " args to primitive property '" + name + "'");
           }
           output[name] = values[0].toMGLValue(options);
         }
-        options.rule = null;
+        options.property = null;
       }
       return output;
     };

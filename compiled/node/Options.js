@@ -25,11 +25,11 @@
 
     function Options() {
       this.valueMacroStack = [];
-      this.ruleMacroStack = [];
+      this.propertyMacroStack = [];
       this.scopeStack = [];
       this.filters = 0;
-      this.rule = null;
-      this.isMetaRule = false;
+      this.property = null;
+      this.isMetaProperty = false;
     }
 
     return Options;

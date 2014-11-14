@@ -90,7 +90,7 @@ describe "whitespace", ->
     """
     assert.deepEqual stylesheet.layers[0].test, [1, 2]
 
-  it "should allow for a rule's values to span multiple lines within parenthesis", ->
+  it "should allow for a property's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
       test(one, two) = { test: two }
       #layer {

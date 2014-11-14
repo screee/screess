@@ -3,7 +3,7 @@ _ = require("../utilities")
 LayerScope = require('./LayerScope')
 Globals = require('../globals')
 ValueMacro = require('../macros/ValueMacro')
-RuleMacro = require('../macros/RuleMacro')
+PropertyMacro = require('../macros/PropertyMacro')
 assert = require 'assert'
 Options = require('../Options')
 
@@ -18,7 +18,7 @@ module.exports = class GlobalScope extends Scope
     @sources = {}
 
     @addValueMacro(name, null, fn) for name, fn of Globals.valueMacros
-    @addRuleMacro(name, null, fn) for name, fn of Globals.ruleMacros
+    @addPropertyMacro(name, null, fn) for name, fn of Globals.propertyMacros
 
   addSource: (name, source) ->
     @sources[name] = source
@@ -41,19 +41,19 @@ module.exports = class GlobalScope extends Scope
     options.scopeStack.push(@)
 
     layers = _.map @layerScopes, (layer) -> layer.toMGLLayerScope(options)
-    rules = @toMGLRules(options, @rules)
+    properties = @toMGLProperties(options, @properties)
     sources = _.objectMapValues @sources, (name, source) ->
       _.objectMapValues(source, (key, value) -> value.toMGLValue(options))
 
     transition =
-      duration: rules["transition-delay"]
-      delay: rules["transition-duration"]
-    delete rules["transition-delay"]
-    delete rules["transition-duration"]
+      duration: properties["transition-delay"]
+      delay: properties["transition-duration"]
+    delete properties["transition-delay"]
+    delete properties["transition-duration"]
 
     options.scopeStack.pop()
 
-    _.extend(rules, {
+    _.extend(properties, {
       version: 6
       layers: layers
       sources: sources

@@ -54,7 +54,7 @@ describe "value", ->
 
   describe "attribute reference", ->
 
-    it "should parse in a rule", ->
+    it "should parse in a property", ->
       assert.equal parseValue("@foo"), "{foo}"
 
     it "should parse in a filter", ->
