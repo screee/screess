@@ -41,26 +41,26 @@
       return this.source = source;
     };
 
-    function LayerScope(parent) {
+    function LayerScope(name, parent) {
+      this.name = name;
       LayerScope.__super__.constructor.call(this, parent);
       this.classScopes = {};
       this.metaRules = {};
     }
 
     LayerScope.prototype.toMGLLayerScope = function(options) {
-      var filterOptions, metaFilterRule, metaRules, metaSourceRule, paintClassRules, paintRules, _ref;
-      options = _.extend({
-        scope: "layer"
-      }, options);
+      var metaFilterRule, metaRules, metaSourceRule, paintClassRules, paintRules, _ref;
+      options.scopeStack.push(this);
       if (this.filterExpression) {
-        filterOptions = _.extend({
-          filter: true,
-          meta: true,
-          rule: "filter"
-        }, options);
+        options.pushFilter();
+        options.meta = true;
+        options.rule = "filter";
         metaFilterRule = {
-          filter: (_ref = this.filterExpression) != null ? _ref.toMGLFilter(this, filterOptions) : void 0
+          filter: (_ref = this.filterExpression) != null ? _ref.toMGLFilter(this, options) : void 0
         };
+        options.popFilter();
+        options.meta = false;
+        options.rule = null;
       } else {
         metaFilterRule = null;
       }
@@ -74,9 +74,9 @@
       } else {
         metaSourceRule = null;
       }
-      metaRules = this.toMGLRules(_.extend({
-        meta: true
-      }, options), this.metaRules);
+      options.meta = true;
+      metaRules = this.toMGLRules(options, this.metaRules);
+      options.meta = false;
       paintRules = {
         paint: this.toMGLRules(options, this.rules)
       };
@@ -85,7 +85,10 @@
           return ["paint." + name, scope.toMGLClassScope(options)];
         };
       })(this));
-      return _.extend(metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule);
+      options.scopeStack.pop();
+      return _.extend({
+        id: this.name
+      }, metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule);
     };
 
     return LayerScope;

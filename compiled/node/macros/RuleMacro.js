@@ -41,7 +41,9 @@
     };
 
     RuleMacro.prototype.matchesArgValues = function(argValues) {
-      return argValues.length <= this.argLengthMax && argValues.length >= this.argLengthMin;
+      var argLength;
+      argLength = argValues.length;
+      return argLength <= this.argLengthMax && argLength >= this.argLengthMin;
     };
 
     RuleMacro.prototype.processArgs = function(argValues, scope, options) {

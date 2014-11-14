@@ -9,12 +9,9 @@ module.exports = class ValueMacroReferenceExpression extends Expression
 
   toValues: (scope, options) ->
     args = @argExpressions.map (arg) ->
-      _.extend(
-        values: arg.expression.toValues(scope, options),
-        arg
-      )
+      _.extend(values: arg.expression.toValues(scope, options), arg)
 
-    if macro = scope.getValueMacro(@name, args)
+    if macro = scope.getValueMacro(@name, args, options)
       macro.toValues(args, options)
     else
       throw new Error("Could not find value macro '#{@name}'")

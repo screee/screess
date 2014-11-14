@@ -13,6 +13,10 @@
   assert = require('assert');
 
   module.exports = ValueMacro = (function() {
+    ValueMacro.createFromValue = function(name, scope, value) {
+      return this.createFromExpression(name, null, scope, literalExpression(value));
+    };
+
     ValueMacro.createFromExpression = function(name, argDefinitions, parentScope, expression) {
       return this.createFromExpressions(name, argDefinitions, parentScope, [expression]);
     };
@@ -36,6 +40,7 @@
     };
 
     ValueMacro.createFromFunction = function(name, argDefinitions, parentScope, body) {
+      assert(_.isFunction(body));
       return new ValueMacro(name, argDefinitions, parentScope, body);
     };
 
@@ -63,7 +68,7 @@
       if (this.argDefinitions === null) {
         return true;
       }
-      indicies = _.times(this.argDefinitions.length - 1, function() {
+      indicies = _.times(this.argDefinitions.length, function() {
         return false;
       });
       for (_i = 0, _len = argValues.length; _i < _len; _i++) {
@@ -92,8 +97,8 @@
       _ref = this.argDefinitions;
       for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
         argDefinition = _ref[_k];
-        if (argDefinition.value) {
-          indicies[argDefinition.index] = !!argDefinition.value;
+        if (argDefinition.expression) {
+          indicies[argDefinition.index] = !!argDefinition.expression;
         }
       }
       return _.all(indicies);
@@ -153,6 +158,7 @@
         for (_n = 0, _len5 = _ref3.length; _n < _len5; _n++) {
           argDefinition = _ref3[_n];
           if (!args[argDefinition.name]) {
+            assert(argDefinition.expression, "No default value for argument '" + argDefinition.name + "'");
             args[argDefinition.name] = argDefinition.expression.toValue(this.parentScope, options);
           }
         }

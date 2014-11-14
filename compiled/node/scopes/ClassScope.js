@@ -16,10 +16,9 @@
     }
 
     ClassScope.prototype.toMGLClassScope = function(options) {
-      options = _.extend({
-        scope: "class"
-      }, options);
-      return this.toMGLRules(options, this.rules);
+      options.scopeStack.push(this);
+      this.toMGLRules(options, this.rules);
+      return options.scopeStack.pop();
     };
 
     return ClassScope;

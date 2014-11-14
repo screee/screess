@@ -26,12 +26,13 @@
     }
 
     BooleanLogicExpression.prototype.toMGLFilter = function(scope, options) {
-      options = _.extend({
-        filter: true
-      }, options);
-      return [this.operators[this.operator]].concat(_.map(this.expressions, function(expression) {
+      var filter;
+      options.pushFilter();
+      filter = [this.operators[this.operator]].concat(_.map(this.expressions, function(expression) {
         return expression.toMGLFilter(scope, options);
       }));
+      options.popFilter();
+      return filter;
     };
 
     return BooleanLogicExpression;

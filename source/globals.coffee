@@ -16,58 +16,35 @@ module.exports =
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
 
-      options.globalScope.addSource(name, source)
+      options.getGlobalScope().addSource(name, source)
       [new LiteralValue(name)]
 
-    identity: (args, options) -> _.map args, _.identity
+    identity: (args) -> _.values args
 
-    hsv: (args, options) ->
-      [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsva: (args, options) ->
-      [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    hsl: (args, options) ->
-      [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsla: (args, options) ->
-      [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    rgb: (args, options) ->
-      [ColorValue.rgba(args['0'], args['1'], args['2'], 1)]
-    rgba: (args, options) ->
-      [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
+    hsv: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
+    hsva: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
+    hsl: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
+    hsla: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
+    rgb: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], 1)]
+    rgba: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
 
     # Object Types
-    # 'line' is included below
-    polygon: (args, options) -> [new LiteralValue("Polygon")]
-    point: (args, options) -> [new LiteralValue("Point")]
-
-    # Source Types
-    vector: (args, options) -> [new LiteralValue("vector")]
-    raster: (args, options) -> [new LiteralValue("raster")]
-    geojson: (args, options) -> [new LiteralValue("geojson")]
-    video: (args, options) -> [new LiteralValue("video")]
-
-    # Layer Renderer Types
-    # 'line' is included below
-    fill: (args, options) -> [new LiteralValue("fill")]
-    symbol: (args, options) -> [new LiteralValue("symbol")]
-    raster: (args, options) -> [new LiteralValue("raster")]
-    background: (args, options) -> [new LiteralValue("background")]
-
     # Line may refer to the layer paint type or the layer geometry type
+    polygon: -> [new LiteralValue("Polygon")]
+    point: -> [new LiteralValue("Point")]
     line: (args, options) ->
-      if options.rule == "type" && options.meta then new LiteralValue("LineString")
-      else if options.filter then new LiteralValue("line")
-      else throw new Error("The use of 'line' is ambigious in this context")
+      if options.rule == "type" && options.isMetaRule
+        new LiteralValue("LineString")
+      else if options.isFilter()
+        new LiteralValue("line")
+      else
+        throw new Error("The use of 'line' is ambigious in this context")
 
-    'function': (args, options) ->
+    'function': (args) ->
       stops = []
       for key, value of args
         if key == "base" then continue
         if (stop = parseInt(key)) != NaN then stops.push([key, value])
         else assert false
       assert stops.length > 0
-
       [new FunctionValue(args.base, stops)]
-
-
-
-  ruleMacros: {}

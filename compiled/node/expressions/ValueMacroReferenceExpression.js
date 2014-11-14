@@ -27,7 +27,7 @@
           values: arg.expression.toValues(scope, options)
         }, arg);
       });
-      if (macro = scope.getValueMacro(this.name, args)) {
+      if (macro = scope.getValueMacro(this.name, args, options)) {
         return macro.toValues(args, options);
       } else {
         throw new Error("Could not find value macro '" + this.name + "'");

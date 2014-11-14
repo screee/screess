@@ -4,8 +4,11 @@ LayerScope = require('./LayerScope')
 Globals = require('../globals')
 ValueMacro = require('../macros/ValueMacro')
 RuleMacro = require('../macros/RuleMacro')
+assert = require 'assert'
+Options = require('../Options')
 
 {literalValue} = require('../values/LiteralValue')
+
 
 module.exports = class GlobalScope extends Scope
 
@@ -14,37 +17,28 @@ module.exports = class GlobalScope extends Scope
     @layerScopes = {}
     @sources = {}
 
+    @addValueMacro(name, null, fn) for name, fn of Globals.valueMacros
+    @addRuleMacro(name, null, fn) for name, fn of Globals.ruleMacros
+
   addSource: (name, source) ->
     @sources[name] = source
+
+  getGlobalScope: -> @
 
   getValueMacro: (name, argValues) ->
     if macro = super
       macro
-    else if macro = @getGlobalValueMacro(name, argValues)
-      macro
     else if argValues.length == 0
-      ValueMacro.createFromValue(name, @, literalValue(name))
-
-  getRuleMacro: (name, argValues) ->
-    super || @getGlobalRuleMacro(name, argValues)
-
-  getGlobalRuleMacro: (name, argValues) ->
-    # TODO
-
-  getGlobalValueMacro: (name, argValues) ->
-    if fn = Globals.valueMacros[name]
-      ValueMacro.createFromFunction(name, null, @, fn)
+      ValueMacro.createFromValue(name, @, literalValue name)
     else
       null
-
-  getGlobalScope: -> @
 
   addLayerScope: (name, scope) ->
     if @layerScopes[name] then throw new Error("Duplicate entries for layer scope '#{name}'")
     @layerScopes[name] = new LayerScope(name, @)
 
-  toMGLGlobalScope: (options) ->
-    options = _.extend(scope: "global", globalScope: @, options)
+  toMGLGlobalScope: (options = new Options()) ->
+    options.scopeStack.push(@)
 
     layers = _.map @layerScopes, (layer) -> layer.toMGLLayerScope(options)
     rules = @toMGLRules(options, @rules)
@@ -54,9 +48,10 @@ module.exports = class GlobalScope extends Scope
     transition =
       duration: rules["transition-delay"]
       delay: rules["transition-duration"]
-
     delete rules["transition-delay"]
     delete rules["transition-duration"]
+
+    options.scopeStack.pop()
 
     _.extend(rules, {
       version: 6

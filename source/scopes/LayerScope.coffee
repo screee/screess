@@ -26,11 +26,18 @@ module.exports = class LayerScope extends Scope
     @metaRules = {}
 
   toMGLLayerScope: (options) ->
-    options = _.extend(scope: "layer", options)
+    options.scopeStack.push(@)
 
     if @filterExpression
-      filterOptions = _.extend(filter: true, meta: true, rule: "filter", options)
-      metaFilterRule = {filter: @filterExpression?.toMGLFilter(@, filterOptions)}
+      options.pushFilter()
+      options.meta = true
+      options.rule = "filter"
+
+      metaFilterRule = {filter: @filterExpression?.toMGLFilter(@, options)}
+
+      options.popFilter()
+      options.meta = false
+      options.rule = null
     else
       metaFilterRule = null
 
@@ -40,12 +47,17 @@ module.exports = class LayerScope extends Scope
     else
       metaSourceRule = null
 
-    metaRules = @toMGLRules(_.extend(meta:true, options), @metaRules)
+    options.meta = true
+    metaRules = @toMGLRules(options, @metaRules)
+    options.meta = false
+
     paintRules = paint: @toMGLRules(options, @rules)
 
     paintClassRules = _.objectMap(
       @classScopes,
       (scope, name) => ["paint.#{name}", scope.toMGLClassScope(options)]
     )
+
+    options.scopeStack.pop()
 
     _.extend(id: @name, metaRules, paintRules, paintClassRules, metaFilterRule, metaSourceRule)

@@ -3,6 +3,28 @@ assert = require("assert")
 
 describe "rule macro", ->
 
+  describe "shadowing", ->
+
+    it "should shadow a rule macro in an enclosing scope", ->
+      stylesheet = parse """
+        rule = { foo: 17 }
+        #layer {
+          rule = { rule }
+          rule
+        }
+      """
+      assert.equal stylesheet.layers[0].paint.foo, 17
+
+    # it "should shadow a rule macro in the same scope", ->
+    #   stylesheet = parse """
+    #     rule(value) = { foo: value }
+    #     rule(value) = { rule(17) }
+    #     #layer { rule(0) }
+    #   """
+    #   assert.equal stylesheet.layers[0].paint.foo, "bar"
+
+
+
   describe "arguments", ->
 
     it "should apply a rule macro with no arguments", ->

@@ -46,6 +46,9 @@
       if (object instanceof klass) {
         return true;
       }
+      if (!object) {
+        return false;
+      }
       while (object.__super__ != null) {
         if (object.__super__ === klass.prototype) {
           return true;
@@ -55,7 +58,7 @@
       return false;
     },
     count: function() {
-      return _.countBy.apply(_, arguments)[true];
+      return _.countBy.apply(_, arguments)[true] || 0;
     }
   });
 

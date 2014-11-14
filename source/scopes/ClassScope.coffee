@@ -4,5 +4,6 @@ _ = require("../utilities")
 module.exports = class ClassScope extends Scope
 
   toMGLClassScope: (options) ->
-    options = _.extend(scope: "class", options)
+    options.scopeStack.push(@)
     @toMGLRules(options, @rules)
+    options.scopeStack.pop()

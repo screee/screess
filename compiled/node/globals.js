@@ -22,58 +22,46 @@
           source.tileSize = source["tile-size"];
           delete source["tile-size"];
         }
-        options.globalScope.addSource(name, source);
+        options.getGlobalScope().addSource(name, source);
         return [new LiteralValue(name)];
       },
-      identity: function(args, options) {
-        return _.map(args, _.identity);
+      identity: function(args) {
+        return _.values(args);
       },
-      hsv: function(args, options) {
+      hsv: function(args) {
         return [ColorValue.hsla(args['0'], args['1'], args['2'], 1)];
       },
-      hsva: function(args, options) {
+      hsva: function(args) {
         return [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])];
       },
-      hsl: function(args, options) {
+      hsl: function(args) {
         return [ColorValue.hsla(args['0'], args['1'], args['2'], 1)];
       },
-      hsla: function(args, options) {
+      hsla: function(args) {
         return [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])];
       },
-      rgb: function(args, options) {
+      rgb: function(args) {
         return [ColorValue.rgba(args['0'], args['1'], args['2'], 1)];
       },
-      rgba: function(args, options) {
+      rgba: function(args) {
         return [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])];
       },
-      polygon: function(args, options) {
+      polygon: function() {
         return [new LiteralValue("Polygon")];
       },
-      point: function(args, options) {
+      point: function() {
         return [new LiteralValue("Point")];
       },
-      fill: function(args, options) {
-        return [new LiteralValue("fill")];
-      },
-      symbol: function(args, options) {
-        return [new LiteralValue("symbol")];
-      },
-      raster: function(args, options) {
-        return [new LiteralValue("raster")];
-      },
-      background: function(args, options) {
-        return [new LiteralValue("background")];
-      },
       line: function(args, options) {
-        if (options.rule === "type" && options.meta) {
+        if (options.rule === "type" && options.isMetaRule) {
           return new LiteralValue("LineString");
-        } else if (options.filter) {
+        } else if (options.isFilter()) {
           return new LiteralValue("line");
         } else {
           throw new Error("The use of 'line' is ambigious in this context");
         }
       },
-      'function': function(args, options) {
+      'function': function(args) {
         var key, stop, stops, value;
         stops = [];
         for (key in args) {
@@ -90,8 +78,7 @@
         assert(stops.length > 0);
         return [new FunctionValue(args.base, stops)];
       }
-    },
-    ruleMacros: {}
+    }
   };
 
 }).call(this);

@@ -28,19 +28,22 @@
       return this.rules[name] = expressions;
     };
 
-    Scope.prototype.addValueMacro = function(name, args, expressions) {
+    Scope.prototype.addValueMacro = function(name, args, body) {
       var ValueMacro, macro;
-      assert(_.isArray(expressions));
       ValueMacro = require("../macros/ValueMacro");
-      macro = ValueMacro.createFromExpressions(name, args, this, expressions);
-      return this.valueMacros.push(macro);
+      if (_.isArray(body)) {
+        macro = ValueMacro.createFromExpressions(name, args, this, body);
+      } else if (_.isFunction) {
+        macro = ValueMacro.createFromFunction(name, args, this, body);
+      }
+      return this.valueMacros.unshift(macro);
     };
 
-    Scope.prototype.addRuleMacro = function(name, args) {
+    Scope.prototype.addRuleMacro = function(name, args, body) {
       var RuleMacro, macro;
       RuleMacro = require("../macros/RuleMacro");
-      macro = new RuleMacro(this, name, args);
-      this.ruleMacros.push(macro);
+      macro = new RuleMacro(this, name, args, body);
+      this.ruleMacros.unshift(macro);
       return macro.scope;
     };
 
@@ -49,18 +52,28 @@
       return this.sourceScopes[name] || ((_ref = this.parent) != null ? _ref.getSourceScope(name) : void 0);
     };
 
-    Scope.prototype.getValueMacro = function(name, argValues) {
-      var _ref;
-      return _.find(this.valueMacros, function(valueMacro) {
-        return valueMacro.matches(name, argValues);
-      }) || ((_ref = this.parent) != null ? _ref.getValueMacro(name, argValues) : void 0);
+    Scope.prototype.getValueMacro = function(name, argValues, options) {
+      var macro, _i, _len, _ref, _ref1;
+      _ref = this.valueMacros;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        macro = _ref[_i];
+        if (macro.matches(name, argValues) && !_.contains(options.valueMacroStack, macro)) {
+          return macro;
+        }
+      }
+      return (_ref1 = this.parent) != null ? _ref1.getValueMacro(name, argValues, options) : void 0;
     };
 
-    Scope.prototype.getRuleMacro = function(name, argValues) {
-      var _ref;
-      return _.find(this.ruleMacros, function(ruleMacro) {
-        return ruleMacro.matches(name, argValues);
-      }) || ((_ref = this.parent) != null ? _ref.getRuleMacro(name, argValues) : void 0);
+    Scope.prototype.getRuleMacro = function(name, argValues, options) {
+      var macro, _i, _len, _ref, _ref1;
+      _ref = this.ruleMacros;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        macro = _ref[_i];
+        if (macro.matches(name, argValues) && !_.contains(options.ruleMacroStack, macro)) {
+          return macro;
+        }
+      }
+      return (_ref1 = this.parent) != null ? _ref1.getRuleMacro(name, argValues, options) : void 0;
     };
 
     Scope.prototype.toMGLRules = function(options, rules) {
@@ -68,23 +81,23 @@
       output = {};
       for (name in rules) {
         expressions = rules[name];
+        options.rule = name;
         values = _.flatten(_.map(expressions, (function(_this) {
           return function(expression) {
-            return expression.toValues(_this, _.extend({
-              rule: name
-            }, options));
+            return expression.toValues(_this, options);
           };
         })(this)));
-        if ((ruleMacro = this.getRuleMacro(name, values))) {
+        if ((ruleMacro = this.getRuleMacro(name, values, options))) {
+          options.ruleMacroStack.push(ruleMacro);
           _.extend(output, ruleMacro.toMGLScope(values, options));
+          options.ruleMacroStack.pop();
         } else {
           if (values.length !== 1) {
             throw new Error("Cannot apply " + values.length + " args to primitive rule '" + name + "'");
           }
-          output[name] = values[0].toMGLValue(_.extend({
-            rule: name
-          }, options));
+          output[name] = values[0].toMGLValue(options);
         }
+        options.rule = null;
       }
       return output;
     };

@@ -21,6 +21,7 @@ module.exports = class ValueMacro
       expression.toValue(scope, options) for expression in expressions
 
   @createFromFunction: (name, argDefinitions, parentScope, body) ->
+    assert _.isFunction(body)
     new ValueMacro(name, argDefinitions, parentScope, body)
 
   constructor: (@name, @argDefinitions, @parentScope, @body) ->
@@ -33,7 +34,7 @@ module.exports = class ValueMacro
   matchesArgValues: (argValues) ->
     return true if @argDefinitions == null
 
-    indicies = _.times(@argDefinitions.length - 1, -> false)
+    indicies = _.times(@argDefinitions.length, -> false)
 
     # Identify named arguments
     for argValue in argValues
@@ -46,15 +47,16 @@ module.exports = class ValueMacro
     positionalIndex = -1
     for argValue in argValues
       if !argValue.name
-        null while indicies[++positionalIndex] && positionalIndex < @argDefinitions.length
-        indicies[positionalIndex] = true
+        for values in argValue.values
+          null while indicies[++positionalIndex] && positionalIndex < @argDefinitions.length
+          indicies[positionalIndex] = true
 
     return false if positionalIndex >= @argDefinitions.length
 
     # Identify default arguments
     for argDefinition in @argDefinitions
-      if argDefinition.value
-        indicies[argDefinition.index] = !!argDefinition.value
+      if argDefinition.expression
+        indicies[argDefinition.index] = !!argDefinition.expression
 
     _.all(indicies)
 
@@ -62,7 +64,7 @@ module.exports = class ValueMacro
     args = @processArgs(argValues, options)
     values = @body(args, options)
     assert _.isArray(values)
-    return values
+    values
 
   # TODO this scope shoud come from the place the macro is defined
   processArgs: (argValues, options) ->
@@ -103,11 +105,7 @@ module.exports = class ValueMacro
       # Extract default arguments
       for argDefinition in @argDefinitions
         if !args[argDefinition.name]
+          assert(argDefinition.expression, "No default value for argument '#{argDefinition.name}'")
           args[argDefinition.name] = argDefinition.expression.toValue(@parentScope, options)
 
     args
-
-
-
-
-

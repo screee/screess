@@ -10,10 +10,12 @@ module.exports = class BooleanLogicExpression extends Expression
   constructor: (@operator, @expressions) ->
 
   toMGLFilter: (scope, options) ->
-    options = _.extend(filter: true, options)
-    [@operators[@operator]].concat(
+    options.pushFilter()
+    filter = [@operators[@operator]].concat(
       _.map(
         @expressions,
         (expression) -> expression.toMGLFilter(scope, options)
       )
     )
+    options.popFilter()
+    filter
