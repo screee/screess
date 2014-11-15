@@ -1,6 +1,6 @@
 Value = require "../values/value"
-MacroArgumentValues = require "../macros/MacroArgumentValues"
-MacroArgumentDefinition = require '../macros/MacroArgumentDefinition'
+MacroArgValues = require "../macros/MacroArgValues"
+MacroArgDefinition = require '../macros/MacroArgDefinition'
 assert = require "assert"
 _ = require "../utilities"
 {literalExpression} = require('../expressions/LiteralExpression')
@@ -27,10 +27,10 @@ module.exports = class Scope
 
   addLiteralValueMacros: (values) ->
     for name, value of values
-      @addValueMacro(name, MacroArgumentDefinition.ZERO, [literalExpression(value)])
+      @addValueMacro(name, MacroArgDefinition.ZERO, [literalExpression(value)])
 
   addValueMacro: (name, argDefinition, body) ->
-    assert _.is(argDefinition, MacroArgumentDefinition) || !argDefinition
+    assert _.is(argDefinition, MacroArgDefinition) || !argDefinition
 
     ValueMacro = require "../macros/ValueMacro"
     # TODO move this logic to ValueMacro
@@ -41,7 +41,7 @@ module.exports = class Scope
     @valueMacros.unshift(macro)
 
   addPropertyMacro: (name, argDefinition, body) ->
-    assert _.is(argDefinition, MacroArgumentDefinition) || !argDefinition
+    assert _.is(argDefinition, MacroArgDefinition) || !argDefinition
 
     PropertyMacro = require "../macros/PropertyMacro"
     macro = new PropertyMacro(@, name, argDefinition, body)
@@ -71,7 +71,7 @@ module.exports = class Scope
     for name, expressions of properties
       options.property = name
 
-      argValues = MacroArgumentValues.createFromExpressions(
+      argValues = MacroArgValues.createFromExpressions(
         expression: expression for expression in expressions,
         @,
         options

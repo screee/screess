@@ -3,14 +3,14 @@ Expression = require("./Expression")
 util = require('util')
 _ = require("../utilities")
 Scope = require "../scopes/Scope"
-MacroArgumentValues = require '../macros/MacroArgumentValues'
+MacroArgValues = require '../macros/MacroArgValues'
 
 module.exports = class ValueMacroReferenceExpression extends Expression
 
   constructor: (@name, @argumentExpressions) ->
 
   toValues: (scope, options) ->
-    argValues = MacroArgumentValues.createFromExpressions(
+    argValues = MacroArgValues.createFromExpressions(
       @argumentExpressions,
       scope,
       options

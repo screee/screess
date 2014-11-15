@@ -10,7 +10,7 @@
   @ArrayValue = require("./values/ArrayValue")
   @FunctionValue = require("./values/FunctionValue")
 
-  @MacroArgumentDefinition = require("./macros/MacroArgumentDefinition")
+  @MacroArgDefinition = require("./macros/MacroArgDefinition")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @StringExpression = require("./expressions/StringExpression")
@@ -68,8 +68,8 @@ propertyMacroDefinitionScope =
   (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
 
 propertyMacroDefinitionScopeArguments =
-  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @MacroArgumentDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
-  "" { @MacroArgumentDefinition.ZERO }
+  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @MacroArgDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
+  "" { @MacroArgDefinition.ZERO }
 
 propertyMacroDefinitionScopeArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
@@ -107,8 +107,8 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
-  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @MacroArgumentDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
-  "" { @MacroArgumentDefinition.ZERO }
+  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @MacroArgDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
+  "" { @MacroArgDefinition.ZERO }
 
 valueMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /

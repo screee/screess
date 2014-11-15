@@ -2,7 +2,7 @@
 Scope  = require '../scopes/Scope'
 _ = require "../utilities"
 assert = require "assert"
-MacroArgumentValues = require "./MacroArgumentValues"
+MacroArgValues = require "./MacroArgValues"
 Options = require "../Options"
 
 module.exports = class PropertyMacro
@@ -20,7 +20,7 @@ module.exports = class PropertyMacro
     @argLengthMax = @argDefinition.length
 
   toMGLScope: (argValues, options) ->
-    assert _.is(argValues, MacroArgumentValues)
+    assert _.is(argValues, MacroArgValues)
     assert _.is(options, Options)
 
     args = argValues.toArguments(@argDefinition, options)
