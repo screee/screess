@@ -4,7 +4,7 @@ ScreeSS is a high level stylesheet language that compiles down to a [Mapbox GL s
 
 ## Writing a ScreeSS Stylesheet
 
-**NOTE: ** Some features in this tutorial are not yet implemented.
+**NOTE**: Some features in this tutorial are not yet implemented.
 
 Create a layer called "water"
 ```
