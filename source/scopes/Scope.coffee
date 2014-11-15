@@ -1,6 +1,9 @@
 Value = require "../values/value"
+MacroArgumentValues = require "../macros/MacroArgumentValues"
+MacroArgumentDefinition = require '../macros/MacroArgumentDefinition'
 assert = require "assert"
 _ = require "../utilities"
+{literalExpression} = require('../expressions/LiteralExpression')
 
 # scopeTypes:
 #   source: {}
@@ -22,18 +25,26 @@ module.exports = class Scope
     if @properties[name] then throw new Error("Duplicate entries for property '#{name}'")
     @properties[name] = expressions
 
-  addValueMacro: (name, args, body) ->
+  addLiteralValueMacros: (values) ->
+    for name, value of values
+      @addValueMacro(name, MacroArgumentDefinition.ZERO, [literalExpression(value)])
+
+  addValueMacro: (name, argDefinition, body) ->
+    assert _.is(argDefinition, MacroArgumentDefinition) || !argDefinition
+
     ValueMacro = require "../macros/ValueMacro"
     # TODO move this logic to ValueMacro
     if _.isArray(body)
-      macro = ValueMacro.createFromExpressions(name, args, @, body)
+      macro = ValueMacro.createFromExpressions(name, argDefinition, @, body)
     else if _.isFunction
-      macro = ValueMacro.createFromFunction(name, args, @, body)
+      macro = ValueMacro.createFromFunction(name, argDefinition, @, body)
     @valueMacros.unshift(macro)
 
-  addPropertyMacro: (name, args, body) ->
+  addPropertyMacro: (name, argDefinition, body) ->
+    assert _.is(argDefinition, MacroArgumentDefinition) || !argDefinition
+
     PropertyMacro = require "../macros/PropertyMacro"
-    macro = new PropertyMacro(@, name, args, body)
+    macro = new PropertyMacro(@, name, argDefinition, body)
     @propertyMacros.unshift(macro)
     macro.scope
 
@@ -59,17 +70,22 @@ module.exports = class Scope
 
     for name, expressions of properties
       options.property = name
-      values = _.flatten _.map expressions, (expression) =>
-        expression.toValues(@, options)
 
-      if (propertyMacro = @getPropertyMacro(name, values, options))
+      argValues = MacroArgumentValues.createFromExpressions(
+        expression: expression for expression in expressions,
+        @,
+        options
+      )
+
+      if (propertyMacro = @getPropertyMacro(name, argValues, options))
         options.propertyMacroStack.push propertyMacro
-        _.extend(output, propertyMacro.toMGLScope(values, options))
+        _.extend(output, propertyMacro.toMGLScope(argValues, options))
         options.propertyMacroStack.pop()
       else
-        if values.length != 1
-          throw new Error("Cannot apply #{values.length} args to primitive property '#{name}'")
-        output[name] = values[0].toMGLValue(options)
+        if argValues.length != 1 || argValues.positionalArgs.length != 1
+          throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
+
+        output[name] = argValues.positionalArgs[0].toMGLValue(options)
 
       options.property = null
 

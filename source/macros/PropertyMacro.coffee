@@ -2,48 +2,39 @@
 Scope  = require '../scopes/Scope'
 _ = require "../utilities"
 assert = require "assert"
+MacroArgumentValues = require "./MacroArgumentValues"
+Options = require "../Options"
 
 module.exports = class PropertyMacro
 
   # TODO allow for subclasses, sublayers?
 
-  constructor: (@parentScope, @name, @argDefinitions, @body = null) ->
+  constructor: (@parentScope, @name, @argDefinition, @body = null) ->
     ClassScope = require("../scopes/ClassScope")
     @scope = new ClassScope(@parentScope)
 
-    @argLengthMin = _.count @argDefinitions, (argDefinition) -> !argDefinition.expression
-    @argLengthMax = @argDefinitions.length
+    @argLengthMin = _.count(
+      @argDefinition.definitions,
+      (argDefinition) -> !argDefinition.expression
+    )
+    @argLengthMax = @argDefinition.length
 
   toMGLScope: (argValues, options) ->
-    args = @processArgs(argValues, @parentScope, options)
+    assert _.is(argValues, MacroArgumentValues)
+    assert _.is(options, Options)
+
+    args = argValues.toArguments(@argDefinition, options)
 
     scope = new Scope(@scope)
-    for name, value of args
-      scope.addValueMacro(name, [], [literalExpression(value)])
+    scope.addLiteralValueMacros(args)
 
-    _.extend(
+    options.scopeStack.push(scope)
+    values = _.extend(
       scope.toMGLProperties(options, @scope.properties),
       @body?.apply({}, argValues)
     )
+    options.scopeStack.pop()
+    values
 
-  matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
+  matches: (name, argValues) -> name == @name && argValues.matches(@argDefinition)
 
-  matchesArgValues: (argValues) ->
-    argLength = argValues.length
-    argLength <= @argLengthMax && argLength >= @argLengthMin
-
-  processArgs: (argValues, scope, options) ->
-    assert @matchesArgValues(argValues)
-
-    args = {}
-
-    positionaIndex = 0
-    for argValue in argValues
-      argDefinition = @argDefinitions[positionaIndex++]
-      args[argDefinition.name] = argValue
-
-    while positionaIndex < @argDefinitions.length
-      argDefinition = @argDefinitions[positionaIndex++]
-      args[argDefinition.name] = argDefinition.expression.toValue(scope, options)
-
-    args

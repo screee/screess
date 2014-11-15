@@ -7,16 +7,16 @@ module.exports = class ColorValue
   unwrap = (value) -> value.toLiteralValue()
 
   @hex: (hex) ->
-    [r, g, b] = _.hex2rgb(hex)
-    new ColorValue(r, g, b, 1)
+    [red, green, blue] = _.hex2rgb(hex)
+    new ColorValue(red, green, blue, 1)
 
-  @hsva: (h, s, v, a) ->
-    [r, g, b] = _.hsv2rgb(unwrap(h), unwrap(s), unwrap(v))
-    new ColorValue(r, g, b, a)
+  @hsva: (hue, saturation, value, alpha) ->
+    [red, green, blue] = _.hsv2rgb(unwrap(hue), unwrap(saturation), unwrap(value))
+    new ColorValue(red, green, blue, alpha)
 
-  @hsla: (h, s, l, a) ->
-    [r, g, b] = _.hsl2rgb(unwrap(h), unwrap(s), unwrap(l))
-    new ColorValue(r, g, b, a)
+  @hsla: (hue, saturation, lightness, alpha) ->
+    [red, green, blue] = _.hsl2rgb(unwrap(hue), unwrap(saturation), unwrap(lightness))
+    new ColorValue(red, green, blue, alpha)
 
   @rgba: (red, green, blue, alpha) ->
     new ColorValue(unwrap(red), unwrap(green), unwrap(blue), unwrap(alpha))

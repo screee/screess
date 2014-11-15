@@ -16,21 +16,21 @@
     };
 
     ColorValue.hex = function(hex) {
-      var b, g, r, _ref;
-      _ref = _.hex2rgb(hex), r = _ref[0], g = _ref[1], b = _ref[2];
-      return new ColorValue(r, g, b, 1);
+      var blue, green, red, _ref;
+      _ref = _.hex2rgb(hex), red = _ref[0], green = _ref[1], blue = _ref[2];
+      return new ColorValue(red, green, blue, 1);
     };
 
-    ColorValue.hsva = function(h, s, v, a) {
-      var b, g, r, _ref;
-      _ref = _.hsv2rgb(unwrap(h), unwrap(s), unwrap(v)), r = _ref[0], g = _ref[1], b = _ref[2];
-      return new ColorValue(r, g, b, a);
+    ColorValue.hsva = function(hue, saturation, value, alpha) {
+      var blue, green, red, _ref;
+      _ref = _.hsv2rgb(unwrap(hue), unwrap(saturation), unwrap(value)), red = _ref[0], green = _ref[1], blue = _ref[2];
+      return new ColorValue(red, green, blue, alpha);
     };
 
-    ColorValue.hsla = function(h, s, l, a) {
-      var b, g, r, _ref;
-      _ref = _.hsl2rgb(unwrap(h), unwrap(s), unwrap(l)), r = _ref[0], g = _ref[1], b = _ref[2];
-      return new ColorValue(r, g, b, a);
+    ColorValue.hsla = function(hue, saturation, lightness, alpha) {
+      var blue, green, red, _ref;
+      _ref = _.hsl2rgb(unwrap(hue), unwrap(saturation), unwrap(lightness)), red = _ref[0], green = _ref[1], blue = _ref[2];
+      return new ColorValue(red, green, blue, alpha);
     };
 
     ColorValue.rgba = function(red, green, blue, alpha) {

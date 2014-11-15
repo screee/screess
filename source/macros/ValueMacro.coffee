@@ -1,111 +1,44 @@
 Expression = require('../expressions/Expression')
-{literalExpression} = require('../expressions/LiteralExpression')
+MacroArgumentDefinition = require('../macros/MacroArgumentDefinition')
 _ = require("../utilities")
 Scope = require('../scopes/Scope')
 assert = require 'assert'
+{literalExpression} = require('../expressions/LiteralExpression')
 
 module.exports = class ValueMacro
 
   @createFromValue: (name, scope, value) ->
-    @createFromExpression(name, null, scope, literalExpression(value))
+    @createFromExpression(name, MacroArgumentDefinition.ZERO, scope, literalExpression(value))
 
-  @createFromExpression: (name, argDefinitions, parentScope, expression) ->
-    @createFromExpressions(name, argDefinitions, parentScope, [expression])
+  @createFromExpression: (name, argDefinition, parentScope, expression) ->
+    @createFromExpressions(name, argDefinition, parentScope, [expression])
 
-  @createFromExpressions: (name, argDefinitions, parentScope, expressions) ->
+  @createFromExpressions: (name, argDefinition, parentScope, expressions) ->
     assert _.isArray(expressions)
-    @createFromFunction name, argDefinitions, parentScope, (args, options) ->
+    @createFromFunction name, argDefinition, parentScope, (args, options) ->
       scope = new Scope(parentScope)
-      for name, value of args
-        scope.addValueMacro(name, [], [literalExpression(value)])
-      expression.toValue(scope, options) for expression in expressions
+      scope.addLiteralValueMacros(args)
 
-  @createFromFunction: (name, argDefinitions, parentScope, body) ->
+      options.scopeStack.push(scope)
+      values = (expression.toValue(scope, options) for expression in expressions)
+      options.scopeStack.pop()
+      values
+
+  @createFromFunction: (name, argDefinition, parentScope, body) ->
     assert _.isFunction(body)
-    new ValueMacro(name, argDefinitions, parentScope, body)
+    new ValueMacro(name, argDefinition, parentScope, body)
 
-  constructor: (@name, @argDefinitions, @parentScope, @body) ->
+  constructor: (@name, @argDefinition, @parentScope, @body) ->
     assert _.is(@parentScope, Scope)
-    @argDefinitionsMap = _.objectMap @argDefinitions, (index, argDefinition) ->
-      [argDefinition.name, _.extend(argDefinition, index:index)]
+    assert _.is(@argDefinition, MacroArgumentDefinition) || !@argDefinition
+    assert _.isFunction @body
 
-  matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
-
-  matchesArgValues: (argValues) ->
-    return true if @argDefinitions == null
-
-    indicies = _.times(@argDefinitions.length, -> false)
-
-    # Identify named arguments
-    for argValue in argValues
-      if argValue.name
-        argDefinition = @argDefinitionsMap[argValue.name]
-        return false unless argDefinition
-        indicies[argDefinition.index] = true
-
-    # Identify positional arguments
-    positionalIndex = -1
-    for argValue in argValues
-      if !argValue.name
-        for values in argValue.values
-          null while indicies[++positionalIndex] && positionalIndex < @argDefinitions.length
-          indicies[positionalIndex] = true
-
-    return false if positionalIndex >= @argDefinitions.length
-
-    # Identify default arguments
-    for argDefinition in @argDefinitions
-      if argDefinition.expression
-        indicies[argDefinition.index] = !!argDefinition.expression
-
-    _.all(indicies)
+  matches: (name, argValues) -> name == @name && argValues.matches(@argDefinition)
 
   toValues: (argValues, options) ->
-    args = @processArgs(argValues, options)
+    args = argValues.toArguments(@argDefinition, options)
     values = @body(args, options)
     assert _.isArray(values)
     values
 
-  # TODO this scope shoud come from the place the macro is defined
-  processArgs: (argValues, options) ->
-    args = {}
 
-    if !@argDefinitions
-      positionalIndex = 0
-      for argValue in argValues
-        for value in argValue.values
-          args[argValue.name || positionalIndex++] = value
-
-    else
-      assert @matchesArgValues(argValues)
-
-      args = {}
-
-      # Extract named arguments
-      for argValue in argValues
-        if argValue.name
-          argDefinition = _.find(
-            @argDefinitions,
-            (argDefinition) -> argDefinition.name == argValue.name
-          )
-          assert.equal argValue.values.length, 1
-          args[argDefinition.name] = argValue.values[0]
-
-      # Extract positional arguments
-      positionalIndex = -1
-      for argValue in argValues
-        if !argValue.name
-          for value in argValue.values
-            # Advance positionalIndex to the next unused positional argument
-            null while args[@argDefinitions[++positionalIndex]?.name] && positionalIndex < @argDefinitions.length
-            argDefinition = @argDefinitions[positionalIndex]
-            assert(argDefinition)
-            args[argDefinition.name] = value
-
-      # Extract default arguments
-      for argDefinition in @argDefinitions
-        if !args[argDefinition.name]
-          assert(argDefinition.expression, "No default value for argument '#{argDefinition.name}'")
-          args[argDefinition.name] = argDefinition.expression.toValue(@parentScope, options)
-
-    args

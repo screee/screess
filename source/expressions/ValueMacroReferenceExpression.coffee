@@ -2,16 +2,21 @@ Expression = require("./Expression")
 {literal} = require("./LiteralExpression")
 util = require('util')
 _ = require("../utilities")
+Scope = require "../scopes/Scope"
+MacroArgumentValues = require '../macros/MacroArgumentValues'
 
 module.exports = class ValueMacroReferenceExpression extends Expression
 
-  constructor: (@name, @argExpressions) ->
+  constructor: (@name, @argumentExpressions) ->
 
   toValues: (scope, options) ->
-    args = @argExpressions.map (arg) ->
-      _.extend(values: arg.expression.toValues(scope, options), arg)
+    argValues = MacroArgumentValues.createFromExpressions(
+      @argumentExpressions,
+      scope,
+      options
+    )
 
-    if macro = scope.getValueMacro(@name, args, options)
-      macro.toValues(args, options)
+    if macro = scope.getValueMacro(@name, argValues, options)
+      macro.toValues(argValues, options)
     else
       throw new Error("Could not find value macro '#{@name}'")

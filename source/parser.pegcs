@@ -10,6 +10,8 @@
   @ArrayValue = require("./values/ArrayValue")
   @FunctionValue = require("./values/FunctionValue")
 
+  @MacroArgumentDefinition = require("./macros/MacroArgumentDefinition")
+
   @LiteralExpression = require('./expressions/LiteralExpression')
   @StringExpression = require("./expressions/StringExpression")
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
@@ -66,8 +68,8 @@ propertyMacroDefinitionScope =
   (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
 
 propertyMacroDefinitionScopeArguments =
-  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { [head].concat(tail.map (e) -> e[1] ) } /
-  "" { [] }
+  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @MacroArgumentDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
+  "" { @MacroArgumentDefinition.ZERO }
 
 propertyMacroDefinitionScopeArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
@@ -105,8 +107,8 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:valueExpressions { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
-  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
-  "" { return [] }
+  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @MacroArgumentDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
+  "" { @MacroArgumentDefinition.ZERO }
 
 valueMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
