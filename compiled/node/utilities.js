@@ -6,27 +6,21 @@
 
   _.mixin({
     objectMapValues: function(input, filter) {
-      var output;
-      output = {};
-      _.each(input, function(value, key) {
-        return output[key] = filter(key, value);
+      return this.objectMap(input, function(value, key) {
+        return [key, filter(value, key)];
       });
-      return output;
     },
     objectMapKeys: function(input, filter) {
-      var output;
-      output = {};
-      _.each(input, function(value, key) {
-        return output[filter(key, value)] = value;
+      return this.objectMap(input, function(value, key) {
+        return [filter(value, key), value];
       });
-      return output;
     },
     objectMap: function(input, filter) {
       var output;
       output = {};
       _.each(input, function(inputValue, inputKey) {
         var outputKey, outputValue, _ref;
-        _ref = filter(inputKey, inputValue), outputKey = _ref[0], outputValue = _ref[1];
+        _ref = filter(inputValue, inputKey), outputKey = _ref[0], outputValue = _ref[1];
         return output[outputKey] = outputValue;
       });
       return output;
@@ -57,8 +51,20 @@
       }
       return false;
     },
-    count: function() {
-      return _.countBy.apply(_, arguments)[true] || 0;
+    count: function(input, predicate) {
+      var count;
+      if (predicate == null) {
+        predicate = _.identity;
+      }
+      count = 0;
+      _.each(input, (function(_this) {
+        return function() {
+          if (predicate.apply(_this, arguments)) {
+            return count++;
+          }
+        };
+      })(this));
+      return count;
     }
   });
 

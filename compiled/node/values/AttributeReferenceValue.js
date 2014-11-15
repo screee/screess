@@ -14,11 +14,7 @@
     }
 
     AttributeReferenceValue.prototype.toMGLValue = function(options) {
-      if (options.isFilter()) {
-        return this.name;
-      } else {
-        return "{" + this.name + "}";
-      }
+      return "{" + this.name + "}";
     };
 
     return AttributeReferenceValue;

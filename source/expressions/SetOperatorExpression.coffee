@@ -3,6 +3,7 @@ ArrayValue = require "../values/ArrayValue"
 AttributeReferenceValue = require "../values/AttributeReferenceValue"
 _ = require "../utilities"
 assert = require "assert"
+Value = require '../values/Value'
 
 module.exports = class SetOperatorExoression extends Expression
 
@@ -16,6 +17,6 @@ module.exports = class SetOperatorExoression extends Expression
     assert lvalue instanceof AttributeReferenceValue
     assert rvalue instanceof ArrayValue
 
-    [@operator, lvalue.name].concat(rvalue.toMGLValue(options))
+    [@operator, lvalue.name].concat(Value.toMGLValue(rvalue, options))
 
 

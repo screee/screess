@@ -1,15 +1,17 @@
-ColorValue = require("./values/ColorValue")
-LiteralValue = require("./values/LiteralValue")
-FunctionValue = require("./values/FunctionValue")
+ColorValue = require "./values/ColorValue"
+LiteralValue = require "./values/LiteralValue"
+FunctionValue = require "./values/FunctionValue"
 _ = require "./utilities"
 assert = require "assert"
+Value = require './values/Value'
 
 module.exports =
 
   valueMacros:
 
     source: (source, options) ->
-      name = source.name?.toMGLValue(options) || _.uniq()
+      debugger
+      name = Value.toMGLValue(source.name, options) || _.uniq()
       delete source.name
 
       if source["tile-size"]

@@ -1,3 +1,5 @@
+Value = require '../values/Value'
+
 module.exports = class Expression
   toValue: (scope, options) ->
     values = @toValues(scope, options)
@@ -9,4 +11,4 @@ module.exports = class Expression
     throw new Error("Abstract method")
 
   toMGLValue: (scope, options) ->
-    @toValue(scope, options).toMGLValue(options)
+    Value.toMGLValue(@toValue(scope, options), options)

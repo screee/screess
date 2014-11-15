@@ -1,7 +1,7 @@
 module.exports = class Value
-  @toMGLValue: (value) ->
+  @toMGLValue: (value, options) ->
     if value.toMGLValue
-      value.toMGLValue
+      value.toMGLValue(options)
     else
       value
 

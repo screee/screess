@@ -6,6 +6,7 @@ ValueMacro = require('../macros/ValueMacro')
 PropertyMacro = require('../macros/PropertyMacro')
 assert = require 'assert'
 Options = require('../Options')
+Value = require '../values/Value'
 
 {literalValue} = require('../values/LiteralValue')
 
@@ -43,7 +44,7 @@ module.exports = class GlobalScope extends Scope
     layers = _.map @layerScopes, (layer) -> layer.toMGLLayerScope(options)
     properties = @toMGLProperties(options, @properties)
     sources = _.objectMapValues @sources, (source, name) ->
-      _.objectMapValues(source, (value, key) -> value.toMGLValue(options))
+      _.objectMapValues(source, (value, key) -> Value.toMGLValue(value, options))
 
     transition =
       duration: properties["transition-delay"]

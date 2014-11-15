@@ -4,6 +4,7 @@ MacroArgDefinition = require '../macros/MacroArgDefinition'
 assert = require "assert"
 _ = require "../utilities"
 {literalExpression} = require('../expressions/LiteralExpression')
+Value = require '../values/Value'
 
 # scopeTypes:
 #   source: {}
@@ -85,7 +86,7 @@ module.exports = class Scope
         if argValues.length != 1 || argValues.positionalArgs.length != 1
           throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
 
-        output[name] = argValues.positionalArgs[0].toMGLValue(options)
+        output[name] = Value.toMGLValue(argValues.positionalArgs[0], options)
 
       options.property = null
 

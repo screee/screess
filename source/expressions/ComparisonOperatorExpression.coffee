@@ -2,6 +2,7 @@ Expression = require "./Expression"
 AttributeReferenceValue = require "../values/AttributeReferenceValue"
 _ = require "../utilities"
 assert = require "assert"
+Value = require '../values/Value'
 
 module.exports = class ComparisonOperatorExpression extends Expression
 
@@ -16,4 +17,4 @@ module.exports = class ComparisonOperatorExpression extends Expression
     assert lvalue instanceof AttributeReferenceValue
     assert !(rvalue instanceof AttributeReferenceValue)
 
-    [@operator, lvalue.name, rvalue.toMGLValue(options)]
+    [@operator, lvalue.name, Value.toMGLValue(rvalue, options)]
