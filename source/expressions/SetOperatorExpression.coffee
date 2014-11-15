@@ -16,6 +16,6 @@ module.exports = class SetOperatorExoression extends Expression
     assert lvalue instanceof AttributeReferenceValue
     assert rvalue instanceof ArrayValue
 
-    [@operator, lvalue.toMGLValue(options)].concat(rvalue.toMGLValue(options))
+    [@operator, lvalue.name].concat(rvalue.toMGLValue(options))
 
 

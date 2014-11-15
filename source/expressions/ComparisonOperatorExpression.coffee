@@ -16,4 +16,4 @@ module.exports = class ComparisonOperatorExpression extends Expression
     assert lvalue instanceof AttributeReferenceValue
     assert !(rvalue instanceof AttributeReferenceValue)
 
-    [@operator, lvalue.toMGLValue(options), rvalue.toMGLValue(options)]
+    [@operator, lvalue.name, rvalue.toMGLValue(options)]
