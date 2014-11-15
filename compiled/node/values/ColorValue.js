@@ -9,12 +9,6 @@
   assert = require("assert");
 
   module.exports = ColorValue = (function() {
-    var unwrap;
-
-    unwrap = function(value) {
-      return value.toLiteralValue();
-    };
-
     ColorValue.hex = function(hex) {
       var blue, green, red, _ref;
       _ref = _.hex2rgb(hex), red = _ref[0], green = _ref[1], blue = _ref[2];
@@ -23,18 +17,18 @@
 
     ColorValue.hsva = function(hue, saturation, value, alpha) {
       var blue, green, red, _ref;
-      _ref = _.hsv2rgb(unwrap(hue), unwrap(saturation), unwrap(value)), red = _ref[0], green = _ref[1], blue = _ref[2];
+      _ref = _.hsv2rgb(hue, saturation, value), red = _ref[0], green = _ref[1], blue = _ref[2];
       return new ColorValue(red, green, blue, alpha);
     };
 
     ColorValue.hsla = function(hue, saturation, lightness, alpha) {
       var blue, green, red, _ref;
-      _ref = _.hsl2rgb(unwrap(hue), unwrap(saturation), unwrap(lightness)), red = _ref[0], green = _ref[1], blue = _ref[2];
+      _ref = _.hsl2rgb(hue, saturation, lightness), red = _ref[0], green = _ref[1], blue = _ref[2];
       return new ColorValue(red, green, blue, alpha);
     };
 
     ColorValue.rgba = function(red, green, blue, alpha) {
-      return new ColorValue(unwrap(red), unwrap(green), unwrap(blue), unwrap(alpha));
+      return new ColorValue(red, green, blue, alpha);
     };
 
     function ColorValue(red, green, blue, alpha) {

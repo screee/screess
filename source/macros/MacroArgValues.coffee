@@ -40,7 +40,7 @@ module.exports = class MacroArgValues
 
     # Mark default arguments
     for definition in argDefinition.definitions
-      if definition.expression
+      if definition.expression?
         indicies[definition.index] = true
 
     _.all(indicies)
@@ -65,7 +65,6 @@ module.exports = class MacroArgValues
           if positionalIndex < @positionalArgs.length
             args[definition.name] = @positionalArgs[positionalIndex++]
           else
-            debugger unless argDefinition.scope
             args[definition.name] = definition.expression.toValue(argDefinition.scope, options)
 
       args

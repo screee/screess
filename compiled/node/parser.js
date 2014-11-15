@@ -246,23 +246,23 @@ module.exports = (function() {
         peg$c104 = "true",
         peg$c105 = { type: "literal", value: "true", description: "\"true\"" },
         peg$c106 = function() {return (function() {
-          return this.literalValue(true);
+          return true;
         }).apply(__initializer);
         },
         peg$c107 = "false",
         peg$c108 = { type: "literal", value: "false", description: "\"false\"" },
         peg$c109 = function() {return (function() {
-          return this.literalValue(false);
+          return false;
         }).apply(__initializer);
         },
         peg$c110 = /^[0-9]/,
         peg$c111 = { type: "class", value: "[0-9]", description: "[0-9]" },
         peg$c112 = function(before, after) {return (function() {
-          return this.literalValue(before + parseFloat("." + after.join("")));
+          return before + parseFloat("." + after.join(""));
         }).apply(__initializer);
         },
         peg$c113 = function(number) {return (function() {
-          return this.literalValue(number);
+          return number;
         }).apply(__initializer);
         },
         peg$c114 = /^[1-9]/,
@@ -2918,7 +2918,6 @@ module.exports = (function() {
       this.GlobalScope = require('./scopes/GlobalScope');
       this.ColorValue = require('./values/ColorValue');
       this.AttributeReferenceValue = require('./values/AttributeReferenceValue');
-      this.LiteralValue = require("./values/LiteralValue");
       this.ArrayValue = require("./values/ArrayValue");
       this.FunctionValue = require("./values/FunctionValue");
       this.MacroArgDefinition = require("./macros/MacroArgDefinition");
@@ -2933,7 +2932,6 @@ module.exports = (function() {
       this.globalScope = this.scope = new this.GlobalScope();
       this.stack = [];
       this.literalExpression = this.LiteralExpression.literalExpression;
-      this.literalValue = this.LiteralValue.literalValue;
       this.pushScope = function(scope) {
         this.stack.push(this.scope);
         return this.scope = scope;

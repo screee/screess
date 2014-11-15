@@ -1,5 +1,4 @@
 ColorValue = require "./values/ColorValue"
-LiteralValue = require "./values/LiteralValue"
 FunctionValue = require "./values/FunctionValue"
 _ = require "./utilities"
 assert = require "assert"
@@ -10,8 +9,7 @@ module.exports =
   valueMacros:
 
     source: (source, options) ->
-      debugger
-      name = Value.toMGLValue(source.name, options) || _.uniq()
+      name = source.name || _.uniq()
       delete source.name
 
       if source["tile-size"]
@@ -19,7 +17,7 @@ module.exports =
         delete source["tile-size"]
 
       options.getGlobalScope().addSource(name, source)
-      [new LiteralValue(name)]
+      [name]
 
     identity: (args) -> _.values args
 
@@ -32,13 +30,13 @@ module.exports =
 
     # Object Types
     # Line may refer to the layer paint type or the layer geometry type
-    polygon: -> [new LiteralValue("Polygon")]
-    point: -> [new LiteralValue("Point")]
+    polygon: -> ["Polygon"]
+    point: -> ["Point"]
     line: (args, options) ->
       if options.property == "type" && options.isMetaProperty
-        new LiteralValue("LineString")
+        "LineString"
       else if options.isFilter()
-        new LiteralValue("line")
+        "line"
       else
         throw new Error("The use of 'line' is ambigious in this context")
 

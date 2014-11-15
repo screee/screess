@@ -12,21 +12,23 @@
     __extends(FunctionValue, _super);
 
     function FunctionValue(base, stops) {
-      this.stops = _.map(stops, function(stop) {
-        return [stop[0], stop[1].toMGLValue()];
-      });
-      this.base = base != null ? base.toMGLValue() : void 0;
+      this.base = base;
+      this.stops = stops;
     }
 
     FunctionValue.prototype.toMGLValue = function(options) {
+      var stops;
+      stops = _.map(this.stops, function(stop) {
+        return [stop[0], Value.toMGLValue(stop[1], options)];
+      });
       if (this.base) {
         return {
-          base: this.base,
-          stops: this.stops
+          base: Value.toMGLValue(this.base, options),
+          stops: stops
         };
       } else {
         return {
-          stops: this.stops
+          stops: stops
         };
       }
     };

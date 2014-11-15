@@ -97,7 +97,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(foo, bar) = one
         foo(one, two) = two
-        #layer { $bar: foo(one:0, 17) }
+        #layer { $bar: foo(two:17 0) }
       """
       assert.equal stylesheet.layers[0].bar, 17
 

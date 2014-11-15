@@ -1,5 +1,4 @@
 Expression = require "./Expression"
-LiteralValue = require "../values/LiteralValue"
 {parse} = require "../parser"
 
 module.exports = class StringValue extends Expression
@@ -16,4 +15,4 @@ module.exports = class StringValue extends Expression
 
       output = output.substr(0, matchStart) + value.toString() + output.substr(matchEnd)
 
-    [new LiteralValue output]
+    [output]

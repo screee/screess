@@ -6,7 +6,6 @@
 
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
-  @LiteralValue = require("./values/LiteralValue")
   @ArrayValue = require("./values/ArrayValue")
   @FunctionValue = require("./values/FunctionValue")
 
@@ -25,7 +24,6 @@
   @stack = []
 
   {@literalExpression} = @LiteralExpression
-  {@literalValue} = @LiteralValue
 
   @pushScope = (scope) ->
     @stack.push(@scope)
@@ -205,15 +203,15 @@ value =
   arrayValue
 
 arrayValue =
-  "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { return new @ArrayValue(expressions) }
+  "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { new @ArrayValue(expressions) }
 
 booleanValue =
-  "true" { @literalValue true } /
-  "false" { @literalValue false }
+  "true" { true } /
+  "false" { false }
 
 numberValue =
-  before:integer? "." after:([0-9]+) { @literalValue (before + parseFloat("." + after.join(""))) } /
-  number:integer { @literalValue number }
+  before:integer? "." after:([0-9]+) { (before + parseFloat("." + after.join(""))) } /
+  number:integer { number }
 
 integer =
   head:[1-9] tail:[0-9]* { parseInt(head + tail.join("")) } /

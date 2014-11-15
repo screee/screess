@@ -8,9 +8,6 @@ assert = require 'assert'
 Options = require('../Options')
 Value = require '../values/Value'
 
-{literalValue} = require('../values/LiteralValue')
-
-
 module.exports = class GlobalScope extends Scope
 
   constructor: ->
@@ -30,7 +27,7 @@ module.exports = class GlobalScope extends Scope
     if macro = super
       macro
     else if argValues.length == 0
-      ValueMacro.createFromValue(name, @, literalValue name)
+      ValueMacro.createFromValue(name, @, name)
     else
       null
 

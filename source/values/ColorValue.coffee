@@ -4,22 +4,20 @@ assert = require "assert"
 
 module.exports = class ColorValue
 
-  unwrap = (value) -> value.toLiteralValue()
-
   @hex: (hex) ->
     [red, green, blue] = _.hex2rgb(hex)
     new ColorValue(red, green, blue, 1)
 
   @hsva: (hue, saturation, value, alpha) ->
-    [red, green, blue] = _.hsv2rgb(unwrap(hue), unwrap(saturation), unwrap(value))
+    [red, green, blue] = _.hsv2rgb(hue, saturation, value)
     new ColorValue(red, green, blue, alpha)
 
   @hsla: (hue, saturation, lightness, alpha) ->
-    [red, green, blue] = _.hsl2rgb(unwrap(hue), unwrap(saturation), unwrap(lightness))
+    [red, green, blue] = _.hsl2rgb(hue, saturation, lightness)
     new ColorValue(red, green, blue, alpha)
 
   @rgba: (red, green, blue, alpha) ->
-    new ColorValue(unwrap(red), unwrap(green), unwrap(blue), unwrap(alpha))
+    new ColorValue(red, green, blue, alpha)
 
   constructor: (@red, @green, @blue, @alpha) ->
 
