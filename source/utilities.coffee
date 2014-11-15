@@ -3,24 +3,16 @@ module.exports = _ = require "underscore"
 _.mixin
 
   objectMapValues: (input, filter) ->
-    output = {}
-    _.each input, (value, key) ->
-      output[key] = filter(key, value)
-    output
+    @objectMap(input, (value, key) -> [key, filter(value, key)])
 
   objectMapKeys: (input, filter) ->
-    output = {}
-    _.each input, (value, key) ->
-      output[filter(key, value)] = value
-    output
+    @objectMap(input, (value, key) -> [filter(value, key), value])
 
   objectMap: (input, filter) ->
     output = {}
-
     _.each input, (inputValue, inputKey) ->
-      [outputKey, outputValue] = filter(inputKey, inputValue)
+      [outputKey, outputValue] = filter(inputValue, inputKey)
       output[outputKey] = outputValue
-
     output
 
   objectZip: (keys, values) ->
@@ -41,7 +33,10 @@ _.mixin
 
     false
 
-  count: -> _.countBy.apply(_, arguments)[true] || 0
+  count: (input, predicate = _.identity) ->
+    count = 0
+    _.each(input, => count++ if predicate.apply(@, arguments) )
+    count
 
 `
 /**

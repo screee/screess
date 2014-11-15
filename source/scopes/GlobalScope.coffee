@@ -42,8 +42,8 @@ module.exports = class GlobalScope extends Scope
 
     layers = _.map @layerScopes, (layer) -> layer.toMGLLayerScope(options)
     properties = @toMGLProperties(options, @properties)
-    sources = _.objectMapValues @sources, (name, source) ->
-      _.objectMapValues(source, (key, value) -> value.toMGLValue(options))
+    sources = _.objectMapValues @sources, (source, name) ->
+      _.objectMapValues(source, (value, key) -> value.toMGLValue(options))
 
     transition =
       duration: properties["transition-delay"]
