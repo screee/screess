@@ -240,7 +240,7 @@ module.exports = (function() {
         peg$c101 = "]",
         peg$c102 = { type: "literal", value: "]", description: "\"]\"" },
         peg$c103 = function(expressions) {return (function() {
-          return new this.ArrayValue(expressions);
+          return new this.ArrayExpression(expressions);
         }).apply(__initializer);
         },
         peg$c104 = "true",
@@ -2303,6 +2303,9 @@ module.exports = (function() {
         s0 = peg$parsevalueMacroReferenceValueExpression();
         if (s0 === peg$FAILED) {
           s0 = peg$parsestringExpression();
+          if (s0 === peg$FAILED) {
+            s0 = peg$parsearrayExpression();
+          }
         }
       }
 
@@ -2584,27 +2587,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalue() {
-      var s0;
-
-      s0 = peg$parsebooleanValue();
-      if (s0 === peg$FAILED) {
-        s0 = peg$parsenumberValue();
-        if (s0 === peg$FAILED) {
-          s0 = peg$parseattributeReferenceValue();
-          if (s0 === peg$FAILED) {
-            s0 = peg$parsecolorValue();
-            if (s0 === peg$FAILED) {
-              s0 = peg$parsearrayValue();
-            }
-          }
-        }
-      }
-
-      return s0;
-    }
-
-    function peg$parsearrayValue() {
+    function peg$parsearrayExpression() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
@@ -2662,6 +2645,23 @@ module.exports = (function() {
       } else {
         peg$currPos = s0;
         s0 = peg$c1;
+      }
+
+      return s0;
+    }
+
+    function peg$parsevalue() {
+      var s0;
+
+      s0 = peg$parsebooleanValue();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parsenumberValue();
+        if (s0 === peg$FAILED) {
+          s0 = peg$parseattributeReferenceValue();
+          if (s0 === peg$FAILED) {
+            s0 = peg$parsecolorValue();
+          }
+        }
       }
 
       return s0;
@@ -2918,7 +2918,6 @@ module.exports = (function() {
       this.GlobalScope = require('./scopes/GlobalScope');
       this.ColorValue = require('./values/ColorValue');
       this.AttributeReferenceValue = require('./values/AttributeReferenceValue');
-      this.ArrayValue = require("./values/ArrayValue");
       this.FunctionValue = require("./values/FunctionValue");
       this.MacroArgDefinition = require("./macros/MacroArgDefinition");
       this.LiteralExpression = require('./expressions/LiteralExpression');
@@ -2929,6 +2928,7 @@ module.exports = (function() {
       this.BooleanLogicExpression = require('./expressions/BooleanLogicExpression');
       this.SetOperatorExpression = require('./expressions/SetOperatorExpression');
       this.NotOperatorExpression = require('./expressions/NotOperatorExpression');
+      this.ArrayExpression = require('./expressions/ArrayExpression');
       this.globalScope = this.scope = new this.GlobalScope();
       this.stack = [];
       this.literalExpression = this.LiteralExpression.literalExpression;

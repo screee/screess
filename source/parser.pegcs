@@ -6,7 +6,6 @@
 
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
-  @ArrayValue = require("./values/ArrayValue")
   @FunctionValue = require("./values/FunctionValue")
 
   @MacroArgDefinition = require("./macros/MacroArgDefinition")
@@ -19,6 +18,7 @@
   @BooleanLogicExpression = require('./expressions/BooleanLogicExpression')
   @SetOperatorExpression = require('./expressions/SetOperatorExpression')
   @NotOperatorExpression = require('./expressions/NotOperatorExpression')
+  @ArrayExpression = require('./expressions/ArrayExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -170,7 +170,8 @@ valueExpressions =
 valueExpression =
   literalValueExpression /
   valueMacroReferenceValueExpression /
-  stringExpression
+  stringExpression /
+  arrayExpression
 
 valueMacroReferenceValueExpression =
   name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
@@ -189,6 +190,9 @@ stringExpression =
 literalValueExpression =
   value:value { @literalExpression value }
 
+arrayExpression =
+  "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { new @ArrayExpression(expressions) }
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                                  Value                                     //
@@ -199,11 +203,7 @@ value =
   booleanValue /
   numberValue /
   attributeReferenceValue /
-  colorValue /
-  arrayValue
-
-arrayValue =
-  "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { new @ArrayValue(expressions) }
+  colorValue
 
 booleanValue =
   "true" { true } /

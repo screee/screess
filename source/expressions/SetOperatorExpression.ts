@@ -1,6 +1,5 @@
 import Expression = require("./Expression");
 import assert = require("assert");
-var ArrayValue = require("../values/ArrayValue");
 var AttributeReferenceValue = require("../values/AttributeReferenceValue");
 var _ = require("../utilities");
 var Value = require('../values/Value');
@@ -15,7 +14,7 @@ class SetOperatorExpression extends Expression {
     var rvalue = this.right.toValue(scope, options);
 
     assert(lvalue instanceof AttributeReferenceValue);
-    assert(rvalue instanceof ArrayValue);
+    assert(rvalue instanceof Array);
 
     return [this.operator, lvalue.name].concat(Value.toMGLValue(rvalue, options))
   }

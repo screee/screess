@@ -1,10 +1,1 @@
-{
-  "version": 3,
-  "file": "AttributeReferenceValue.js",
-  "sourceRoot": "../../..",
-  "sources": [
-    "source/values/AttributeReferenceValue.coffee"
-  ],
-  "names": [],
-  "mappings": ";AAAA;AAAA,MAAA,8BAAA;IAAA;mSAAA;;AAAA,EAAA,KAAA,GAAQ,OAAA,CAAQ,SAAR,CAAR,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AACrB,8CAAA,CAAA;;AAAa,IAAA,iCAAE,IAAF,GAAA;AAAS,MAAR,IAAC,CAAA,OAAA,IAAO,CAAT;IAAA,CAAb;;AAAA,sCACA,UAAA,GAAY,SAAC,OAAD,GAAA;aAAc,GAAA,GAAG,IAAC,CAAA,IAAJ,GAAS,IAAvB;IAAA,CADZ,CAAA;;mCAAA;;KADqD,MAFvD,CAAA;AAAA"
-}
+{"version":3,"file":"AttributeReferenceValue.js","sourceRoot":"","sources":["../../../source/values/AttributeReferenceValue.ts"],"names":["AttributeReferenceValue","AttributeReferenceValue.constructor","AttributeReferenceValue.toMGLValue"],"mappings":";;;;;;AAAA,IAAO,KAAK,WAAW,SAAS,CAAC,CAAA;AAEjC,IAAM,uBAAuB;IAASA,UAAhCA,uBAAuBA,UAAcA;IACzCA,SADIA,uBAAuBA,CACRA,IAAIA;QAAIC,iBAAOA,CAAAA;QAAfA,SAAIA,GAAJA,IAAIA,CAAAA;IAAYA,CAACA;IACpCD,4CAAUA,GAAVA,UAAWA,OAAOA;QAAIE,MAAMA,CAACA,GAAGA,GAAGA,IAAIA,CAACA,IAAIA,GAAGA,GAAGA,CAAAA;IAACA,CAACA;IACtDF,8BAACA;AAADA,CAACA,AAHD,EAAsC,KAAK,EAG1C;AAEgC,AAAjC,iBAAS,uBAAuB,CAAC"}
