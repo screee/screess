@@ -7,6 +7,9 @@
   "installed": {
     "node/node.d.ts": {
       "commit": "07ae96e580d1ac9817d40717158fcafc875044b3"
+    },
+    "commander/commander.d.ts": {
+      "commit": "07ae96e580d1ac9817d40717158fcafc875044b3"
     }
   }
 }
