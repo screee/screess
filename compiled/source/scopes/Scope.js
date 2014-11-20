@@ -2,9 +2,8 @@ var Value = require("../values/value");
 var MacroArgValues = require("../macros/MacroArgValues");
 var MacroArgDefinition = require('../macros/MacroArgDefinition');
 var assert = require("assert");
+var LiteralExpression = require('../expressions/LiteralExpression');
 var _ = require("../utilities");
-var literalExpression = require('../expressions/LiteralExpression').literalExpression;
-var Value = require('../values/Value');
 var Scope = (function () {
     function Scope(parent) {
         this.parent = parent;
@@ -28,7 +27,7 @@ var Scope = (function () {
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (name in values) {
             var value = values[name];
-            this.addValueMacro(name, MacroArgDefinition.ZERO, [literalExpression(value)]);
+            this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
         }
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {

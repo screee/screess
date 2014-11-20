@@ -1,9 +1,9 @@
-var literalExpression = require("../expressions/LiteralExpression").literalExpression
-var Scope  = require('../scopes/Scope');
-var _ = require("../utilities");
+import LiteralExpression = require("../expressions/LiteralExpression")
+import Scope  = require('../scopes/Scope');
 import assert = require("assert");
 import MacroArgValues = require("./MacroArgValues");
-var Options = require("../Options");
+import Options = require("../Options");
+var _ = require("../utilities");
 
 class PropertyMacro {
 

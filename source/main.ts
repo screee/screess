@@ -1,3 +1,5 @@
+/// <reference path="../definitions/index.d.ts" />
+
 var Parser = require('./parser');
 
 if (module.exports) {

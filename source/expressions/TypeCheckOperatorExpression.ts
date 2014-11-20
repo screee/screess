@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
-var AttributeReferenceValue = require("../values/AttributeReferenceValue");
-var _ = require("../utilities");
+import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
+var _ = require("../utilities");
 
 class TypeCheckExpression extends Expression {
 

@@ -1,5 +1,5 @@
-var _ = require('../utilities');
 import assert = require('assert');
+var _ = require('../utilities');
 
 class MacroArgValues {
 

@@ -1,12 +1,12 @@
 import Scope = require("./Scope");
-var _ = require("../utilities");
-var LayerScope = require('./LayerScope');
-var Globals = require('../globals');
+import LayerScope = require('./LayerScope');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
 import assert = require('assert');
-var Options = require('../Options');
-var Value = require('../values/Value');
+import Options = require('../Options');
+import Value = require('../values/Value');
+var _ = require("../utilities");
+var Globals = require('../globals');
 
 class GlobalScope extends Scope {
 

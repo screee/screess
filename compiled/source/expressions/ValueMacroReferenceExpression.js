@@ -5,11 +5,8 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var literal = require("./LiteralExpression").literal;
-var util = require('util');
-var _ = require("../utilities");
-var Scope = require("../scopes/Scope");
 var MacroArgValues = require('../macros/MacroArgValues');
+var _ = require("../utilities");
 var ValueMacroReferenceExpression = (function (_super) {
     __extends(ValueMacroReferenceExpression, _super);
     function ValueMacroReferenceExpression(name, argumentExpressions) {

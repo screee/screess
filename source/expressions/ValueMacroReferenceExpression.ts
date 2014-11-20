@@ -1,9 +1,8 @@
 import Expression = require("./Expression");
-var literal = require("./LiteralExpression").literal;
-var util = require('util');
+import util = require('util');
+import Scope = require("../scopes/Scope");
+import MacroArgValues = require('../macros/MacroArgValues');
 var _ = require("../utilities");
-var Scope = require("../scopes/Scope");
-var MacroArgValues = require('../macros/MacroArgValues');
 
 class ValueMacroReferenceExpression extends Expression {
 

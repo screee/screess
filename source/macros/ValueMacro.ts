@@ -1,15 +1,15 @@
 import Expression = require('../expressions/Expression')
 import MacroArgDefinition = require('../macros/MacroArgDefinition')
-var _ = require("../utilities")
-var Scope = require('../scopes/Scope')
+import Scope = require('../scopes/Scope')
+import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
-var literalExpression = require('../expressions/LiteralExpression').literalExpression
+var _ = require("../utilities")
 
 class ValueMacro {
 
   // TODO make overloaded constructors
   static createFromValue(name, scope, value) {
-    return this.createFromExpression(name, MacroArgDefinition.ZERO, scope, literalExpression(value))
+    return this.createFromExpression(name, MacroArgDefinition.ZERO, scope, new LiteralExpression(value))
   }
 
   static createFromExpression(name, argDefinition, parentScope, expression) {

@@ -1,9 +1,8 @@
-var literalExpression = require("../expressions/LiteralExpression").literalExpression;
 var Scope = require('../scopes/Scope');
-var _ = require("../utilities");
 var assert = require("assert");
 var MacroArgValues = require("./MacroArgValues");
 var Options = require("../Options");
+var _ = require("../utilities");
 var PropertyMacro = (function () {
     function PropertyMacro(parentScope, name, argDefinition, body) {
         if (body === void 0) { body = null; }

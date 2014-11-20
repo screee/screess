@@ -1,9 +1,7 @@
-/// <reference path="../../definitions/index.d.ts" />
-
-var AttributeReferenceValue = require("../values/AttributeReferenceValue");
-var _ = require("../utilities");
+import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Expression = require("./Expression");
+var _ = require("../utilities");
 
 class BooleanLogicExpression extends Expression {
 

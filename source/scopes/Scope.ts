@@ -1,10 +1,9 @@
-var Value = require("../values/value")
+import Value = require("../values/value")
 import MacroArgValues = require("../macros/MacroArgValues")
 import MacroArgDefinition = require('../macros/MacroArgDefinition')
 import assert = require("assert")
+import LiteralExpression = require('../expressions/LiteralExpression')
 var _ = require("../utilities")
-var literalExpression = require('../expressions/LiteralExpression').literalExpression
-var Value = require('../values/Value')
 
 class Scope {
 
@@ -38,7 +37,7 @@ class Scope {
   addLiteralValueMacros(values) {
     for (name in values) {
       var value = values[name];
-      this.addValueMacro(name, MacroArgDefinition.ZERO, [literalExpression(value)]);
+      this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
     }
   }
 

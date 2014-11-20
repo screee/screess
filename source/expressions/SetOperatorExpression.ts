@@ -1,8 +1,8 @@
 import Expression = require("./Expression");
 import assert = require("assert");
-var AttributeReferenceValue = require("../values/AttributeReferenceValue");
+import AttributeReferenceValue = require("../values/AttributeReferenceValue");
+import Value = require('../values/Value');
 var _ = require("../utilities");
-var Value = require('../values/Value');
 
 class SetOperatorExpression extends Expression {
 

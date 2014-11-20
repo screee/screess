@@ -5,12 +5,12 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Scope = require("./Scope");
-var _ = require("../utilities");
 var LayerScope = require('./LayerScope');
-var Globals = require('../globals');
 var ValueMacro = require('../macros/ValueMacro');
 var Options = require('../Options');
 var Value = require('../values/Value');
+var _ = require("../utilities");
+var Globals = require('../globals');
 var GlobalScope = (function (_super) {
     __extends(GlobalScope, _super);
     function GlobalScope() {

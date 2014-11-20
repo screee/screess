@@ -1,8 +1,8 @@
 import Expression = require("./Expression");
-var AttributeReferenceValue = require("../values/AttributeReferenceValue");
-var _ = require("../utilities");
 import assert = require("assert");
-var Value = require('../values/Value');
+import AttributeReferenceValue = require("../values/AttributeReferenceValue");
+import Value = require('../values/Value');
+var _ = require("../utilities");
 
 class ComparisonOperatorExpression extends Expression {
 

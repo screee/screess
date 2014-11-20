@@ -1,4 +1,4 @@
-var Value = require('../values/Value')
+import Value = require('../values/Value')
 
 class Expression {
 

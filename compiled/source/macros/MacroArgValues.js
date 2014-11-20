@@ -1,5 +1,5 @@
-var _ = require('../utilities');
 var assert = require('assert');
+var _ = require('../utilities');
 var MacroArgValues = (function () {
     function MacroArgValues(positionalArgs, namedArgs) {
         this.positionalArgs = positionalArgs;
