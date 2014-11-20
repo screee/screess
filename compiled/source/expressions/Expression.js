@@ -9,11 +9,15 @@ var Expression = (function () {
         }
         return values[0];
     };
+    // TODO use union types on return type
     Expression.prototype.toValues = function (scope, options) {
         throw new Error("Abstract method");
     };
     Expression.prototype.toMGLValue = function (scope, options) {
         return Value.toMGLValue(this.toValue(scope, options), options);
+    };
+    Expression.prototype.toMGLFilter = function (scope, options) {
+        throw new Error("Abstract method");
     };
     return Expression;
 })();

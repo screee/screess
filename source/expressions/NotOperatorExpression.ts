@@ -1,12 +1,14 @@
 import Expression = require("./Expression");
 import assert = require("assert");
 var _ = require("../utilities");
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 
 class SetOperatorExpression extends Expression {
 
-  constructor(public expression) { super(); }
+  constructor(public expression:Expression) { super(); }
 
-  toMGLFilter(scope, options) {
+  toMGLFilter(scope:Scope, options:Options):any[] {
     return ["none", this.expression.toMGLFilter(scope, options)];
   }
 

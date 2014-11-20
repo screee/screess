@@ -1,6 +1,8 @@
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Expression = require("./Expression");
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 var _ = require("../utilities");
 
 class BooleanLogicExpression extends Expression {
@@ -10,11 +12,11 @@ class BooleanLogicExpression extends Expression {
     "&&": "all"
   };
 
-  constructor(public operator, public expressions) {
+  constructor(public operator:string, public expressions:Expression[]) {
     super();
   }
 
-  toMGLFilter(scope, options) {
+  toMGLFilter(scope:Scope, options:Options):any[] {
 
     options.pushFilter();
 

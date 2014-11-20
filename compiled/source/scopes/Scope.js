@@ -30,6 +30,7 @@ var Scope = (function () {
             this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
         }
     };
+    // TODO overload function for different arg types
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
         var ValueMacro = require("../macros/ValueMacro");
@@ -47,7 +48,6 @@ var Scope = (function () {
         return this.valueMacros.unshift(macro);
     };
     Scope.prototype.addPropertyMacro = function (name, argDefinition, body) {
-        assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
         var PropertyMacro = require("../macros/PropertyMacro");
         var macro = new PropertyMacro(this, name, argDefinition, body);
         this.propertyMacros.unshift(macro);

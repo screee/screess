@@ -1,13 +1,15 @@
 import Expression = require("./Expression");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 var _ = require("../utilities");
 
 class TypeCheckExpression extends Expression {
 
-  constructor(public type) { super() }
+  constructor(public type:Expression) { super() }
 
-  toMGLFilter(scope, options) {
+  toMGLFilter(scope:Scope, options:Options) {
     return ["==", "$type", this.type.toMGLValue(scope, options)]
   }
 }

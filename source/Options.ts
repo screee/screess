@@ -13,6 +13,7 @@ class Options {
   public filters;
   public property;
   public isMetaProperty;
+  public meta:boolean;
 
   constructor() {
     this.valueMacroStack = []

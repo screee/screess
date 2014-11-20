@@ -5,13 +5,16 @@ import PropertyMacro = require('../macros/PropertyMacro');
 import assert = require('assert');
 import Options = require('../Options');
 import Value = require('../values/Value');
+import MacroArgValues = require('../macros/MacroArgValues');
 var _ = require("../utilities");
 var Globals = require('../globals');
 
 class GlobalScope extends Scope {
 
-  public layerScopes;
-  public sources;
+  public layerScopes:{[name:string]: LayerScope};
+
+  // TODO create source class
+  public sources:{[name:string]: any};
 
   constructor() {
     super(null)
@@ -30,15 +33,17 @@ class GlobalScope extends Scope {
 
   }
 
-  addSource(name, source) {
+  // TODO create source class
+  addSource(name:string, source:any):void {
     this.sources[name] = source;
   }
 
-  getGlobalScope() {
+  // TODO create source class
+  getGlobalScope():GlobalScope {
     return this
   }
 
-  getValueMacro(name, argValues, options) {
+  getValueMacro(name:string, argValues:MacroArgValues, options:Options):ValueMacro {
     var macro;
     if (macro = super.getValueMacro(name, argValues, options)) {
       return macro;
@@ -49,18 +54,18 @@ class GlobalScope extends Scope {
     }
   }
 
-  getSource(name) {
+  getSource(name:string):any {
     return this.sources[name];
   }
 
-  addLayerScope(name, scope) {
+  addLayerScope(name:string, scope:Scope):Scope {
     if (this.layerScopes[name]) {
       throw new Error("Duplicate entries for layer scope " + name)
     }
     return this.layerScopes[name] = new LayerScope(name, this);
   }
 
-  toMGLGlobalScope(options = new Options()) {
+  toMGLGlobalScope(options:Options = new Options()):any {
     options.scopeStack.push(this)
 
     var layers = _.map(this.layerScopes, (layer) => {

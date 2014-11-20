@@ -17,7 +17,7 @@ var LayerScope = (function (_super) {
     }
     LayerScope.prototype.addMetaProperty = function (name, expressions) {
         if (this.metaProperties[name]) {
-            throw new Error("Duplicate entries for metaproperty '#{name}'");
+            throw new Error("Duplicate entries for metaproperty '" + name + "'");
         }
         this.metaProperties[name] = expressions;
     };

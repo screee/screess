@@ -1,11 +1,13 @@
 import Expression = require("./Expression");
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 var parse = require("../parser").parse;
 
 class StringExpression extends Expression {
 
-  constructor(public body) { super() }
+  constructor(public body:string) { super() }
 
-  toValues(scope, options) {
+  toValues(scope:Scope, options:Options):any[] {
     var output = this.body;
     var match;
     while (match = (/#\{(.*)\}/).exec(output)) {

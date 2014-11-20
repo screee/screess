@@ -1,14 +1,17 @@
 import assert = require('assert')
+import Scope = require('../scopes/Scope')
 var _ = require('../utilities')
 
 class MacroArgDefinition {
 
-  static ZERO = new MacroArgDefinition([], null);
+  static ZERO:MacroArgDefinition = new MacroArgDefinition([], null);
 
+  // TODO create type for namedArgs
   public namedArgs;
   public length:number;
 
-  constructor(public definitions, public scope) {
+  // TODO create type for definitions
+  constructor(public definitions, public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }

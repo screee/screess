@@ -8,7 +8,7 @@ class ComparisonOperatorExpression extends Expression {
 
   constructor(public left, public operator, public right) { super() }
 
-  toMGLFilter(scope, options) {
+  toMGLFilter(scope, options):any[] {
     var lvalue = this.left.toValue(scope, options)
     var rvalue = this.right.toValue(scope, options)
 

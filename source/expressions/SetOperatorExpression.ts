@@ -2,13 +2,15 @@ import Expression = require("./Expression");
 import assert = require("assert");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import Value = require('../values/Value');
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 var _ = require("../utilities");
 
 class SetOperatorExpression extends Expression {
 
-  constructor(public left, public operator, public right) { super() }
+  constructor(public left:Expression, public operator:string, public right:Expression) { super() }
 
-  toMGLFilter(scope, options) {
+  toMGLFilter(scope:Scope, options:Options):any[] {
     var lvalue = this.left.toValue(scope, options);
     // TODO allow for multiple rvalues
     var rvalue = this.right.toValue(scope, options);

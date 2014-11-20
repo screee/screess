@@ -3,6 +3,11 @@ import MacroArgValues = require("../macros/MacroArgValues")
 import MacroArgDefinition = require('../macros/MacroArgDefinition')
 import assert = require("assert")
 import LiteralExpression = require('../expressions/LiteralExpression')
+import GlobalScope = require('./GlobalScope');
+import Options = require('../Options')
+import Expression = require('../expressions/Expression');
+import ValueMacro = require('../macros/ValueMacro');
+import PropertyMacro = require('../macros/PropertyMacro');
 var _ = require("../utilities")
 
 class Scope {
@@ -18,15 +23,15 @@ class Scope {
     this.propertyMacros = [];
   }
 
-  getGlobalScope () {
+  getGlobalScope():GlobalScope {
     return this.parent.getGlobalScope()
   }
 
-  getSource(name) {
+  getSource(name:string):any {
     return this.parent.getSource(name);
   }
 
-  addProperty(name, expressions) {
+  addProperty(name:string, expressions:Expression[]) {
     if (this.properties[name]) {
       throw new Error("Duplicate entries for property '#{name}'")
     }
@@ -34,14 +39,15 @@ class Scope {
     return this.properties[name] = expressions;
   }
 
-  addLiteralValueMacros(values) {
+  addLiteralValueMacros(values:{[name:string]:any}):void {
     for (name in values) {
       var value = values[name];
       this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
     }
   }
 
-  addValueMacro(name, argDefinition, body) {
+  // TODO overload function for different arg types
+  addValueMacro(name:String, argDefinition:MacroArgDefinition, body:any) {
     assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
 
     var ValueMacro = require("../macros/ValueMacro");
@@ -58,9 +64,7 @@ class Scope {
     return this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name, argDefinition, body) {
-    assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
-
+  addPropertyMacro(name:string, argDefinition:MacroArgDefinition, body:MacroArgDefinition):Scope {
     var PropertyMacro = require("../macros/PropertyMacro");
     var macro = new PropertyMacro(this, name, argDefinition, body)
     this.propertyMacros.unshift(macro)
@@ -68,7 +72,7 @@ class Scope {
     return macro.scope
   }
 
-  getValueMacro(name, argValues, options) {
+  getValueMacro(name:string, argValues:MacroArgValues, options:Options):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, argValues) && !_.contains(options.valueMacroStack, macro)) {
@@ -79,7 +83,7 @@ class Scope {
     return this.parent ? this.parent.getValueMacro(name, argValues, options) : null;
   }
 
-  getPropertyMacro(name, argValues, options) {
+  getPropertyMacro(name:string, argValues:MacroArgValues, options:Options):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
       if (macro.matches(name, argValues) && !_.contains(options.propertyMacroStack, macro)) {
@@ -92,7 +96,7 @@ class Scope {
     return this.parent ? this.parent.getPropertyMacro(name, argValues, options) : null;
   }
 
-  toMGLProperties(options, properties) {
+  toMGLProperties(options:Options, properties:{[name:string]: Expression[]}):any {
     var output = {}
 
     for (var name in properties) {

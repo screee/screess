@@ -1,49 +1,51 @@
 import Scope = require("./Scope")
 import ClassScope = require('./ClassScope')
+import Expression = require('../expressions/Expression');
+import Options = require('../Options')
 var _ = require('../utilities')
 
 class LayerScope extends Scope {
 
-  addMetaProperty(name, expressions) {
-    if(this.metaProperties[name]) {
-      throw new Error("Duplicate entries for metaproperty '#{name}'")
+  addMetaProperty(name:string, expressions:Expression[]):void {
+    if (this.metaProperties[name]) {
+      throw new Error("Duplicate entries for metaproperty '" + name + "'")
     }
     this.metaProperties[name] = expressions
   }
 
-  addClassScope(name) {
+  addClassScope(name:string):Scope {
     if (!this.classScopes[name]) {
       this.classScopes[name] = new ClassScope(this)
     }
     return this.classScopes[name];
   }
 
-  setFilter(filterExpression) {
+  setFilter(filterExpression:Expression):void {
     if (this.filterExpression) {
       throw new Error("Duplicate filters")
     }
     this.filterExpression = filterExpression
   }
 
-  setSource(source) {
+  setSource(source:string):void {
     if (this.source) {
       throw new Error("Duplicate sources")
     }
     this.source = source
   }
 
-  public classScopes;
-  public metaProperties;
-  public filterExpression;
-  public source;
+  public classScopes:{[name:string]: ClassScope};
+  public metaProperties:{[name:string]: Expression[]};
+  public filterExpression:Expression;
+  public source:string;
 
-  constructor(public name, parent) {
+  constructor(public name:string, parent:Scope) {
     super(parent)
     this.classScopes = {}
     this.metaProperties = {}
   }
 
-  toMGLLayerScope(options) {
+  toMGLLayerScope(options:Options):any {
     options.scopeStack.push(this)
 
     if (this.filterExpression) {

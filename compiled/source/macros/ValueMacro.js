@@ -9,17 +9,16 @@ var ValueMacro = (function () {
         this.argDefinition = argDefinition;
         this.parentScope = parentScope;
         this.body = body;
-        assert(_.is(this.parentScope, Scope));
-        assert(_.is(this.argDefinition, MacroArgDefinition) || !this.argDefinition);
-        assert(_.isFunction(this.body));
     }
     // TODO make overloaded constructors
     ValueMacro.createFromValue = function (name, scope, value) {
         return this.createFromExpression(name, MacroArgDefinition.ZERO, scope, new LiteralExpression(value));
     };
+    // TODO make overloaded constructors
     ValueMacro.createFromExpression = function (name, argDefinition, parentScope, expression) {
         return this.createFromExpressions(name, argDefinition, parentScope, [expression]);
     };
+    // TODO make overloaded constructors
     ValueMacro.createFromExpressions = function (name, argDefinition, parentScope, expressions) {
         assert(_.isArray(expressions));
         return this.createFromFunction(name, argDefinition, parentScope, function (args, options) {
@@ -33,6 +32,7 @@ var ValueMacro = (function () {
             return values;
         });
     };
+    // TODO make overloaded constructors
     ValueMacro.createFromFunction = function (name, argDefinition, parentScope, body) {
         assert(_.isFunction(body));
         return new ValueMacro(name, argDefinition, parentScope, body);

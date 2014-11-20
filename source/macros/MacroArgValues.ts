@@ -1,10 +1,14 @@
 import assert = require('assert');
+import MacroArgDefinition = require('./MacroArgDefinition');
+import Scope = require("../scopes/Scope");
+import Options = require("../Options");
 var _ = require('../utilities');
 
 class MacroArgValues {
 
-  // TODO make a constructor
-  static createFromExpressions(args, scope, options) {
+  // TODO make all factory methods into overloaded constructors
+  // TODO add types to arguments
+  static createFromExpressions(args, scope:Scope, options:Options) {
     var positionalArgs = [];
     var namedArgs = {};
 
@@ -25,11 +29,12 @@ class MacroArgValues {
 
   public length:number;
 
+  // TODO add types to arguments
   constructor(public positionalArgs, public namedArgs) {
     this.length = this.positionalArgs.length + _.values(this.namedArgs).length
   }
 
-  matches(argDefinition) {
+  matches(argDefinition:MacroArgDefinition):boolean {
     if (!argDefinition) { return true }
 
     var indicies = _.times(argDefinition.length, () => { false });

@@ -1,6 +1,7 @@
 var assert = require('assert');
 var _ = require('../utilities');
 var MacroArgDefinition = (function () {
+    // TODO create type for definitions
     function MacroArgDefinition(definitions, scope) {
         this.definitions = definitions;
         this.scope = scope;

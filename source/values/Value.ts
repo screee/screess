@@ -1,6 +1,8 @@
+import Options = require('../Options');
+
 class Value {
 
-  static toMGLValue(value, options) {
+  static toMGLValue(value:any, options:Options):any {
     if (value.toMGLValue) {
       return value.toMGLValue(options);
     } else {
@@ -8,7 +10,7 @@ class Value {
     }
   }
 
-  toMGLValue(options):any {
+  toMGLValue(options:Options):any {
     throw "Abstract method"
   }
 

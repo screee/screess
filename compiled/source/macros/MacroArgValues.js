@@ -1,12 +1,14 @@
 var assert = require('assert');
 var _ = require('../utilities');
 var MacroArgValues = (function () {
+    // TODO add types to arguments
     function MacroArgValues(positionalArgs, namedArgs) {
         this.positionalArgs = positionalArgs;
         this.namedArgs = namedArgs;
         this.length = this.positionalArgs.length + _.values(this.namedArgs).length;
     }
-    // TODO make a constructor
+    // TODO make all factory methods into overloaded constructors
+    // TODO add types to arguments
     MacroArgValues.createFromExpressions = function (args, scope, options) {
         var positionalArgs = [];
         var namedArgs = {};

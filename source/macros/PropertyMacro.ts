@@ -2,6 +2,7 @@ import LiteralExpression = require("../expressions/LiteralExpression")
 import Scope  = require('../scopes/Scope');
 import assert = require("assert");
 import MacroArgValues = require("./MacroArgValues");
+import MacroArgDefinition = require("./MacroArgDefinition");
 import Options = require("../Options");
 var _ = require("../utilities");
 
@@ -11,7 +12,7 @@ class PropertyMacro {
   public argLengthMin:number;
   public argLengthMax:number;
 
-  constructor(public parentScope, public name, public argDefinition, public body = null) {
+  constructor(public parentScope:Scope, public name:string, public argDefinition:MacroArgDefinition, public body:Function = null) {
     var ClassScope = require("../scopes/ClassScope")
     this.scope = new ClassScope(this.parentScope)
 
@@ -40,7 +41,7 @@ class PropertyMacro {
     return values
   }
 
-  matches(name, argValues) {
+  matches(name:string, argValues:MacroArgValues):boolean {
     return name == this.name && argValues.matches(this.argDefinition)
   }
 

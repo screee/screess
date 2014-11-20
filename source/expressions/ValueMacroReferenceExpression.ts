@@ -2,13 +2,17 @@ import Expression = require("./Expression");
 import util = require('util');
 import Scope = require("../scopes/Scope");
 import MacroArgValues = require('../macros/MacroArgValues');
+import Options = require("../Options");
 var _ = require("../utilities");
 
 class ValueMacroReferenceExpression extends Expression {
 
-  constructor(public name, public argumentExpressions) { super() }
+  // TODO add type to argumentExpressions
+  constructor(public name:string, public argumentExpressions) {
+    super()
+  }
 
-  toValues(scope, options):any[] {
+  toValues(scope:Scope, options:Options):any[] {
     var argValues = MacroArgValues.createFromExpressions(
       this.argumentExpressions,
       scope,

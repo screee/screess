@@ -26,9 +26,11 @@ var GlobalScope = (function (_super) {
             this.addPropertyMacro(name, null, fn);
         }
     }
+    // TODO create source class
     GlobalScope.prototype.addSource = function (name, source) {
         this.sources[name] = source;
     };
+    // TODO create source class
     GlobalScope.prototype.getGlobalScope = function () {
         return this;
     };

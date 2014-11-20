@@ -9,6 +9,7 @@ var MacroArgValues = require('../macros/MacroArgValues');
 var _ = require("../utilities");
 var ValueMacroReferenceExpression = (function (_super) {
     __extends(ValueMacroReferenceExpression, _super);
+    // TODO add type to argumentExpressions
     function ValueMacroReferenceExpression(name, argumentExpressions) {
         _super.call(this);
         this.name = name;
