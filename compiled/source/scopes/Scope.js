@@ -16,6 +16,9 @@ var Scope = (function () {
     Scope.prototype.getGlobalScope = function () {
         return this.parent.getGlobalScope();
     };
+    Scope.prototype.getSource = function (name) {
+        return this.parent.getSource(name);
+    };
     Scope.prototype.addProperty = function (name, expressions) {
         if (this.properties[name]) {
             throw new Error("Duplicate entries for property '#{name}'");

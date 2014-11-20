@@ -23,6 +23,10 @@ class Scope {
     return this.parent.getGlobalScope()
   }
 
+  getSource(name) {
+    return this.parent.getSource(name);
+  }
+
   addProperty(name, expressions) {
     if (this.properties[name]) {
       throw new Error("Duplicate entries for property '#{name}'")
