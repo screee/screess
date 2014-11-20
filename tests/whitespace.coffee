@@ -1,6 +1,6 @@
-{parse} = require("../source/main")
+{parse} = require("../compiled/source/main")
 assert = require("assert")
-_ = require("../source/utilities")
+_ = require("../compiled/source/utilities")
 
 describe "whitespace", ->
   zero = [{id: "test", paint: { }}]

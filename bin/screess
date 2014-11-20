@@ -4,7 +4,7 @@ ENCODING = "utf8"
 
 Package = require '../package.json'
 Fs = require 'fs'
-Parser = require '../source/parser'
+Parser = require '../compiled/source/parser'
 
 CLI = require 'commander'
 CLI.version(Package.version)

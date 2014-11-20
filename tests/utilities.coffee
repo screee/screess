@@ -1,4 +1,4 @@
-_ = require "../source/utilities"
+_ = require "../compiled/source/utilities"
 assert = require "assert"
 
 describe 'utilities', ->

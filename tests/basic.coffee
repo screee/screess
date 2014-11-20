@@ -1,4 +1,4 @@
-{parse} = require("../source/main")
+{parse} = require("../compiled/source/main")
 assert = require("assert")
 
 it "should mark the stylesheet as version 6", ->

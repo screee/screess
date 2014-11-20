@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "AttributeReferenceValue.js",
+  "sourceRoot": "../../..",
+  "sources": [
+    "source/values/AttributeReferenceValue.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,MAAA,8BAAA;IAAA;mSAAA;;AAAA,EAAA,KAAA,GAAQ,OAAA,CAAQ,SAAR,CAAR,CAAA;;AAAA,EAEA,MAAM,CAAC,OAAP,GAAuB;AACrB,8CAAA,CAAA;;AAAa,IAAA,iCAAE,IAAF,GAAA;AAAS,MAAR,IAAC,CAAA,OAAA,IAAO,CAAT;IAAA,CAAb;;AAAA,sCACA,UAAA,GAAY,SAAC,OAAD,GAAA;aAAc,GAAA,GAAG,IAAC,CAAA,IAAJ,GAAS,IAAvB;IAAA,CADZ,CAAA;;mCAAA;;KADqD,MAFvD,CAAA;AAAA"
+}

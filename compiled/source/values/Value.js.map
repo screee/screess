@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "Value.js",
+  "sourceRoot": "../../..",
+  "sources": [
+    "source/values/Value.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;AAAA,MAAA,KAAA;;AAAA,EAAA,MAAM,CAAC,OAAP,GAAuB;uBACrB;;AAAA,IAAA,KAAC,CAAA,UAAD,GAAa,SAAC,KAAD,EAAQ,OAAR,GAAA;AACX,MAAA,IAAG,KAAK,CAAC,UAAT;eACE,KAAK,CAAC,UAAN,CAAiB,OAAjB,EADF;OAAA,MAAA;eAGE,MAHF;OADW;IAAA,CAAb,CAAA;;AAAA,oBAMA,UAAA,GAAY,SAAC,OAAD,GAAA;AAAa,YAAM,iBAAN,CAAb;IAAA,CANZ,CAAA;;iBAAA;;MADF,CAAA;AAAA"
+}
