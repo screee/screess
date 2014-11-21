@@ -2,7 +2,7 @@ import assert = require('assert');
 import MacroArgDefinition = require('./MacroArgDefinition');
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
-var _ = require('../utilities');
+import _ = require('../utilities');
 
 class MacroArgValues {
 
@@ -37,7 +37,7 @@ class MacroArgValues {
   matches(argDefinition:MacroArgDefinition):boolean {
     if (!argDefinition) { return true }
 
-    var indicies = _.times(argDefinition.length, () => { false });
+    var indicies = _.times(argDefinition.length, () => { return false });
 
     // Mark named arguments
     for (var name in this.namedArgs) {

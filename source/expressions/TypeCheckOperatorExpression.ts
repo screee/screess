@@ -3,7 +3,7 @@ import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class TypeCheckExpression extends Expression {
 

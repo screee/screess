@@ -4,7 +4,7 @@ import assert = require("assert");
 import MacroArgValues = require("./MacroArgValues");
 import MacroArgDefinition = require("./MacroArgDefinition");
 import Options = require("../Options");
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class PropertyMacro {
 
@@ -18,15 +18,12 @@ class PropertyMacro {
 
     this.argLengthMin = _.count(
       this.argDefinition.definitions,
-      (argDefinition) => { !argDefinition.expression }
+      (argDefinition) => { return !argDefinition.expression }
     )
     this.argLengthMax = this.argDefinition.length;
   }
 
-  toMGLScope(argValues, options) {
-    assert(_.is(argValues, MacroArgValues));
-    assert(_.is(options, Options));
-
+  toMGLScope(argValues:MacroArgValues, options:Options) {
     var args = argValues.toArguments(this.argDefinition, options)
 
     var scope = new Scope(this.scope)

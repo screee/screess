@@ -70,7 +70,7 @@ var LayerScope = (function (_super) {
         options.meta = false;
         var paintProperties = { paint: this.toMGLProperties(options, this.properties) };
         var paintClassProperties = _.objectMap(this.classScopes, function (scope, name) {
-            ["paint.#{name}", scope.toMGLClassScope(options)];
+            return ["paint.#{name}", scope.toMGLClassScope(options)];
         });
         options.scopeStack.pop();
         return _.extend({ id: this.name }, metaProperties, paintProperties, paintClassProperties, metaFilterProperty, metaSourceProperty);

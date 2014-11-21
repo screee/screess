@@ -1,6 +1,6 @@
 import Value = require("./Value");
 import Options = require("../Options")
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class FunctionValue extends Value {
   constructor(public base:number, public stops:[number, number][]) { super(); }

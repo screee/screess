@@ -5,7 +5,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Scope = require("./Scope");
-var _ = require("../utilities");
 var ClassScope = (function (_super) {
     __extends(ClassScope, _super);
     function ClassScope() {

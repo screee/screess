@@ -6,7 +6,7 @@ import assert = require('assert');
 import Options = require('../Options');
 import Value = require('../values/Value');
 import MacroArgValues = require('../macros/MacroArgValues');
-var _ = require("../utilities");
+import _ = require("../utilities");
 var Globals = require('../globals');
 
 class GlobalScope extends Scope {

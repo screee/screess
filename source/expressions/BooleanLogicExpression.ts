@@ -3,7 +3,7 @@ import assert = require("assert");
 import Expression = require("./Expression");
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class BooleanLogicExpression extends Expression {
 

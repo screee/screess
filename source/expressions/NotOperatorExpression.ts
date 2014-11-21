@@ -1,6 +1,6 @@
 import Expression = require("./Expression");
 import assert = require("assert");
-var _ = require("../utilities");
+import _ = require("../utilities");
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
 

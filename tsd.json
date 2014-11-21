@@ -10,6 +10,9 @@
     },
     "commander/commander.d.ts": {
       "commit": "07ae96e580d1ac9817d40717158fcafc875044b3"
+    },
+    "underscore/underscore.d.ts": {
+      "commit": "7a31100a5aac155d9a3071eda99dcb47a10a5211"
     }
   }
 }

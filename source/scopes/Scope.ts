@@ -8,7 +8,7 @@ import Options = require('../Options')
 import Expression = require('../expressions/Expression');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
-var _ = require("../utilities")
+import _ = require("../utilities")
 
 class Scope {
 
@@ -16,8 +16,7 @@ class Scope {
   public valueMacros;
   public propertyMacros;
 
-  constructor(public parent) {
-    assert(!this.parent || _.is(this.parent, Scope));
+  constructor(public parent:Scope) {
     this.properties = {};
     this.valueMacros = [];
     this.propertyMacros = [];
@@ -48,8 +47,6 @@ class Scope {
 
   // TODO overload function for different arg types
   addValueMacro(name:String, argDefinition:MacroArgDefinition, body:any) {
-    assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
-
     var ValueMacro = require("../macros/ValueMacro");
     // TODO move this logic to ValueMacro
     var macro;

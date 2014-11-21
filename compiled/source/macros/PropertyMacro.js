@@ -1,7 +1,4 @@
 var Scope = require('../scopes/Scope');
-var assert = require("assert");
-var MacroArgValues = require("./MacroArgValues");
-var Options = require("../Options");
 var _ = require("../utilities");
 var PropertyMacro = (function () {
     function PropertyMacro(parentScope, name, argDefinition, body) {
@@ -13,13 +10,11 @@ var PropertyMacro = (function () {
         var ClassScope = require("../scopes/ClassScope");
         this.scope = new ClassScope(this.parentScope);
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
-            !argDefinition.expression;
+            return !argDefinition.expression;
         });
         this.argLengthMax = this.argDefinition.length;
     }
     PropertyMacro.prototype.toMGLScope = function (argValues, options) {
-        assert(_.is(argValues, MacroArgValues));
-        assert(_.is(options, Options));
         var args = argValues.toArguments(this.argDefinition, options);
         var scope = new Scope(this.scope);
         scope.addLiteralValueMacros(args);

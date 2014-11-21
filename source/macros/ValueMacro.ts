@@ -4,7 +4,7 @@ import MacroArgValues = require('../macros/MacroArgValues')
 import Scope = require('../scopes/Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
-var _ = require("../utilities")
+import _ = require("../utilities")
 
 class ValueMacro {
 
@@ -19,7 +19,7 @@ class ValueMacro {
   }
 
   // TODO make overloaded constructors
-  static createFromExpressions(name, argDefinition, parentScope, expressions) {
+  static createFromExpressions(name, argDefinition, parentScope, expressions:Expression[]) {
     assert(_.isArray(expressions));
 
     return this.createFromFunction(name, argDefinition, parentScope, (args, options) => {

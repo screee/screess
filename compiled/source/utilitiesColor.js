@@ -1,44 +1,3 @@
-module.exports = _ = require "underscore"
-
-_.mixin
-
-  objectMapValues: (input, filter) ->
-    @objectMap(input, (value, key) -> [key, filter(value, key)])
-
-  objectMapKeys: (input, filter) ->
-    @objectMap(input, (value, key) -> [filter(value, key), value])
-
-  objectMap: (input, filter) ->
-    output = {}
-    _.each input, (inputValue, inputKey) ->
-      [outputKey, outputValue] = filter(inputValue, inputKey)
-      output[outputKey] = outputValue
-    output
-
-  objectZip: (keys, values) ->
-    output = {}
-    for i in [0...keys.length]
-      output[keys[i]] = values[i]
-    output
-
-  none: -> return !_.some.apply(_, arguments)
-
-  is: (object, klass) ->
-    return true if object instanceof klass
-    return false if !object
-
-    while object.__super__?
-      return true if object.__super__ is klass::
-      object = object.__super__.constructor
-
-    false
-
-  count: (input, predicate = _.identity) ->
-    count = 0
-    _.each(input, => count++ if predicate.apply(@, arguments) )
-    count
-
-`
 /**
  * Converts an RGB color value to HSL. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
@@ -50,27 +9,32 @@ _.mixin
  * @param   Number  b       The blue color value
  * @return  Array           The HSL representation
  */
-function rgbToHsl(r, g, b){
+function rgb2hsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var h, s, l = (max + min) / 2;
-
-    if(max == min){
+    if (max == min) {
         h = s = 0; // achromatic
-    }else{
+    }
+    else {
         var d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
         }
         h /= 6;
     }
-
     return [h, s, l];
 }
-
+exports.rgb2hsl = rgb2hsl;
 /**
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
@@ -82,32 +46,35 @@ function rgbToHsl(r, g, b){
  * @param   Number  l       The lightness
  * @return  Array           The RGB representation
  */
-function hslToRgb(h, s, l){
+function hsl2rgb(h, s, l) {
     var r, g, b;
-
-    if(s == 0){
+    if (s == 0) {
         r = g = b = l; // achromatic
-    }else{
-        function hue2rgb(p, q, t){
-            if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    }
+    else {
+        function hue2rgb(p, q, t) {
+            if (t < 0)
+                t += 1;
+            if (t > 1)
+                t -= 1;
+            if (t < 1 / 6)
+                return p + (q - p) * 6 * t;
+            if (t < 1 / 2)
+                return q;
+            if (t < 2 / 3)
+                return p + (q - p) * (2 / 3 - t) * 6;
             return p;
         }
-
         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1/3);
+        r = hue2rgb(p, q, h + 1 / 3);
         g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1/3);
+        b = hue2rgb(p, q, h - 1 / 3);
     }
-
     return [r * 255, g * 255, b * 255];
 }
-
-/**
+exports.hsl2rgb = hsl2rgb;
+/*
  * Converts an RGB color value to HSV. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
  * Assumes r, g, and b are contained in the set [0, 255] and
@@ -118,28 +85,32 @@ function hslToRgb(h, s, l){
  * @param   Number  b       The blue color value
  * @return  Array           The HSV representation
  */
-function rgbToHsv(r, g, b){
-    r = r/255, g = g/255, b = b/255;
+function rgb2hsv(r, g, b) {
+    r = r / 255, g = g / 255, b = b / 255;
     var max = Math.max(r, g, b), min = Math.min(r, g, b);
     var h, s, v = max;
-
     var d = max - min;
     s = max == 0 ? 0 : d / max;
-
-    if(max == min){
+    if (max == min) {
         h = 0; // achromatic
-    }else{
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
+    }
+    else {
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
         }
         h /= 6;
     }
-
     return [h, s, v];
 }
-
+exports.rgb2hsv = rgb2hsv;
 /**
  * Converts an HSV color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -151,38 +122,46 @@ function rgbToHsv(r, g, b){
  * @param   Number  v       The value
  * @return  Array           The RGB representation
  */
-function hsvToRgb(h, s, v){
+function hsv2rgb(h, s, v) {
     var r, g, b;
-
     var i = Math.floor(h * 6);
     var f = h * 6 - i;
     var p = v * (1 - s);
     var q = v * (1 - f * s);
     var t = v * (1 - (1 - f) * s);
-
-    switch(i % 6){
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
+    switch (i % 6) {
+        case 0:
+            r = v, g = t, b = p;
+            break;
+        case 1:
+            r = q, g = v, b = p;
+            break;
+        case 2:
+            r = p, g = v, b = t;
+            break;
+        case 3:
+            r = p, g = q, b = v;
+            break;
+        case 4:
+            r = t, g = p, b = v;
+            break;
+        case 5:
+            r = v, g = p, b = q;
+            break;
     }
-
     return [r * 255, g * 255, b * 255];
 }
-
-function rgbToHex(r, g, b) {
+exports.hsv2rgb = hsv2rgb;
+function rgb2hex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
-
-function hexToRgb(hex) {
+exports.rgb2hex = rgb2hex;
+function hex2rgb(hex) {
     // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
     var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
         return r + r + g + g + b + b;
     });
-
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? [
         parseInt(result[1], 16),
@@ -190,13 +169,5 @@ function hexToRgb(hex) {
         parseInt(result[3], 16)
     ] : null;
 }
-
-_.mixin({
-    rgb2hsl: rgbToHsl,
-    hsl2rgb: hslToRgb,
-    rgb2hsv: rgbToHsv,
-    hsv2rgb: hsvToRgb,
-    rgb2hex: rgbToHex,
-    hex2rgb: hexToRgb
-})
-`
+exports.hex2rgb = hex2rgb;
+//# sourceMappingURL=utilitiesColor.js.map

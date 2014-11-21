@@ -6,7 +6,6 @@ var __extends = this.__extends || function (d, b) {
 };
 var Expression = require("./Expression");
 var MacroArgValues = require('../macros/MacroArgValues');
-var _ = require("../utilities");
 var ValueMacroReferenceExpression = (function (_super) {
     __extends(ValueMacroReferenceExpression, _super);
     // TODO add type to argumentExpressions

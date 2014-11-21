@@ -1,6 +1,7 @@
 import assert = require('assert')
 import Scope = require('../scopes/Scope')
-var _ = require('../utilities')
+import _ = require('../utilities')
+import Expression = require('../expressions/Expression');
 
 class MacroArgDefinition {
 
@@ -11,7 +12,7 @@ class MacroArgDefinition {
   public length:number;
 
   // TODO create type for definitions
-  constructor(public definitions, public scope:Scope) {
+  constructor(public definitions:{name: string;index?: number;expression?: Expression;}[], public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }

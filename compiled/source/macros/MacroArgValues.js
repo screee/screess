@@ -30,7 +30,7 @@ var MacroArgValues = (function () {
             return true;
         }
         var indicies = _.times(argDefinition.length, function () {
-            false;
+            return false;
         });
         for (var name in this.namedArgs) {
             var value = this.namedArgs[name];

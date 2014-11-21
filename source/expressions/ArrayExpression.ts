@@ -3,7 +3,7 @@ import LiteralExpression = require("./LiteralExpression");
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
 
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class ArrayExpression extends Expression {
 

@@ -3,7 +3,7 @@ import util = require('util');
 import Scope = require("../scopes/Scope");
 import MacroArgValues = require('../macros/MacroArgValues');
 import Options = require("../Options");
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class ValueMacroReferenceExpression extends Expression {
 

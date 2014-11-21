@@ -4,7 +4,7 @@ import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import Value = require('../values/Value');
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class SetOperatorExpression extends Expression {
 

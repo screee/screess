@@ -1,6 +1,6 @@
 import Scope = require("./Scope");
 import Options = require('../Options');
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class ClassScope extends Scope {
 

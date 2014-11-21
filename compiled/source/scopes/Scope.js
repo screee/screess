@@ -7,7 +7,6 @@ var _ = require("../utilities");
 var Scope = (function () {
     function Scope(parent) {
         this.parent = parent;
-        assert(!this.parent || _.is(this.parent, Scope));
         this.properties = {};
         this.valueMacros = [];
         this.propertyMacros = [];
@@ -32,7 +31,6 @@ var Scope = (function () {
     };
     // TODO overload function for different arg types
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
-        assert(_.is(argDefinition, MacroArgDefinition) || !argDefinition);
         var ValueMacro = require("../macros/ValueMacro");
         // TODO move this logic to ValueMacro
         var macro;

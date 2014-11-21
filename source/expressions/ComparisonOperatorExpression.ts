@@ -2,7 +2,7 @@ import Expression = require("./Expression");
 import assert = require("assert");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import Value = require('../values/Value');
-var _ = require("../utilities");
+import _ = require("../utilities");
 
 class ComparisonOperatorExpression extends Expression {
 

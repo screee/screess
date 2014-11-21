@@ -5,7 +5,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var _ = require("../utilities");
 var SetOperatorExpression = (function (_super) {
     __extends(SetOperatorExpression, _super);
     function SetOperatorExpression(expression) {

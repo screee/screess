@@ -8,7 +8,6 @@ var Expression = require("./Expression");
 var assert = require("assert");
 var AttributeReferenceValue = require("../values/AttributeReferenceValue");
 var Value = require('../values/Value');
-var _ = require("../utilities");
 var SetOperatorExpression = (function (_super) {
     __extends(SetOperatorExpression, _super);
     function SetOperatorExpression(left, operator, right) {

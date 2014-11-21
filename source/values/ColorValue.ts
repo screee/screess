@@ -1,7 +1,7 @@
 import Value = require("./Value");
 import assert = require("assert");
 import Options = require('../Options');
-var _ = require('../utilities');
+import _ = require('../utilities');
 
 class ColorValue extends Value {
 

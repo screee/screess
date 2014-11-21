@@ -53,21 +53,6 @@ describe 'utilities', ->
     it 'should respect a custom predicate', ->
       assert _.none([true, true, true], (value) -> !value)
 
-  describe 'is', ->
-    it 'should true for a matching primitive', ->
-      assert _.is [], Array
-
-    it 'should true for a matching coffeescript class', ->
-      class Parent
-      parent = new Parent
-      assert _.is parent, Parent
-
-    it 'should true for a matching coffeescript superclass', ->
-      class Grandparent
-      class Parent extends Grandparent
-      parent = new Parent
-      assert _.is parent, Grandparent
-
   describe 'count', ->
     it 'should return the number of trues', ->
       assert.equal _.count([true, false, true]), 2

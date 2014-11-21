@@ -5,7 +5,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var _ = require("../utilities");
 var TypeCheckExpression = (function (_super) {
     __extends(TypeCheckExpression, _super);
     function TypeCheckExpression(type) {

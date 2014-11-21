@@ -2,7 +2,7 @@ import Scope = require("./Scope")
 import ClassScope = require('./ClassScope')
 import Expression = require('../expressions/Expression');
 import Options = require('../Options')
-var _ = require('../utilities')
+import _ = require('../utilities')
 
 class LayerScope extends Scope {
 
@@ -82,7 +82,7 @@ class LayerScope extends Scope {
 
     var paintClassProperties = _.objectMap(
       this.classScopes,
-      (scope, name) => { ["paint.#{name}", scope.toMGLClassScope(options)] }
+      (scope, name) => { return ["paint.#{name}", scope.toMGLClassScope(options)] }
     )
 
     options.scopeStack.pop()
