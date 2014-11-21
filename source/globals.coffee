@@ -15,7 +15,6 @@ module.exports =
       if source["tile-size"]
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
-
       options.getGlobalScope().addSource(name, source)
       [name]
 
