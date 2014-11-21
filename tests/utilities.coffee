@@ -53,6 +53,17 @@ describe 'utilities', ->
     it 'should respect a custom predicate', ->
       assert _.none([true, true, true], (value) -> !value)
 
+  describe 'map method', ->
+
+    it 'should return an empty array for an empty array', ->
+      assert.deepEqual _.mapMethod([] ,"foo"), []
+
+    it 'should run the method', ->
+      assert.deepEqual _.mapMethod([{foo: => "bar"}] ,"foo"), ["bar"]
+
+    it 'should run the method with args', ->
+      assert.deepEqual _.mapMethod([{foo: (value) => value}] ,"foo", "bar"), ["bar"]
+
   describe 'count', ->
     it 'should return the number of trues', ->
       assert.equal _.count([true, false, true]), 2

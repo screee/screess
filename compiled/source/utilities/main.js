@@ -29,6 +29,13 @@ var Utilities = (function () {
         });
         return output;
     };
+    Utilities.prototype.mapMethod = function (list, method) {
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        return _.map(list, function (value) { return value[method].apply(value, args); });
+    };
     Utilities.prototype.objectZip = function (keys, values) {
         var output = {};
         for (var i = 0; i < keys.length; i++) {

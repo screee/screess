@@ -46,6 +46,17 @@ export class Utilities {
     return output
   }
 
+  mapMethod<T, U>(
+    list:_.List<T>,
+    method:string,
+    ...args:any[]
+  ):_.List<U> {
+    return _.map(
+      list,
+      (value) => value[method].apply(value, args)
+    )
+  }
+
   objectZip<T>(
     keys:string[],
     values:T[]
