@@ -3,16 +3,22 @@ import Scope = require('../scopes/Scope')
 import _ = require('../utilities')
 import Expression = require('../expressions/Expression');
 
-class MacroArgDefinition {
+interface Definition {
+  name: string;
+  index?: number;
+  expression?: Expression;
+}
 
-  static ZERO:MacroArgDefinition = new MacroArgDefinition([], null);
+class MacroArgDefinitions {
+
+  static ZERO:MacroArgDefinitions = new MacroArgDefinitions([], null);
 
   // TODO create type for namedArgs
   public namedArgs;
   public length:number;
 
   // TODO create type for definitions
-  constructor(public definitions:{name: string;index?: number;expression?: Expression;}[], public scope:Scope) {
+  constructor(public definitions:Definition[], public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }
@@ -31,4 +37,4 @@ class MacroArgDefinition {
   }
 }
 
-export = MacroArgDefinition;
+export = MacroArgDefinitions;

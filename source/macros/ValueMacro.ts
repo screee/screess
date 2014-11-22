@@ -1,5 +1,5 @@
 import Expression = require('../expressions/Expression')
-import MacroArgDefinition = require('../macros/MacroArgDefinition')
+import MacroArgDefinitions = require('../macros/MacroArgDefinitions')
 import MacroArgValues = require('../macros/MacroArgValues')
 import Scope = require('../scopes/Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
@@ -10,7 +10,7 @@ class ValueMacro {
 
   // TODO make overloaded constructors
   static createFromValue(name, scope, value) {
-    return this.createFromExpression(name, MacroArgDefinition.ZERO, scope, new LiteralExpression(value))
+    return this.createFromExpression(name, MacroArgDefinitions.ZERO, scope, new LiteralExpression(value))
   }
 
   // TODO make overloaded constructors
@@ -39,7 +39,7 @@ class ValueMacro {
     return new ValueMacro(name, argDefinition, parentScope, body);
   }
 
-  constructor(public name:string, public argDefinition:MacroArgDefinition, public parentScope:Scope, public body:Function) {}
+  constructor(public name:string, public argDefinition:MacroArgDefinitions, public parentScope:Scope, public body:Function) {}
 
   matches(name:string, argValues:MacroArgValues):boolean {
     return name == this.name && argValues.matches(this.argDefinition);

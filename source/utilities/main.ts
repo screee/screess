@@ -2,17 +2,19 @@ import _ = require('underscore');
 
 export class Utilities {
 
-  cast<T, U>(input:T):U {
-    var intermediate:any = input;
-    var output = intermediate;
-    return output;
-  }
+  objectMapValues<T, U>(
+    input:_.Dictionary<T>,
+    iterator:_.ObjectIterator<T, U>,
+    context?:any
+  ):_.Dictionary<U>;
 
   objectMapValues<T, U>(
-    input:{[key:string]: T},
-    iterator: (value:T, key:string) => U,
-    context?: any
-  ):{[key:string]: U} {
+    input:_.List<T>,
+    iterator:_.ListIterator<T, U>,
+    context?:any
+  ):_.Dictionary<U>;
+
+  objectMapValues(input, iterator, context = {}):any {
     return this.objectMap(
       input,
       (value, key) => { return [key, iterator(value, key)] }
@@ -20,10 +22,18 @@ export class Utilities {
   }
 
   objectMapKeys<T>(
-    input:{[key:string]: T},
-    iterator:(value:T, key:string) => string,
-    context:any = {}
-  ):{[key:string]: T} {
+    input:_.Dictionary<T>,
+    iterator:_.ObjectIterator<T, string>,
+    context?:any
+  ):_.Dictionary<T>;
+
+  objectMapKeys<T>(
+    input:_.List<T>,
+    iterator:_.ListIterator<T, string>,
+    context?:any
+  ):_.Dictionary<T>;
+
+  objectMapKeys<T>(input, iterator, context = {}):any {
     return this.objectMap(
       input,
       (value, key) => { return [iterator(value, key), value] },
@@ -32,17 +42,36 @@ export class Utilities {
   }
 
   objectMap<T, U>(
-    input:{[key:string]: T},
-    iterator: (value:T, key:string) => [string, U],
-    context:any = {}
-  ):{[key:string]: U} {
-    var output:{[key:string]: U} = {}
+    input:_.Dictionary<T>,
+    iterator:_.ObjectIterator<T, [string, U]>,
+    context?:any
+  ):_.Dictionary<U>;
+
+  objectMap<T, U>(
+    input:_.List<T>,
+    iterator:_.ListIterator<T, [string, U]>,
+    context?:any
+  ):_.Dictionary<U>;
+
+  objectMap(input, iterator, context = {}):any {
+    var output = {}
     _.each(input, (inputValue, inputKey) => {
       var tuple = iterator(inputValue, inputKey);
       var outputKey = tuple[0];
       var outputValue = tuple[1];
-      output[outputKey] = outputValue
+      output[outputKey] = outputValue;
     })
+    return output;
+  }
+
+  objectZip<T>(
+    keys:string[],
+    values:T[]
+  ):{[key:string]: T} {
+    var output:{[key:string]: T} = {}
+    for (var i=0; i<keys.length; i++) {
+      output[keys[i]] = values[i];
+    }
     return output
   }
 
@@ -57,20 +86,9 @@ export class Utilities {
     )
   }
 
-  objectZip<T>(
-    keys:string[],
-    values:T[]
-  ):{[key:string]: T} {
-    var output:{[key:string]: T} = {}
-    for (var i=0; i<keys.length; i++) {
-      output[keys[i]] = values[i];
-    }
-    return output
-  }
-
   none<T>(
-    list: _.Dictionary<T>,
-    iterator: (value:T, key:string) => boolean = _.identity,
+    list: _.List<T>,
+    iterator: (value:T, key:number) => boolean = _.identity,
     context: any = {}
   ):boolean {
     return !_.some(list, iterator, context);

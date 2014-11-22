@@ -16,7 +16,8 @@ var StringExpression = (function (_super) {
         var output = this.body;
         var match;
         while (match = (/#\{(.*)\}/).exec(output)) {
-            var value = parse(match[1], { startRule: 'valueExpression' }).toMGLValue(scope, options);
+            var expression = parse(match[1], { startRule: 'valueExpression' });
+            var value = expression.toMGLValue(scope, options);
             var matchStart = match.index;
             var matchEnd = match.index + match[0].length;
             output = output.substr(0, matchStart) + value.toString() + output.substr(matchEnd);

@@ -19,12 +19,12 @@ class ValueMacroReferenceExpression extends Expression {
       options
     );
 
-    var macro;
-    if (macro = scope.getValueMacro(this.name, argValues, options)) {
-      return macro.toValues(argValues, options);
-    } else {
+    var macro = scope.getValueMacro(this.name, argValues, options);
+    if (!macro ) {
       throw new Error("Could not find value macro '#{this.name}'");
     }
+
+    return macro.toValues(argValues, options);
   }
 }
 

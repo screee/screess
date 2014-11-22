@@ -16,13 +16,11 @@ var ValueMacroReferenceExpression = (function (_super) {
     }
     ValueMacroReferenceExpression.prototype.toValues = function (scope, options) {
         var argValues = MacroArgValues.createFromExpressions(this.argumentExpressions, scope, options);
-        var macro;
-        if (macro = scope.getValueMacro(this.name, argValues, options)) {
-            return macro.toValues(argValues, options);
-        }
-        else {
+        var macro = scope.getValueMacro(this.name, argValues, options);
+        if (!macro) {
             throw new Error("Could not find value macro '#{this.name}'");
         }
+        return macro.toValues(argValues, options);
     };
     return ValueMacroReferenceExpression;
 })(Expression);

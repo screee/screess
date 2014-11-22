@@ -85,14 +85,14 @@ module.exports = (function() {
         peg$c32 = ")",
         peg$c33 = { type: "literal", value: ")", description: "\")\"" },
         peg$c34 = function(head, tail) {return (function() {
-          return new this.MacroArgDefinition([head].concat(tail.map(function(e) {
+          return new this.MacroArgDefinitions([head].concat(tail.map(function(e) {
             return e[1];
           })), this.scope);
         }).apply(__initializer);
         },
         peg$c35 = "",
         peg$c36 = function() {return (function() {
-          return this.MacroArgDefinition.ZERO;
+          return this.MacroArgDefinitions.ZERO;
         }).apply(__initializer);
         },
         peg$c37 = function(name, expression) {return (function() {
@@ -144,7 +144,7 @@ module.exports = (function() {
         }).apply(__initializer);
         },
         peg$c56 = function(head, tail) {return (function() {
-          return new this.MacroArgDefinition([head].concat(this._.pluck(tail, 1)), this.scope);
+          return new this.MacroArgDefinitions([head].concat(this._.pluck(tail, 1)), this.scope);
         }).apply(__initializer);
         },
         peg$c57 = "||",
@@ -2919,7 +2919,7 @@ module.exports = (function() {
       this.ColorValue = require('./values/ColorValue');
       this.AttributeReferenceValue = require('./values/AttributeReferenceValue');
       this.FunctionValue = require("./values/FunctionValue");
-      this.MacroArgDefinition = require("./macros/MacroArgDefinition");
+      this.MacroArgDefinitions = require("./macros/MacroArgDefinitions");
       this.LiteralExpression = require('./expressions/LiteralExpression');
       this.StringExpression = require("./expressions/StringExpression");
       this.ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression');

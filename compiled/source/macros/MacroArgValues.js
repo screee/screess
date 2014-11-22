@@ -62,7 +62,7 @@ var MacroArgValues = (function () {
         assert(this.matches(argDefinition));
         if (!argDefinition) {
             return _.extend(_.objectMap(this.positionalArgs, function (values, index) {
-                return [index, values];
+                return [index.toString(), values];
             }), this.namedArgs);
         }
         else {

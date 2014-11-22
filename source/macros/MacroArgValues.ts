@@ -1,16 +1,22 @@
 import assert = require('assert');
-import MacroArgDefinition = require('./MacroArgDefinition');
+import MacroArgDefinitions = require('./MacroArgDefinitions');
 import Scope = require("../scopes/Scope");
 import Options = require("../Options");
 import _ = require('../utilities');
+import Expression = require('../expressions/Expression');
+
+interface Value {
+  name?: string;
+  expression: Expression;
+}
 
 class MacroArgValues {
 
   // TODO make all factory methods into overloaded constructors
   // TODO add types to arguments
-  static createFromExpressions(args, scope:Scope, options:Options) {
-    var positionalArgs = [];
-    var namedArgs = {};
+  static createFromExpressions(args:Value[], scope:Scope, options:Options) {
+    var positionalArgs:Value[] = [];
+    var namedArgs:{[s:string]:Value} = {};
 
     for (var i in args) {
       var arg = args[i];
@@ -30,11 +36,14 @@ class MacroArgValues {
   public length:number;
 
   // TODO add types to arguments
-  constructor(public positionalArgs, public namedArgs) {
+  constructor(
+      public positionalArgs:Value[],
+      public namedArgs:{[s:string]:Value}
+  ) {
     this.length = this.positionalArgs.length + _.values(this.namedArgs).length
   }
 
-  matches(argDefinition:MacroArgDefinition):boolean {
+  matches(argDefinition:MacroArgDefinitions):boolean {
     if (!argDefinition) { return true }
 
     var indicies = _.times(argDefinition.length, () => { return false });
@@ -66,16 +75,23 @@ class MacroArgValues {
     return _.all(indicies);
   }
 
-  toArguments(argDefinition, options) {
+  toArguments(
+      argDefinition:MacroArgDefinitions,
+      options:Options
+  ):{[s:string]: any} {
+
     assert(this.matches(argDefinition));
 
     if (!argDefinition) {
       return _.extend(
-        _.objectMap(this.positionalArgs, (values, index) => { return [index, values]; }),
+        _.objectMap(
+          this.positionalArgs,
+          (values, index) => { return [index.toString(), values]; }
+        ),
         this.namedArgs
-      )
+      );
     } else {
-      var args = {}
+      var args:{[s:string]: any} = {}
 
       for (var name in this.namedArgs) {
         var value = this.namedArgs[name];

@@ -2,12 +2,8 @@ var _ = require('underscore');
 var Utilities = (function () {
     function Utilities() {
     }
-    Utilities.prototype.cast = function (input) {
-        var intermediate = input;
-        var output = intermediate;
-        return output;
-    };
     Utilities.prototype.objectMapValues = function (input, iterator, context) {
+        if (context === void 0) { context = {}; }
         return this.objectMap(input, function (value, key) {
             return [key, iterator(value, key)];
         });
@@ -29,19 +25,19 @@ var Utilities = (function () {
         });
         return output;
     };
-    Utilities.prototype.mapMethod = function (list, method) {
-        var args = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            args[_i - 2] = arguments[_i];
-        }
-        return _.map(list, function (value) { return value[method].apply(value, args); });
-    };
     Utilities.prototype.objectZip = function (keys, values) {
         var output = {};
         for (var i = 0; i < keys.length; i++) {
             output[keys[i]] = values[i];
         }
         return output;
+    };
+    Utilities.prototype.mapMethod = function (list, method) {
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        return _.map(list, function (value) { return value[method].apply(value, args); });
     };
     Utilities.prototype.none = function (list, iterator, context) {
         if (iterator === void 0) { iterator = _.identity; }

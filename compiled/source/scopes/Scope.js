@@ -1,6 +1,6 @@
 var Value = require("../values/value");
 var MacroArgValues = require("../macros/MacroArgValues");
-var MacroArgDefinition = require('../macros/MacroArgDefinition');
+var MacroArgDefinitions = require('../macros/MacroArgDefinitions');
 var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var _ = require("../utilities");
@@ -26,7 +26,7 @@ var Scope = (function () {
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (name in values) {
             var value = values[name];
-            this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
+            this.addValueMacro(name, MacroArgDefinitions.ZERO, [new LiteralExpression(value)]);
         }
     };
     // TODO overload function for different arg types

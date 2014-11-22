@@ -1,6 +1,6 @@
 import Value = require("../values/value")
 import MacroArgValues = require("../macros/MacroArgValues")
-import MacroArgDefinition = require('../macros/MacroArgDefinition')
+import MacroArgDefinitions = require('../macros/MacroArgDefinitions')
 import assert = require("assert")
 import LiteralExpression = require('../expressions/LiteralExpression')
 import GlobalScope = require('./GlobalScope');
@@ -41,12 +41,12 @@ class Scope {
   addLiteralValueMacros(values:{[name:string]:any}):void {
     for (name in values) {
       var value = values[name];
-      this.addValueMacro(name, MacroArgDefinition.ZERO, [new LiteralExpression(value)]);
+      this.addValueMacro(name, MacroArgDefinitions.ZERO, [new LiteralExpression(value)]);
     }
   }
 
   // TODO overload function for different arg types
-  addValueMacro(name:String, argDefinition:MacroArgDefinition, body:any) {
+  addValueMacro(name:String, argDefinition:MacroArgDefinitions, body:any) {
     var ValueMacro = require("../macros/ValueMacro");
     // TODO move this logic to ValueMacro
     var macro;
@@ -61,7 +61,7 @@ class Scope {
     return this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:MacroArgDefinition, body:MacroArgDefinition):Scope {
+  addPropertyMacro(name:string, argDefinition:MacroArgDefinitions, body:MacroArgDefinitions):Scope {
     var PropertyMacro = require("../macros/PropertyMacro");
     var macro = new PropertyMacro(this, name, argDefinition, body)
     this.propertyMacros.unshift(macro)
