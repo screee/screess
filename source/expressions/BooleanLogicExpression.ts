@@ -16,14 +16,14 @@ class BooleanLogicExpression extends Expression {
     super();
   }
 
-  toMGLFilter(scope:Scope, options:Options):any[] {
+  evaluateFilter(scope:Scope, options:Options):any[] {
 
     options.pushFilter();
 
     var filter = [BooleanLogicExpression.operators[this.operator]].concat(
       _.map(
         this.expressions,
-        (expression) => { return expression.toMGLFilter(scope, options) }
+        (expression) => { return expression.evaluateFilter(scope, options) }
       )
     )
 

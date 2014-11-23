@@ -15,7 +15,6 @@ module.exports =
 
       return options.getGlobalScope().addSource(source)
 
-
     identity: (args) -> _.values args
 
     hsv: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]

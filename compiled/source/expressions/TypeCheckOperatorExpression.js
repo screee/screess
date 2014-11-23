@@ -11,8 +11,8 @@ var TypeCheckExpression = (function (_super) {
         _super.call(this);
         this.type = type;
     }
-    TypeCheckExpression.prototype.toMGLFilter = function (scope, options) {
-        return ["==", "$type", this.type.toMGLValue(scope, options)];
+    TypeCheckExpression.prototype.evaluateFilter = function (scope, options) {
+        return ["==", "$type", this.type.evaluateValue(scope, options)];
     };
     return TypeCheckExpression;
 })(Expression);

@@ -14,12 +14,12 @@ var PropertyMacro = (function () {
         });
         this.argLengthMax = this.argDefinition.length;
     }
-    PropertyMacro.prototype.toMGLScope = function (argValues, options) {
+    PropertyMacro.prototype.evaluateScope = function (argValues, options) {
         var args = argValues.toArguments(this.argDefinition, options);
         var scope = new Scope(this.scope);
         scope.addLiteralValueMacros(args);
         options.scopeStack.push(scope);
-        var values = _.extend(scope.toMGLProperties(options, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);
+        var values = _.extend(scope.evaluateProperties(options, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);
         options.scopeStack.pop();
         return values;
     };

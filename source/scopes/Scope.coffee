@@ -43,7 +43,7 @@ module.exports = class Scope
   getRuleMacro: (name, argValues, options) ->
     _.find(@ruleMacros, (ruleMacro) -> ruleMacro.matches(name, argValues)) || @parent?.getRuleMacro(name, argValues)
 
-  toMGLRules: (options, rules) ->
+  evaluateRules: (options, rules) ->
     output = {}
 
     for name, expressions of rules
@@ -51,11 +51,11 @@ module.exports = class Scope
         expression.toValues(@, _.extend(rule: name, options))
 
       if (ruleMacro = @getRuleMacro(name, values, options))
-        _.extend(output, ruleMacro.toMGLScope(values, options))
+        _.extend(output, ruleMacro.evaluateScope(values, options))
       else
         if values.length != 1
           throw new Error("Cannot apply #{values.length} args to primitive rule '#{name}'")
-        output[name] = values[0].toMGLValue(_.extend(rule: name, options))
+        output[name] = values[0].evaluateValue(_.extend(rule: name, options))
 
     output
 

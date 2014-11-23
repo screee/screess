@@ -8,7 +8,7 @@ class ComparisonOperatorExpression extends Expression {
 
   constructor(public left, public operator, public right) { super() }
 
-  toMGLFilter(scope, options):any[] {
+  evaluateFilter(scope, options):any[] {
     var lvalue = this.left.toValue(scope, options)
     var rvalue = this.right.toValue(scope, options)
 
@@ -17,7 +17,7 @@ class ComparisonOperatorExpression extends Expression {
     assert(lvalue instanceof AttributeReferenceValue)
     assert(!(rvalue instanceof AttributeReferenceValue))
 
-    return [this.operator, lvalue.name, Value.toMGLValue(rvalue, options)]
+    return [this.operator, lvalue.name, Value.evaluateValue(rvalue, options)]
   }
 
 }

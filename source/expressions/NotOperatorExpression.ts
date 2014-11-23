@@ -8,8 +8,8 @@ class SetOperatorExpression extends Expression {
 
   constructor(public expression:Expression) { super(); }
 
-  toMGLFilter(scope:Scope, options:Options):any[] {
-    return ["none", this.expression.toMGLFilter(scope, options)];
+  evaluateFilter(scope:Scope, options:Options):any[] {
+    return ["none", this.expression.evaluateFilter(scope, options)];
   }
 
 }

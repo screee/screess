@@ -1,15 +1,15 @@
 var Value = (function () {
     function Value() {
     }
-    Value.toMGLValue = function (value, options) {
-        if (value.toMGLValue) {
-            return value.toMGLValue(options);
+    Value.evaluateValue = function (value, options) {
+        if (value.evaluateValue) {
+            return value.evaluateValue(options);
         }
         else {
             return value;
         }
     };
-    Value.prototype.toMGLValue = function (options) {
+    Value.prototype.evaluateValue = function (options) {
         throw "Abstract method";
     };
     return Value;

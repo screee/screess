@@ -16,14 +16,14 @@ var ComparisonOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ComparisonOperatorExpression.prototype.toMGLFilter = function (scope, options) {
+    ComparisonOperatorExpression.prototype.evaluateFilter = function (scope, options) {
         var lvalue = this.left.toValue(scope, options);
         var rvalue = this.right.toValue(scope, options);
         // Only one of the values can be an AttributeReferenceValue and it must be
         // the lvalue
         assert(lvalue instanceof AttributeReferenceValue);
         assert(!(rvalue instanceof AttributeReferenceValue));
-        return [this.operator, lvalue.name, Value.toMGLValue(rvalue, options)];
+        return [this.operator, lvalue.name, Value.evaluateValue(rvalue, options)];
     };
     return ComparisonOperatorExpression;
 })(Expression);

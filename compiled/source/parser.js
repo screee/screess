@@ -33,7 +33,7 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
-          return this.globalScope.toMGLGlobalScope();
+          return this.globalScope.evaluateGlobalScope();
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,

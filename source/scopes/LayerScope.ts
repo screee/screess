@@ -45,7 +45,7 @@ class LayerScope extends Scope {
     this.metaProperties = {}
   }
 
-  toMGLLayerScope(options:Options):any {
+  evaluateLayerScope(options:Options):any {
     options.scopeStack.push(this)
 
     if (this.filterExpression) {
@@ -54,7 +54,7 @@ class LayerScope extends Scope {
       options.property = "filter"
 
       var metaFilterProperty = this.filterExpression ? {
-        filter: this.filterExpression.toMGLFilter(this, options)
+        filter: this.filterExpression.evaluateFilter(this, options)
       } : null;
 
       options.popFilter()
@@ -75,14 +75,14 @@ class LayerScope extends Scope {
     }
 
     options.isMetaProperty = true
-    var metaProperties = this.toMGLProperties(options, this.metaProperties)
+    var metaProperties = this.evaluateProperties(options, this.metaProperties)
     options.isMetaProperty = false
 
-    var paintProperties = { paint: this.toMGLProperties(options, this.properties) }
+    var paintProperties = { paint: this.evaluateProperties(options, this.properties) }
 
     var paintClassProperties = _.objectMap(
       this.classScopes,
-      (scope, name) => { return ["paint.#{name}", scope.toMGLClassScope(options)] }
+      (scope, name) => { return ["paint.#{name}", scope.evaluateClassScope(options)] }
     )
 
     options.scopeStack.pop()

@@ -18,7 +18,7 @@ module.exports = class RuleMacro
       @argLengthMin = _.count @argDefinitions, (argDefinition) -> !argDefinition.expression
       @argLengthMax = @argDefinitions.length
 
-  toMGLScope: (argValues, options) ->
+  evaluateScope: (argValues, options) ->
     args = @processArgs(argValues, @parentScope, options)
 
     scope = new Scope(@scope)
@@ -26,7 +26,7 @@ module.exports = class RuleMacro
       scope.addValueMacro(name, [], [literalExpression(value)])
 
     _.extend(
-      scope.toMGLRules(options, @scope.rules),
+      scope.evaluateRules(options, @scope.rules),
       @body?.call({}, argValues, options)
     )
 

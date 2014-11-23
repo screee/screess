@@ -23,7 +23,7 @@ class PropertyMacro {
     this.argLengthMax = this.argDefinition.length;
   }
 
-  toMGLScope(argValues:MacroArgValues, options:Options) {
+  evaluateScope(argValues:MacroArgValues, options:Options) {
     var args = argValues.toArguments(this.argDefinition, options)
 
     var scope = new Scope(this.scope)
@@ -31,7 +31,7 @@ class PropertyMacro {
 
     options.scopeStack.push(scope)
     var values = _.extend(
-      scope.toMGLProperties(options, this.scope.properties),
+      scope.evaluateProperties(options, this.scope.properties),
       this.body ? this.body.apply({}, argValues) : null
     )
     options.scopeStack.pop()

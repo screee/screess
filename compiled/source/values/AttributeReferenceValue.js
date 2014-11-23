@@ -11,7 +11,7 @@ var AttributeReferenceValue = (function (_super) {
         _super.call(this);
         this.name = name;
     }
-    AttributeReferenceValue.prototype.toMGLValue = function (options) {
+    AttributeReferenceValue.prototype.evaluateValue = function (options) {
         return "{" + this.name + "}";
     };
     return AttributeReferenceValue;

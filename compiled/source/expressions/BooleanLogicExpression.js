@@ -13,10 +13,10 @@ var BooleanLogicExpression = (function (_super) {
         this.operator = operator;
         this.expressions = expressions;
     }
-    BooleanLogicExpression.prototype.toMGLFilter = function (scope, options) {
+    BooleanLogicExpression.prototype.evaluateFilter = function (scope, options) {
         options.pushFilter();
         var filter = [BooleanLogicExpression.operators[this.operator]].concat(_.map(this.expressions, function (expression) {
-            return expression.toMGLFilter(scope, options);
+            return expression.evaluateFilter(scope, options);
         }));
         options.popFilter();
         return filter;

@@ -4,9 +4,9 @@ import _ = require("../utilities");
 
 class ClassScope extends Scope {
 
-  toMGLClassScope(options:Options):any {
+  evaluateClassScope(options:Options):any {
     options.scopeStack.push(this);
-    this.toMGLProperties(options, this.properties);
+    this.evaluateProperties(options, this.properties);
     options.scopeStack.pop();
   }
 }

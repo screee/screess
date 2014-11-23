@@ -13,10 +13,10 @@ var Expression = (function () {
     Expression.prototype.toValues = function (scope, options) {
         throw new Error("Abstract method");
     };
-    Expression.prototype.toMGLValue = function (scope, options) {
-        return Value.toMGLValue(this.toValue(scope, options), options);
+    Expression.prototype.evaluateValue = function (scope, options) {
+        return Value.evaluateValue(this.toValue(scope, options), options);
     };
-    Expression.prototype.toMGLFilter = function (scope, options) {
+    Expression.prototype.evaluateFilter = function (scope, options) {
         throw new Error("Abstract method");
     };
     return Expression;

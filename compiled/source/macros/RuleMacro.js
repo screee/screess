@@ -31,7 +31,7 @@
       }
     }
 
-    RuleMacro.prototype.toMGLScope = function(argValues, options) {
+    RuleMacro.prototype.evaluateScope = function(argValues, options) {
       var args, name, scope, value, _ref;
       args = this.processArgs(argValues, this.parentScope, options);
       scope = new Scope(this.scope);
@@ -39,7 +39,7 @@
         value = args[name];
         scope.addValueMacro(name, [], [literalExpression(value)]);
       }
-      return _.extend(scope.toMGLRules(options, this.scope.rules), (_ref = this.body) != null ? _ref.call({}, argValues, options) : void 0);
+      return _.extend(scope.evaluateRules(options, this.scope.rules), (_ref = this.body) != null ? _ref.call({}, argValues, options) : void 0);
     };
 
     RuleMacro.prototype.matches = function(name, argValues) {

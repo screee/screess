@@ -10,7 +10,7 @@ class SetOperatorExpression extends Expression {
 
   constructor(public left:Expression, public operator:string, public right:Expression) { super() }
 
-  toMGLFilter(scope:Scope, options:Options):any[] {
+  evaluateFilter(scope:Scope, options:Options):any[] {
     var lvalue = this.left.toValue(scope, options);
     // TODO allow for multiple rvalues
     var rvalue = this.right.toValue(scope, options);
@@ -18,7 +18,7 @@ class SetOperatorExpression extends Expression {
     assert(lvalue instanceof AttributeReferenceValue);
     assert(rvalue instanceof Array);
 
-    return [this.operator, lvalue.name].concat(Value.toMGLValue(rvalue, options))
+    return [this.operator, lvalue.name].concat(Value.evaluateValue(rvalue, options))
   }
 
 }

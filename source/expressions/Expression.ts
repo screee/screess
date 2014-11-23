@@ -17,11 +17,11 @@ class Expression {
     throw new Error("Abstract method");
   }
 
-  toMGLValue(scope, options):any[] {
-    return Value.toMGLValue(this.toValue(scope, options), options);
+  evaluateValue(scope, options):any[] {
+    return Value.evaluateValue(this.toValue(scope, options), options);
   }
 
-  toMGLFilter(scope, options):any[] {
+  evaluateFilter(scope, options):any[] {
     throw new Error("Abstract method");
   }
 

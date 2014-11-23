@@ -9,8 +9,8 @@ class TypeCheckExpression extends Expression {
 
   constructor(public type:Expression) { super() }
 
-  toMGLFilter(scope:Scope, options:Options) {
-    return ["==", "$type", this.type.toMGLValue(scope, options)]
+  evaluateFilter(scope:Scope, options:Options) {
+    return ["==", "$type", this.type.evaluateValue(scope, options)]
   }
 }
 

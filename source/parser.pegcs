@@ -33,7 +33,7 @@
     @scope = @stack.pop()
 }
 
-global = statements { @globalScope.toMGLGlobalScope() }
+global = statements { @globalScope.evaluateGlobalScope() }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 

@@ -2,15 +2,15 @@ import Options = require('../Options');
 
 class Value {
 
-  static toMGLValue(value:any, options:Options):any {
-    if (value.toMGLValue) {
-      return value.toMGLValue(options);
+  static evaluateValue(value:any, options:Options):any {
+    if (value.evaluateValue) {
+      return value.evaluateValue(options);
     } else {
       return value;
     }
   }
 
-  toMGLValue(options:Options):any {
+  evaluateValue(options:Options):any {
     throw "Abstract method"
   }
 

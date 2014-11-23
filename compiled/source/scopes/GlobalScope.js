@@ -57,16 +57,16 @@ var GlobalScope = (function (_super) {
         }
         return this.layerScopes[name] = new LayerScope(name, this);
     };
-    GlobalScope.prototype.toMGLGlobalScope = function (options) {
+    GlobalScope.prototype.evaluateGlobalScope = function (options) {
         if (options === void 0) { options = new Options(); }
         options.scopeStack.push(this);
         var layers = _.map(this.layerScopes, function (layer) {
-            return layer.toMGLLayerScope(options);
+            return layer.evaluateLayerScope(options);
         });
-        var properties = this.toMGLProperties(options, this.properties);
+        var properties = this.evaluateProperties(options, this.properties);
         var sources = _.objectMapValues(this.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
-                return Value.toMGLValue(value, options);
+                return Value.evaluateValue(value, options);
             });
         });
         var transition = {

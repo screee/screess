@@ -16,13 +16,13 @@ var SetOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    SetOperatorExpression.prototype.toMGLFilter = function (scope, options) {
+    SetOperatorExpression.prototype.evaluateFilter = function (scope, options) {
         var lvalue = this.left.toValue(scope, options);
         // TODO allow for multiple rvalues
         var rvalue = this.right.toValue(scope, options);
         assert(lvalue instanceof AttributeReferenceValue);
         assert(rvalue instanceof Array);
-        return [this.operator, lvalue.name].concat(Value.toMGLValue(rvalue, options));
+        return [this.operator, lvalue.name].concat(Value.evaluateValue(rvalue, options));
     };
     return SetOperatorExpression;
 })(Expression);

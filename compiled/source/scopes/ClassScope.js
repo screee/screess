@@ -10,9 +10,9 @@ var ClassScope = (function (_super) {
     function ClassScope() {
         _super.apply(this, arguments);
     }
-    ClassScope.prototype.toMGLClassScope = function (options) {
+    ClassScope.prototype.evaluateClassScope = function (options) {
         options.scopeStack.push(this);
-        this.toMGLProperties(options, this.properties);
+        this.evaluateProperties(options, this.properties);
         options.scopeStack.pop();
     };
     return ClassScope;

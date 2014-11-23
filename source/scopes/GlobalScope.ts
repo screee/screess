@@ -67,18 +67,18 @@ class GlobalScope extends Scope {
     return this.layerScopes[name] = new LayerScope(name, this);
   }
 
-  toMGLGlobalScope(options:Options = new Options()):any {
+  evaluateGlobalScope(options:Options = new Options()):any {
     options.scopeStack.push(this)
 
     var layers = _.map(this.layerScopes, (layer) => {
-      return layer.toMGLLayerScope(options)
+      return layer.evaluateLayerScope(options)
     })
 
-    var properties = this.toMGLProperties(options, this.properties)
+    var properties = this.evaluateProperties(options, this.properties)
 
     var sources = _.objectMapValues(this.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
-        return Value.toMGLValue(value, options);
+        return Value.evaluateValue(value, options);
       });
     });
 
