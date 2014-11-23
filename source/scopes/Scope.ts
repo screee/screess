@@ -116,7 +116,7 @@ class Scope {
           throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
         }
 
-        output[name] = Value.evaluateValue(argValues.positionalArgs[0], options);
+        output[name] = Value.evaluate(argValues.positionalArgs[0], options);
       }
 
       options.property = null;

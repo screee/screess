@@ -13,12 +13,12 @@ var FunctionValue = (function (_super) {
         this.base = base;
         this.stops = stops;
     }
-    FunctionValue.prototype.evaluateValue = function (options) {
+    FunctionValue.prototype.evaluate = function (options) {
         var stops = _.map(this.stops, function (stop) {
-            return [stop[0], Value.evaluateValue(stop[1], options)];
+            return [stop[0], Value.evaluate(stop[1], options)];
         });
         if (this.base) {
-            return { base: Value.evaluateValue(this.base, options), stops: stops };
+            return { base: Value.evaluate(this.base, options), stops: stops };
         }
         else {
             return { stops: stops };

@@ -66,7 +66,7 @@ var GlobalScope = (function (_super) {
         var properties = this.evaluateProperties(options, this.properties);
         var sources = _.objectMapValues(this.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
-                return Value.evaluateValue(value, options);
+                return Value.evaluate(value, options);
             });
         });
         var transition = {

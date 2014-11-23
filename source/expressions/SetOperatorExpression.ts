@@ -18,7 +18,7 @@ class SetOperatorExpression extends Expression {
     assert(lvalue instanceof AttributeReferenceValue);
     assert(rvalue instanceof Array);
 
-    return [this.operator, lvalue.name].concat(Value.evaluateValue(rvalue, options))
+    return [this.operator, lvalue.name].concat(Value.evaluate(rvalue, options))
   }
 
 }

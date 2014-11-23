@@ -23,7 +23,7 @@ var ComparisonOperatorExpression = (function (_super) {
         // the lvalue
         assert(lvalue instanceof AttributeReferenceValue);
         assert(!(rvalue instanceof AttributeReferenceValue));
-        return [this.operator, lvalue.name, Value.evaluateValue(rvalue, options)];
+        return [this.operator, lvalue.name, Value.evaluate(rvalue, options)];
     };
     return ComparisonOperatorExpression;
 })(Expression);

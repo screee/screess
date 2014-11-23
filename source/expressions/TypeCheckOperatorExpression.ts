@@ -10,7 +10,7 @@ class TypeCheckExpression extends Expression {
   constructor(public type:Expression) { super() }
 
   evaluateFilter(scope:Scope, options:Options) {
-    return ["==", "$type", this.type.evaluateValue(scope, options)]
+    return ["==", "$type", this.type.evaluate(scope, options)]
   }
 }
 

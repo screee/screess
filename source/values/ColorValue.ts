@@ -26,7 +26,7 @@ class ColorValue extends Value {
 
   constructor(public red:number, public green:number, public blue:number, public alpha:number) { super(); }
 
-  evaluateValue(options:Options):string {
+  evaluate(options:Options):string {
     return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
   }
 }

@@ -78,7 +78,7 @@ class GlobalScope extends Scope {
 
     var sources = _.objectMapValues(this.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
-        return Value.evaluateValue(value, options);
+        return Value.evaluate(value, options);
       });
     });
 

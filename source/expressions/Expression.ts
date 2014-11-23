@@ -17,8 +17,8 @@ class Expression {
     throw new Error("Abstract method");
   }
 
-  evaluateValue(scope, options):any[] {
-    return Value.evaluateValue(this.toValue(scope, options), options);
+  evaluate(scope, options):any[] {
+    return Value.evaluate(this.toValue(scope, options), options);
   }
 
   evaluateFilter(scope, options):any[] {

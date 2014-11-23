@@ -55,7 +55,7 @@ module.exports = class Scope
       else
         if values.length != 1
           throw new Error("Cannot apply #{values.length} args to primitive rule '#{name}'")
-        output[name] = values[0].evaluateValue(_.extend(rule: name, options))
+        output[name] = values[0].evaluate(_.extend(rule: name, options))
 
     output
 

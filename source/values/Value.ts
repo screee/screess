@@ -2,15 +2,15 @@ import Options = require('../Options');
 
 class Value {
 
-  static evaluateValue(value:any, options:Options):any {
-    if (value.evaluateValue) {
-      return value.evaluateValue(options);
+  static evaluate(value:any, options:Options):any {
+    if (value.evaluate) {
+      return value.evaluate(options);
     } else {
       return value;
     }
   }
 
-  evaluateValue(options:Options):any {
+  evaluate(options:Options):any {
     throw "Abstract method"
   }
 

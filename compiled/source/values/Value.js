@@ -1,15 +1,15 @@
 var Value = (function () {
     function Value() {
     }
-    Value.evaluateValue = function (value, options) {
-        if (value.evaluateValue) {
-            return value.evaluateValue(options);
+    Value.evaluate = function (value, options) {
+        if (value.evaluate) {
+            return value.evaluate(options);
         }
         else {
             return value;
         }
     };
-    Value.prototype.evaluateValue = function (options) {
+    Value.prototype.evaluate = function (options) {
         throw "Abstract method";
     };
     return Value;

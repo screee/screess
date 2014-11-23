@@ -13,8 +13,8 @@ var Expression = (function () {
     Expression.prototype.toValues = function (scope, options) {
         throw new Error("Abstract method");
     };
-    Expression.prototype.evaluateValue = function (scope, options) {
-        return Value.evaluateValue(this.toValue(scope, options), options);
+    Expression.prototype.evaluate = function (scope, options) {
+        return Value.evaluate(this.toValue(scope, options), options);
     };
     Expression.prototype.evaluateFilter = function (scope, options) {
         throw new Error("Abstract method");

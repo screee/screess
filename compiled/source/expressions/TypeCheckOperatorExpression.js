@@ -12,7 +12,7 @@ var TypeCheckExpression = (function (_super) {
         this.type = type;
     }
     TypeCheckExpression.prototype.evaluateFilter = function (scope, options) {
-        return ["==", "$type", this.type.evaluateValue(scope, options)];
+        return ["==", "$type", this.type.evaluate(scope, options)];
     };
     return TypeCheckExpression;
 })(Expression);
