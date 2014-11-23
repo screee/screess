@@ -9,14 +9,12 @@ module.exports =
   valueMacros:
 
     source: (source, options) ->
-      name = source.name || _.uniq()
-      delete source.name
-
       if source["tile-size"]
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
-      options.getGlobalScope().addSource(name, source)
-      [name]
+
+      return options.getGlobalScope().addSource(source)
+
 
     identity: (args) -> _.values args
 
@@ -26,18 +24,6 @@ module.exports =
     hsla: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
     rgb: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], 1)]
     rgba: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
-
-    # Object Types
-    # Line may refer to the layer paint type or the layer geometry type
-    polygon: -> ["Polygon"]
-    point: -> ["Point"]
-    line: (args, options) ->
-      if options.property == "type" && options.isMetaProperty
-        "LineString"
-      else if options.isFilter()
-        "line"
-      else
-        throw new Error("The use of 'line' is ambigious in this context")
 
     'function': (args) ->
       stops = []

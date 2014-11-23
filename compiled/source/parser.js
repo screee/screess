@@ -37,11 +37,11 @@ module.exports = (function() {
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,
-        peg$c2 = /^[a-z]/,
-        peg$c3 = { type: "class", value: "[a-z]", description: "[a-z]" },
+        peg$c2 = /^[A-Za-z]/,
+        peg$c3 = { type: "class", value: "[A-Za-z]", description: "[A-Za-z]" },
         peg$c4 = [],
-        peg$c5 = /^[a-z0-9\-]/,
-        peg$c6 = { type: "class", value: "[a-z0-9\\-]", description: "[a-z0-9\\-]" },
+        peg$c5 = /^[a-zA-Z0-9\-_]/,
+        peg$c6 = { type: "class", value: "[a-zA-Z0-9\\-_]", description: "[a-zA-Z0-9\\-_]" },
         peg$c7 = function(a, b) {return (function() {
           return a + b.join("");
         }).apply(__initializer);

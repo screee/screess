@@ -4,6 +4,7 @@ import MacroArgValues = require('../macros/MacroArgValues')
 import Scope = require('../scopes/Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
+import Options = require('../Options')
 import _ = require("../utilities")
 
 class ValueMacro {
@@ -45,10 +46,9 @@ class ValueMacro {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  toValues(argValues, options) {
+  toValues(argValues:MacroArgValues, options:Options) {
     var args = argValues.toArguments(this.argDefinition, options);
     var values = this.body(args, options);
-    assert(_.isArray(values));
     return values;
   }
 

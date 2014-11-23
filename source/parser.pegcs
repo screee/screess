@@ -35,7 +35,7 @@
 
 global = statements { @globalScope.toMGLGlobalScope() }
 
-identifier = a:[a-z]b:[a-z0-9-]* { a + b.join("") }
+identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
 whitespaceWeak = " " / "\t" { null }
 whitespaceStrong = "\n" / "\r" { null }

@@ -34,8 +34,10 @@ class GlobalScope extends Scope {
   }
 
   // TODO create source class
-  addSource(name:string, source:any):void {
-    this.sources[name] = source;
+  addSource(source:{}):string {
+    var hash = _.hash(JSON.stringify(source)).toString();
+    this.sources[hash] = source;
+    return hash;
   }
 
   // TODO create source class

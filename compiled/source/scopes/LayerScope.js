@@ -43,13 +43,13 @@ var LayerScope = (function (_super) {
         options.scopeStack.push(this);
         if (this.filterExpression) {
             options.pushFilter();
-            options.meta = true;
+            options.isMetaProperty = true;
             options.property = "filter";
             var metaFilterProperty = this.filterExpression ? {
                 filter: this.filterExpression.toMGLFilter(this, options)
             } : null;
             options.popFilter();
-            options.meta = false;
+            options.isMetaProperty = false;
             options.property = null;
         }
         else {
@@ -65,9 +65,9 @@ var LayerScope = (function (_super) {
         else {
             metaSourceProperty = null;
         }
-        options.meta = true;
+        options.isMetaProperty = true;
         var metaProperties = this.toMGLProperties(options, this.metaProperties);
-        options.meta = false;
+        options.isMetaProperty = false;
         var paintProperties = { paint: this.toMGLProperties(options, this.properties) };
         var paintClassProperties = _.objectMap(this.classScopes, function (scope, name) {
             return ["paint.#{name}", scope.toMGLClassScope(options)];

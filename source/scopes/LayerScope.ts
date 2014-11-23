@@ -50,7 +50,7 @@ class LayerScope extends Scope {
 
     if (this.filterExpression) {
       options.pushFilter()
-      options.meta = true
+      options.isMetaProperty = true
       options.property = "filter"
 
       var metaFilterProperty = this.filterExpression ? {
@@ -58,7 +58,7 @@ class LayerScope extends Scope {
       } : null;
 
       options.popFilter()
-      options.meta = false
+      options.isMetaProperty = false
       options.property = null
     } else {
       metaFilterProperty = null
@@ -74,9 +74,9 @@ class LayerScope extends Scope {
       metaSourceProperty = null
     }
 
-    options.meta = true
+    options.isMetaProperty = true
     var metaProperties = this.toMGLProperties(options, this.metaProperties)
-    options.meta = false
+    options.isMetaProperty = false
 
     var paintProperties = { paint: this.toMGLProperties(options, this.properties) }
 

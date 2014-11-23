@@ -1,3 +1,42 @@
-#test {
-  color: "test"
+source-mapbox = source(type: vector, url: "mapbox://mapbox.mapbox-streets-v5,mapbox.mapbox-terrain-v1")
+source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
+
+#background {
+  $type: background
+  background-color: #d2f0be
+}
+
+#water {
+  $type: fill
+  $source: source-mapbox
+  $source-layer: water
+
+  fill-color: #63c1f1
+}
+
+#contour-lines {
+  $type: line
+  $source: source-mapbox
+  $source-layer: contour
+
+  line-width: 0.75
+  line-color: #000
+  line-opacity: 0.2
+  line-join: round
+}
+
+#contour-labels {
+  $type: symbol
+  $source: source-mapbox
+  $source-layer: contour
+
+  text-field: "{ele} m"
+  text-font: "Open Sans Regular, Arial Unicode MS Regular"
+  text-max-size: 10
+  text-max-angle: 28.65
+  symbol-placement: line
+  text-color: #fff
+  text-halo-color: #fff
+  text-halo-width: 1.5
+  text-size: 10
 }

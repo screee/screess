@@ -1,0 +1,57 @@
+{
+  "version": 6,
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "layout": {
+        "background-color": "rgba(210, 240, 190, 1)"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "1866861530",
+      "source-layer": "water",
+      "layout": {
+        "fill-color": "rgba(99, 193, 241, 1)"
+      }
+    },
+    {
+      "id": "contour-lines",
+      "type": "line",
+      "source": "1866861530",
+      "source-layer": "contour",
+      "layout": {
+        "line-width": 0.75,
+        "line-color": "rgba(0, 0, 0, 1)",
+        "line-opacity": 0.2,
+        "line-join": "round"
+      }
+    },
+    {
+      "id": "contour-labels",
+      "type": "symbol",
+      "source": "1866861530",
+      "source-layer": "contour",
+      "layout": {
+        "text-field": "{ele} m",
+        "text-font": "Open Sans Regular, Arial Unicode MS Regular",
+        "text-max-size": 10,
+        "text-max-angle": 28.65,
+        "symbol-placement": "line",
+        "text-color": "rgba(255, 255, 255, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 1.5,
+        "text-size": 10
+      }
+    }
+  ],
+  "sources": {
+    "1866861530": {
+      "type": "vector",
+      "url": "mapbox://mapbox.mapbox-streets-v5,mapbox.mapbox-terrain-v1"
+    }
+  },
+  "transition": {}
+}

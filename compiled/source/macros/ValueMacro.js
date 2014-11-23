@@ -43,7 +43,6 @@ var ValueMacro = (function () {
     ValueMacro.prototype.toValues = function (argValues, options) {
         var args = argValues.toArguments(this.argDefinition, options);
         var values = this.body(args, options);
-        assert(_.isArray(values));
         return values;
     };
     return ValueMacro;

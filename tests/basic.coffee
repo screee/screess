@@ -1,5 +1,6 @@
 {parse} = require("../compiled/source/main")
 assert = require("assert")
+_ = require('../compiled/source/utilities')
 
 it "should mark the stylesheet as version 6", ->
   assert.deepEqual parse("").version, 6
@@ -8,19 +9,19 @@ describe "sources", ->
   it "should be respected", ->
     stylesheet = parse """
       #layer {
-        $source: source(name: "test" bar: "baz")
+        $source: source(bar: "baz")
       }
     """
-    assert.deepEqual stylesheet.sources.test, bar: "baz"
-    assert.equal stylesheet.layers[0].source, "test"
+    assert.deepEqual _.values(stylesheet.sources)[0], bar: "baz"
+    assert stylesheet.layers[0].source
 
   it "should rename tile-size to tileSize", ->
     stylesheet = parse """
       #layer {
-        $source: source(name: "test", tile-size: 17)
+        $source: source(tile-size: 17)
       }
     """
-    assert.deepEqual stylesheet.sources.test.tileSize, 17
+    assert.deepEqual  _.values(stylesheet.sources)[0].tileSize, 17
 
 describe "layers", ->
 

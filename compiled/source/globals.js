@@ -15,15 +15,11 @@
   module.exports = {
     valueMacros: {
       source: function(source, options) {
-        var name;
-        name = source.name || _.uniq();
-        delete source.name;
         if (source["tile-size"]) {
           source.tileSize = source["tile-size"];
           delete source["tile-size"];
         }
-        options.getGlobalScope().addSource(name, source);
-        return [name];
+        return options.getGlobalScope().addSource(source);
       },
       identity: function(args) {
         return _.values(args);
@@ -45,21 +41,6 @@
       },
       rgba: function(args) {
         return [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])];
-      },
-      polygon: function() {
-        return ["Polygon"];
-      },
-      point: function() {
-        return ["Point"];
-      },
-      line: function(args, options) {
-        if (options.property === "type" && options.isMetaProperty) {
-          return "LineString";
-        } else if (options.isFilter()) {
-          return "line";
-        } else {
-          throw new Error("The use of 'line' is ambigious in this context");
-        }
       },
       'function': function(args) {
         var key, stop, stops, value;

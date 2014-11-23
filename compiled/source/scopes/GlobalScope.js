@@ -27,8 +27,10 @@ var GlobalScope = (function (_super) {
         }
     }
     // TODO create source class
-    GlobalScope.prototype.addSource = function (name, source) {
-        this.sources[name] = source;
+    GlobalScope.prototype.addSource = function (source) {
+        var hash = _.hash(JSON.stringify(source)).toString();
+        this.sources[hash] = source;
+        return hash;
     };
     // TODO create source class
     GlobalScope.prototype.getGlobalScope = function () {
