@@ -8,10 +8,15 @@ import main = require('./utilities/main');
 var mainAny:any = new main.Utilities()
 underscore.mixin(mainAny);
 
+import object = require('./utilities/object');
+var objectAny:any = new object.Utilities()
+underscore.mixin(objectAny);
+
 interface Utilities extends
   UnderscoreStatic,
   color.Utilities,
-  main.Utilities {}
+  main.Utilities,
+  object.Utilities {}
 
 var underscoreAny:any = underscore;
 var utilities:Utilities = underscoreAny;

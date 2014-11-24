@@ -5,14 +5,14 @@ describe "value", ->
 
   parseValue = (value, options = {}) ->
     if options.filterLvalue
-      stylesheet = parse "#layer { $filter: #{value} == 1 }"
+      stylesheet = parse "#layer { $type: background; $filter: #{value} == 1 }"
       stylesheet.layers[0].filter[1]
     else if options.filterRvalue
-      stylesheet = parse "#layer { $filter: @test == #{value} }"
+      stylesheet = parse "#layer { $type: background; $filter: @test == #{value} }"
       stylesheet.layers[0].filter[2]
     else
-      stylesheet = parse "#layer { foo: #{value} }"
-      stylesheet.layers[0].paint.foo
+      stylesheet = parse "#layer { $type: background; background-color: #{value} }"
+      stylesheet.layers[0].paint['background-color']
 
   describe "array", ->
 
@@ -35,14 +35,6 @@ describe "value", ->
 
     it "should parse a float with a leading 0", ->
       assert.equal parseValue("0.12340"), 0.1234
-
-  describe "boolean", ->
-
-    it "should parse true", ->
-      assert.equal parseValue("true"), true
-
-    it "should parse false", ->
-      assert.equal parseValue("false"), false
 
   describe "boolean", ->
 

@@ -3,6 +3,8 @@ import ClassScope = require('./ClassScope')
 import Expression = require('../expressions/Expression');
 import Options = require('../Options')
 import _ = require('../utilities')
+import MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
+import assert = require('assert');
 
 class LayerScope extends Scope {
 
@@ -45,56 +47,106 @@ class LayerScope extends Scope {
     this.metaProperties = {}
   }
 
-  evaluateLayerScope(options:Options):any {
-    options.scopeStack.push(this)
-
+  evaluateFilterProperty(options:Options):{} {
     if (this.filterExpression) {
+
+      // TODO move inside evaluate filter?
       options.pushFilter()
       options.isMetaProperty = true
       options.property = "filter"
 
-      var metaFilterProperty = this.filterExpression ? {
-        filter: this.filterExpression.evaluateFilter(this, options)
-      } : null;
+      var filter = this.filterExpression.evaluateFilter(this, options);
 
       options.popFilter()
       options.isMetaProperty = false
       options.property = null
-    } else {
-      metaFilterProperty = null
-    }
 
+      return filter;
+    } else {
+      return null
+    }
+  }
+
+  evaluateSourceProperty(options:Options):{} {
     var metaSourceProperty;
+
     if (this.source) {
       if (!this.getSource(this.source)) {
-        throw "Unknown source '#{this.source}'"
+        throw new Error("Unknown source " + this.source);
       }
-      metaSourceProperty = { source: this.source }
+
+      return this.source;
     } else {
-      metaSourceProperty = null
+      return null;
     }
+  }
 
-    options.isMetaProperty = true
-    var metaProperties = this.evaluateProperties(options, this.metaProperties)
-    options.isMetaProperty = false
-
-    var paintProperties = { paint: this.evaluateProperties(options, this.properties) }
-
-    var paintClassProperties = _.objectMap(
+  evaluateClassPaintProperties(type:string, options:Options):{} {
+    // TODO ensure all properties are paint properties, not layout properties
+    return _.objectMap(
       this.classScopes,
-      (scope, name) => { return ["paint.#{name}", scope.evaluateClassScope(options)] }
+      (scope, name) => {
+        return ["paint.#{name}", scope.evaluateClassScope(options)]
+      }
     )
+  }
 
-    options.scopeStack.pop()
+  evaluatePaintProperties(type:string, options:Options):{} {
+    var properties = this.evaluateProperties(
+      options,
+      this.properties
+    );
 
-    return _.extend(
-      {id: this.name},
+    var layout = {};
+    var paint = {};
+
+    _.each(properties, (value, name) => {
+
+      if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+        paint[name] = value;
+      } else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+        layout[name] = value;
+      } else {
+        throw new Error("Unknown property name " + name + " for layer type " + type);
+      }
+
+    });
+
+    return {layout: layout, paint: paint};
+  }
+
+  evaluateMetaProperties(options:Options):{} {
+    options.isMetaProperty = true;
+    var properties = this.evaluateProperties(options, this.metaProperties);
+    options.isMetaProperty = false;
+
+    return properties;
+  }
+
+  evaluateLayerScope(options:Options):any {
+    options.scopeStack.push(this);
+
+    // TODO ensure layer has a source and type
+
+    var metaProperties = this.evaluateMetaProperties(options);
+    var type = metaProperties['type'];
+    assert(type, "Layer must have a type");
+
+    var properties = _.objectCompact(_.extend(
+      {
+        // TODO calcualte name with _.hash
+        id: this.name,
+        source: this.evaluateSourceProperty(options),
+        filter: this.evaluateFilterProperty(options)
+      },
+      this.evaluatePaintProperties(type, options),
       metaProperties,
-      paintProperties,
-      paintClassProperties,
-      metaFilterProperty,
-      metaSourceProperty
-    )
+      this.evaluateClassPaintProperties(type, options)
+    ));
+
+    options.scopeStack.pop();
+
+    return properties;
   }
 }
 

@@ -3,85 +3,73 @@ assert = require("assert")
 _ = require("../compiled/source/utilities")
 
 describe "whitespace", ->
-  zero = [{id: "test", paint: { }}]
-  one = [{id: "test", paint: { foo: "bar" }}]
-  two = [{id: "test", paint: { foo: "bar"; baz: "qux" }}]
 
-  it "should allow for an empty scope", ->
-    stylesheet = parse '#test {}'
-    assert.deepEqual stylesheet.layers, zero
-
-  it "should allow for a scope on one line with one statement", ->
-    stylesheet = parse '#test { foo: "bar" }'
-    assert.deepEqual stylesheet.layers, one
-
-  it "should allow for a scope on one line with multiple statements", ->
-    stylesheet = parse '#test { foo: "bar"; baz: "qux" }'
-    assert.deepEqual stylesheet.layers, two
+  it "should allow for a scope on one line", ->
+    stylesheet = parse '#test { $type: background; background-color: red }'
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
   it "should allow for a scope on one line with a trailing semicolon", ->
-    stylesheet = parse '#test { foo: "bar"; }'
-    assert.deepEqual stylesheet.layers, one
+    stylesheet = parse '#test { $type: background; background-color: red; }'
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
-  it "should allow for a scope on multiple lines with one statement", ->
+  it "should allow for a scope with seperated by newlines", ->
     stylesheet = parse '''
       #test {
-        foo: "bar"
+        $type: background
+        background-color: red
       }
     '''
-    assert.deepEqual stylesheet.layers, one
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
-  it "should allow for a scope with multiple statements seperated by newlines", ->
+  it "should allow for a scope seperated by semicolons and newlines", ->
     stylesheet = parse '''
       #test {
-        foo: "bar"
-        baz: "qux"
+        $type: background;
+        background-color: red
       }
     '''
-    assert.deepEqual stylesheet.layers, two
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
-  it "should allow for a scope with multiple statements seperated by semicolons", ->
+  it "should allow for a scope seperated by semicolons and newlines with a trailing semicolon", ->
     stylesheet = parse '''
       #test {
-        foo: "bar";
-        baz: "qux"
+        $type: background;
+        background-color: red;
       }
     '''
-    assert.deepEqual stylesheet.layers, two
-
-  it "should allow for a scope with a trailing semicolon", ->
-    stylesheet = parse '''
-      #test {
-        foo: "bar"
-      }
-    '''
-    assert.deepEqual stylesheet.layers, one
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
   it "should allow for a scope with empty lines", ->
     stylesheet = parse '''
       #test {
 
-        foo: "bar"
+        $type: background;
 
       }
     '''
-    assert.deepEqual stylesheet.layers, one
+    assert.deepEqual stylesheet.layers[0].type, 'background'
 
   it "should allow for a value macro's arguments to span multiple lines", ->
     stylesheet = parse """
       second(one two) = two
       #layer {
-        $test: second(
-          0
-          17
+        $type: second(
+          foo
+          background
         )
       }
     """
-    assert.equal stylesheet.layers[0].test, 17
+    assert.equal stylesheet.layers[0].type, 'background'
 
   it "should allow for an array's values to span multiple lines", ->
     stylesheet = parse """
       #layer {
+        $type: background
         $test: [
           1
           2
@@ -92,12 +80,12 @@ describe "whitespace", ->
 
   it "should allow for a property's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
-      test(one, two) = { test: two }
+      type-second(one, two) = { type: two }
       #layer {
-        $test: (
-          0
-          17
+        $type-second: (
+          foo
+          background
         )
       }
     """
-    assert.deepEqual stylesheet.layers[0].test, 17
+    assert.deepEqual stylesheet.layers[0].type, 'background'

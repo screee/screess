@@ -7,65 +7,72 @@ describe "property macro", ->
 
     it "should shadow a property macro in an enclosing scope", ->
       stylesheet = parse """
-        property(value) = { foo: value }
+        property(value) = { background-color: value }
         #layer {
+          $type: background
           property = { property: 17 }
           property
         }
       """
-      assert.equal stylesheet.layers[0].paint.foo, 17
+      assert.equal stylesheet.layers[0].paint['background-color'], 17
 
   describe "arguments", ->
 
     it "should apply a property macro with no arguments", ->
       stylesheet = parse """
-        property = { foo: "bar" }
-        #layer { property }
+        property = { background-color: "bar" }
+        #layer { $type: background; property }
       """
-      assert.equal stylesheet.layers[0].paint.foo, "bar"
+      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
     it "should accept arguments", ->
       stylesheet = parse """
-        second(one, two) = { foo: two }
-        #layer { second: "baz" "bar" }
+        second(one, two) = { background-color: two }
+        #layer { $type: background; second: "baz" "bar" }
       """
-      assert.equal stylesheet.layers[0].paint.foo, "bar"
+      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
     it "should accept multiple return values from a property macro", ->
       stylesheet = parse """
         args = "baz" "bar"
-        second(one, two) = { foo: two }
-        #layer { second: args }
+        second(one, two) = { background-color: two }
+        #layer { $type: background; second: args }
       """
-      assert.equal stylesheet.layers[0].paint.foo, "bar"
+      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
   it "should apply value macros", ->
     stylesheet = parse """
-      property(value) = { foo: identity(value) }
-      #layer { property: "bar" }
+      property(value) = { background-color: identity(value) }
+      #layer { $type: background; property: "bar" }
     """
-    assert.equal stylesheet.layers[0].paint.foo, "bar"
+    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
   it "should apply other property macros", ->
     stylesheet = parse """
-      inner(value) = { foo: value }
+      inner(value) = { background-color: value }
       outer(value) = { inner: value }
-      #layer { outer: "bar" }
+      #layer { $type: background; outer: "bar" }
     """
-    assert.equal stylesheet.layers[0].paint.foo, "bar"
+    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
   it "should respect default arguments", ->
     stylesheet = parse """
-      property(one, two=17) = { foo: two }
-      #layer { property: 0 }
+      property(one, two=17) = { background-color: two }
+      #layer {
+        $type: background
+        property: 0
+      }
     """
-    assert.equal stylesheet.layers[0].paint.foo, 17
+    assert.equal stylesheet.layers[0].paint['background-color'], 17
 
   it "should select a property macro by the number of arguments supplied", ->
     stylesheet = parse """
-      property = { foo: 0 }
-      property(value) = { foo: value }
-      #layer { property: 17 }
+      property = { background-color: 0 }
+      property(value) = { background-color: value }
+      #layer {
+        $type: background
+        property: 17
+      }
     """
-    assert.equal stylesheet.layers[0].paint.foo, 17
+    assert.equal stylesheet.layers[0].paint['background-color'], 17
 

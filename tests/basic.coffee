@@ -9,6 +9,7 @@ describe "sources", ->
   it "should be respected", ->
     stylesheet = parse """
       #layer {
+        $type: background
         $source: source(bar: "baz")
       }
     """
@@ -18,6 +19,7 @@ describe "sources", ->
   it "should rename tile-size to tileSize", ->
     stylesheet = parse """
       #layer {
+        $type: background
         $source: source(tile-size: 17)
       }
     """
@@ -26,24 +28,21 @@ describe "sources", ->
 describe "layers", ->
 
   it "should be in the stylesheet", ->
-    stylesheet = parse '#test {}'
+    stylesheet = parse '#test {$type: background}'
     assert stylesheet.layers[0]
 
+  it "should respect layout properties", ->
+    stylesheet = parse '#test { $type: line; line-cap: square }'
+    assert.equal stylesheet.layers[0].layout['line-cap'], 'square'
+
   it "should respect paint properties", ->
-    stylesheet = parse '#test { foo: "bar" }'
-    assert.equal stylesheet.layers[0].paint.foo, "bar"
+    stylesheet = parse '#test { $type: line; line-color: red }'
+    assert.equal stylesheet.layers[0].paint['line-color'], 'red'
 
   it "should respect meta properties", ->
-    stylesheet = parse '#test { $foo: "bar" }'
+    stylesheet = parse '#test { $type: background; $foo: "bar" }'
     assert.equal stylesheet.layers[0].foo, "bar"
 
-  it "should throw an error if an unknown source is referenced", ->
-    assert.throws ->
-      stylesheet = parse """
-        &source { foo: "bar" }
-        #layer { $source: &notsource }
-      """
-
   it "should respect its filter", ->
-    stylesheet = parse '#test { $filter: @name == "foo" }'
+    stylesheet = parse '#test { $type: background; $filter: @name == "foo" }'
     assert stylesheet.layers[0].filter
