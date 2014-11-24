@@ -13,7 +13,7 @@ module.exports =
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
 
-      return options.getGlobalScope().addSource(source)
+      return [options.getGlobalScope().addSource(source)]
 
     identity: (args) -> _.values args
 

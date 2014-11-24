@@ -6,7 +6,8 @@ class Expression {
     var values = this.toValues(scope, options);
 
     if (values.length > 1) {
-      throw new Error("Expected 1 value but found #{values.length} values");
+      console.log(values);
+      throw new Error("Expected 1 value but found " + values.length + " values");
     }
 
     return values[0];

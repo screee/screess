@@ -6,18 +6,10 @@ source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
   background-color: #d2f0be
 }
 
-#water {
-  $type: fill
-  $source: source-mapbox
-  $source-layer: water
-
-  fill-color: #63c1f1
-}
-
 #contour-lines {
   $type: line
-  $source: source-mapbox
-  $source-layer: contour
+  $source: source-scree-contours
+  $source-layer: contours_ft
 
   line-width: 0.75
   line-color: #000
@@ -27,16 +19,24 @@ source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
 
 #contour-labels {
   $type: symbol
-  $source: source-mapbox
-  $source-layer: contour
+  $source: source-scree-contours
+  $source-layer: contours_ft
 
-  text-field: "{ele} m"
+  text-field: "#{@elevation_ft} ft"
   text-font: "Open Sans Regular, Arial Unicode MS Regular"
   text-max-size: 10
   text-max-angle: 28.65
   symbol-placement: line
-  text-color: #fff
+  text-color: #000
   text-halo-color: #fff
   text-halo-width: 1.5
   text-size: 10
+}
+
+#water {
+  $type: fill
+  $source: source-mapbox
+  $source-layer: water
+
+  fill-color: #63c1f1
 }

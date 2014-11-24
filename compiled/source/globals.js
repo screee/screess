@@ -19,7 +19,7 @@
           source.tileSize = source["tile-size"];
           delete source["tile-size"];
         }
-        return options.getGlobalScope().addSource(source);
+        return [options.getGlobalScope().addSource(source)];
       },
       identity: function(args) {
         return _.values(args);
