@@ -41,23 +41,23 @@ var LayerScope = (function (_super) {
         }
         this.source = source;
     };
-    LayerScope.prototype.evaluateFilterProperty = function (options) {
+    LayerScope.prototype.evaluateFilterProperty = function (context) {
         if (this.filterExpression) {
             // TODO move inside evaluate filter?
-            options.pushFilter();
-            options.isMetaProperty = true;
-            options.property = "filter";
-            var filter = this.filterExpression.evaluateFilter(this, options);
-            options.popFilter();
-            options.isMetaProperty = false;
-            options.property = null;
+            context.pushFilter();
+            context.isMetaProperty = true;
+            context.property = "filter";
+            var filter = this.filterExpression.evaluateFilter(this, context);
+            context.popFilter();
+            context.isMetaProperty = false;
+            context.property = null;
             return filter;
         }
         else {
             return null;
         }
     };
-    LayerScope.prototype.evaluateSourceProperty = function (options) {
+    LayerScope.prototype.evaluateSourceProperty = function (context) {
         var metaSourceProperty;
         if (this.source) {
             if (!this.getSource(this.source)) {
@@ -69,14 +69,14 @@ var LayerScope = (function (_super) {
             return null;
         }
     };
-    LayerScope.prototype.evaluateClassPaintProperties = function (type, options) {
+    LayerScope.prototype.evaluateClassPaintProperties = function (type, context) {
         // TODO ensure all properties are paint properties, not layout properties
         return _.objectMap(this.classScopes, function (scope, name) {
-            return ["paint.#{name}", scope.evaluateClassScope(options)];
+            return ["paint.#{name}", scope.evaluateClassScope(context)];
         });
     };
-    LayerScope.prototype.evaluatePaintProperties = function (type, options) {
-        var properties = this.evaluateProperties(options, this.properties);
+    LayerScope.prototype.evaluatePaintProperties = function (type, context) {
+        var properties = this.evaluateProperties(context, this.properties);
         var layout = {};
         var paint = {};
         _.each(properties, function (value, name) {
@@ -92,25 +92,25 @@ var LayerScope = (function (_super) {
         });
         return { layout: layout, paint: paint };
     };
-    LayerScope.prototype.evaluateMetaProperties = function (options) {
-        options.isMetaProperty = true;
-        var properties = this.evaluateProperties(options, this.metaProperties);
-        options.isMetaProperty = false;
+    LayerScope.prototype.evaluateMetaProperties = function (context) {
+        context.isMetaProperty = true;
+        var properties = this.evaluateProperties(context, this.metaProperties);
+        context.isMetaProperty = false;
         return properties;
     };
-    LayerScope.prototype.evaluateLayerScope = function (options) {
-        options.scopeStack.push(this);
+    LayerScope.prototype.evaluateLayerScope = function (context) {
+        context.scopeStack.push(this);
         // TODO ensure layer has a source and type
-        var metaProperties = this.evaluateMetaProperties(options);
+        var metaProperties = this.evaluateMetaProperties(context);
         var type = metaProperties['type'];
         assert(type, "Layer must have a type");
         var properties = _.objectCompact(_.extend({
             // TODO calcualte name with _.hash
             id: this.name,
-            source: this.evaluateSourceProperty(options),
-            filter: this.evaluateFilterProperty(options)
-        }, this.evaluatePaintProperties(type, options), metaProperties, this.evaluateClassPaintProperties(type, options)));
-        options.scopeStack.pop();
+            source: this.evaluateSourceProperty(context),
+            filter: this.evaluateFilterProperty(context)
+        }, this.evaluatePaintProperties(type, context), metaProperties, this.evaluateClassPaintProperties(type, context)));
+        context.scopeStack.pop();
         return properties;
     };
     return LayerScope;

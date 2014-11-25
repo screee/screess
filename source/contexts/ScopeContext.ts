@@ -1,0 +1,5 @@
+class ScopeContext {
+
+}
+
+export = ScopeContext;

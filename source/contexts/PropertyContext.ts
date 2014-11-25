@@ -1,0 +1,5 @@
+class PropertyContext {
+
+}
+
+export = PropertyContext;

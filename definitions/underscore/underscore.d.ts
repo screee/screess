@@ -5,7 +5,7 @@
 
 declare module _ {
 	/**
-	* underscore.js _.throttle options.
+	* underscore.js _.throttle context.
 	**/
 	interface ThrottleSettings {
 
@@ -630,7 +630,7 @@ interface UnderscoreStatic {
 	size<T>(list: _.Collection<T>): number;
 
 	/**
-	* Split array into two arrays: 
+	* Split array into two arrays:
 	* one whose elements all satisfy predicate and one whose elements all do not satisfy predicate.
 	* @param array Array to split in two.
 	* @param iterator Filter iterator function for each element in `array`.
@@ -978,8 +978,8 @@ interface UnderscoreStatic {
 
 	/**
 	* Partially apply a function by filling in any number of its arguments, without changing its dynamic this value.
-	* A close cousin of bind.  You may pass _ in your list of arguments to specify an argument that should not be 
-	* pre-filled, but left open to supply at call-time. 
+	* A close cousin of bind.  You may pass _ in your list of arguments to specify an argument that should not be
+	* pre-filled, but left open to supply at call-time.
 	* @param fn Function to partially fill in arguments.
 	* @param arguments The partial arguments.
 	* @return `fn` with partially filled in arguments.
@@ -1042,13 +1042,13 @@ interface UnderscoreStatic {
 	* the execution on the trailing-edge, pass {trailing: false}.
 	* @param func Function to throttle `waitMS` ms.
 	* @param wait The number of milliseconds to wait before `fn` can be invoked again.
-	* @param options Allows for disabling execution of the throttled function on either the leading or trailing edge.
+	* @param context Allows for disabling execution of the throttled function on either the leading or trailing edge.
 	* @return `fn` with a throttle of `wait`.
 	**/
 	throttle<T extends Function>(
 		func: T,
 		wait: number,
-		options?: _.ThrottleSettings): T;
+		context?: _.ThrottleSettings): T;
 
 	/**
 	* Creates and returns a new debounced version of the passed function that will postpone its execution
@@ -1474,7 +1474,7 @@ interface UnderscoreStatic {
 	**/
 	template(templateString: string, settings?: _.TemplateSettings): (...data: any[]) => string;
     	template(templateString: string, data: any, settings?: _.TemplateSettings): string;
-    	
+
 	/**
 	* By default, Underscore uses ERB-style template delimiters, change the
 	* following template settings to use alternative delimiters.
@@ -2017,7 +2017,7 @@ interface Underscore<T> {
 	* Wrapped type `Function`.
 	* @see _.throttle
 	**/
-	throttle(wait: number, options?: _.ThrottleSettings): Function;
+	throttle(wait: number, context?: _.ThrottleSettings): Function;
 
 	/**
 	* Wrapped type `Function`.
@@ -2848,7 +2848,7 @@ interface _Chain<T> {
 	* Wrapped type `Function`.
 	* @see _.throttle
 	**/
-	throttle(wait: number, options?: _.ThrottleSettings): _Chain<T>;
+	throttle(wait: number, context?: _.ThrottleSettings): _Chain<T>;
 
 	/**
 	* Wrapped type `Function`.

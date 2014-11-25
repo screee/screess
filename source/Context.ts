@@ -1,4 +1,4 @@
-class Options {
+class Context {
 
   getGlobalScope() { return this.scopeStack[0] }
   getScope() { return this.scopeStack[this.scopeStack.length - 1] }
@@ -26,4 +26,4 @@ class Options {
 
 }
 
-export = Options
+export = Context

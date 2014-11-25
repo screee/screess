@@ -1,5 +1,9 @@
 source-mapbox = source(type: vector, url: "mapbox://mapbox.mapbox-streets-v5,mapbox.mapbox-terrain-v1")
 source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
+source-scree-osm = source(type: vector, url: "mapbox://lucaswoj.561773ec")
+
+sprite: "https://www.mapbox.com/mapbox-gl-styles/sprites/outdoors"
+glyphs: "mapbox://fontstack/{fontstack}/{range}.pbf"
 
 #background {
   $type: background
@@ -22,14 +26,16 @@ source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
   $source: source-scree-contours
   $source-layer: contours_ft
 
-  text-field: "#{@elevation_ft} ft"
-  text-font: "Open Sans Regular, Arial Unicode MS Regular"
-  text-max-size: 10
-  text-max-angle: 28.65
+  symbol-min-distance: 500
   symbol-placement: line
   text-color: #000
+  text-field: "#{@elevation_ft} ft"
+  text-font: "Open Sans Regular, Arial Unicode MS Regular"
   text-halo-color: #fff
   text-halo-width: 1.5
+  text-max-angle: 28.65
+  text-max-size: 10
+  text-opacity: 0.5
   text-size: 10
 }
 
@@ -39,4 +45,59 @@ source-scree-contours = source(type: vector, url: "mapbox://lucaswoj.715d65b2")
   $source-layer: water
 
   fill-color: #63c1f1
+}
+
+#mountains {
+  $type: symbol
+  $source: source-scree-osm
+  $source-layer: osm_point
+  $filter: @natural == "peak"
+
+  icon-image: "triangle-12"
+  text-field: "{name}"
+  text-padding: 2
+  text-font: "Open Sans Semibold, Arial Unicode MS Bold"
+  text-max-size: 12
+  text-max-width: 10
+  text-offset: [0, 0.6]
+  text-anchor: top
+}
+
+#road {
+  $type: line
+  $source: source-scree-osm
+  $source-layer: osm_line
+  $filter: @highway in [residential, tertiary, secondary, primary, highway]
+
+  line-width: 4
+  line-color: #ffaf24
+  line-opacity: 1
+  line-cap: round
+}
+
+#trail {
+  $type: line
+  $source: source-mapbox
+  $source-layer: road
+  $filter: @class in [path, footway, bikeway, horseway, track, service, piste]
+
+  line-width: 2.5
+  line-color: #ff7124
+  line-opacity: 1
+  line-cap: round
+}
+
+#way-lables {
+  $type: symbol
+  $source: source-scree-osm
+  $source-layer: osm_line_label
+  $filter: @highway in [residential, tertiary, secondary, primary, highway, path, footway, bikeway, horseway, track, service, piste]
+
+  symbol-placement: line
+  text-color: #000
+  text-field: @name
+  text-font: "Open Sans Semibold, Arial Unicode MS Bold"
+  text-max-angle: 40
+  text-max-size: 12
+  text-max-width: 10
 }

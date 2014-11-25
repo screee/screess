@@ -12,12 +12,12 @@ var StringExpression = (function (_super) {
         _super.call(this);
         this.body = body;
     }
-    StringExpression.prototype.toValues = function (scope, options) {
+    StringExpression.prototype.toValues = function (scope, context) {
         var output = this.body;
         var match;
         while (match = (/#\{(.*)\}/).exec(output)) {
             var expression = parse(match[1], { startRule: 'valueExpression' });
-            var value = expression.evaluate(scope, options);
+            var value = expression.evaluate(scope, context);
             var matchStart = match.index;
             var matchEnd = match.index + match[0].length;
             output = output.substr(0, matchStart) + value.toString() + output.substr(matchEnd);

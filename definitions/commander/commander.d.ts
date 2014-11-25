@@ -159,7 +159,7 @@ declare module commander {
         option(flags:string, description?:string, defaultValue?:any):ICommand;
 
         /**
-         * Parse `argv`, settings options and invoking commands when defined.
+         * Parse `argv`, settings context and invoking commands when defined.
          *
          * @param {Array} argv
          * @return {Command} for chaining
@@ -211,17 +211,17 @@ declare module commander {
         optionFor(arg:string):IOption;
 
         /**
-         * Parse options from `argv` returning `argv`
-         * void of these options.
+         * Parse context from `argv` returning `argv`
+         * void of these context.
          *
          * @param {Array} argv
          * @return {Array}
          * @api public
          */
-        parseOptions(argv:string[]): {args:string[]; unknown:string[];};
+        parseContext(argv:string[]): {args:string[]; unknown:string[];};
 
         /**
-         * Return an object containing options as key-value pairs
+         * Return an object containing context as key-value pairs
          *
          * @return {Object}
          * @api public
@@ -314,7 +314,7 @@ declare module commander {
         largestOptionLength():number;
 
         /**
-         * Return help for options.
+         * Return help for context.
          *
          * @return {String}
          * @api private

@@ -3,7 +3,7 @@ import LayerScope = require('./LayerScope');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
 import assert = require('assert');
-import Options = require('../Options');
+import Context = require('../Context');
 import Value = require('../values/Value');
 import MacroArgValues = require('../macros/MacroArgValues');
 import _ = require("../utilities");
@@ -45,9 +45,9 @@ class GlobalScope extends Scope {
     return this
   }
 
-  getValueMacro(name:string, argValues:MacroArgValues, options:Options):ValueMacro {
+  getValueMacro(name:string, argValues:MacroArgValues, context:Context):ValueMacro {
     var macro;
-    if (macro = super.getValueMacro(name, argValues, options)) {
+    if (macro = super.getValueMacro(name, argValues, context)) {
       return macro;
     } else if (argValues.length == 0) {
       return ValueMacro.createFromValue(name, this, name);
@@ -67,18 +67,18 @@ class GlobalScope extends Scope {
     return this.layerScopes[name] = new LayerScope(name, this);
   }
 
-  evaluateGlobalScope(options:Options = new Options()):any {
-    options.scopeStack.push(this)
+  evaluateGlobalScope(context:Context = new Context()):any {
+    context.scopeStack.push(this)
 
     var layers = _.map(this.layerScopes, (layer) => {
-      return layer.evaluateLayerScope(options)
+      return layer.evaluateLayerScope(context)
     })
 
-    var properties = this.evaluateProperties(options, this.properties)
+    var properties = this.evaluateProperties(context, this.properties)
 
     var sources = _.objectMapValues(this.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
-        return Value.evaluate(value, options);
+        return Value.evaluate(value, context);
       });
     });
 
@@ -89,7 +89,7 @@ class GlobalScope extends Scope {
     delete properties["transition-delay"];
     delete properties["transition-duration"];
 
-    options.scopeStack.pop();
+    context.scopeStack.pop();
 
     return _.extend(properties, {
       version: 6,

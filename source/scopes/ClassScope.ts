@@ -1,13 +1,13 @@
 import Scope = require("./Scope");
-import Options = require('../Options');
+import Context = require('../Context');
 import _ = require("../utilities");
 
 class ClassScope extends Scope {
 
-  evaluateClassScope(options:Options):any {
-    options.scopeStack.push(this);
-    this.evaluateProperties(options, this.properties);
-    options.scopeStack.pop();
+  evaluateClassScope(context:Context):any {
+    context.scopeStack.push(this);
+    this.evaluateProperties(context, this.properties);
+    context.scopeStack.pop();
   }
 }
 

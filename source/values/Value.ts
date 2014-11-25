@@ -1,16 +1,16 @@
-import Options = require('../Options');
+import Context = require('../Context');
 
 class Value {
 
-  static evaluate(value:any, options:Options):any {
+  static evaluate(value:any, context:Context):any {
     if (value.evaluate) {
-      return value.evaluate(options);
+      return value.evaluate(context);
     } else {
       return value;
     }
   }
 
-  evaluate(options:Options):any {
+  evaluate(context:Context):any {
     throw "Abstract method"
   }
 

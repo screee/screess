@@ -11,8 +11,8 @@ var SetOperatorExpression = (function (_super) {
         _super.call(this);
         this.expression = expression;
     }
-    SetOperatorExpression.prototype.evaluateFilter = function (scope, options) {
-        return ["none", this.expression.evaluateFilter(scope, options)];
+    SetOperatorExpression.prototype.evaluateFilter = function (scope, context) {
+        return ["none", this.expression.evaluateFilter(scope, context)];
     };
     return SetOperatorExpression;
 })(Expression);

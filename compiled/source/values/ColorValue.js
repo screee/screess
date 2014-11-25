@@ -30,7 +30,7 @@ var ColorValue = (function (_super) {
     ColorValue.rgba = function (red, green, blue, alpha) {
         return new ColorValue(red, green, blue, alpha);
     };
-    ColorValue.prototype.evaluate = function (options) {
+    ColorValue.prototype.evaluate = function (context) {
         return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
     };
     return ColorValue;

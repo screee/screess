@@ -3,22 +3,22 @@ import assert = require("assert");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import Value = require('../values/Value');
 import Scope = require("../scopes/Scope");
-import Options = require("../Options");
+import Context = require("../Context");
 import _ = require("../utilities");
 
 class SetOperatorExpression extends Expression {
 
   constructor(public left:Expression, public operator:string, public right:Expression) { super() }
 
-  evaluateFilter(scope:Scope, options:Options):any[] {
-    var lvalue = this.left.toValue(scope, options);
+  evaluateFilter(scope:Scope, context:Context):any[] {
+    var lvalue = this.left.toValue(scope, context);
     // TODO allow for multiple rvalues
-    var rvalue = this.right.toValue(scope, options);
+    var rvalue = this.right.toValue(scope, context);
 
     assert(lvalue instanceof AttributeReferenceValue);
     assert(rvalue instanceof Array);
 
-    return [this.operator, lvalue.name].concat(Value.evaluate(rvalue, options))
+    return [this.operator, lvalue.name].concat(Value.evaluate(rvalue, context))
   }
 
 }

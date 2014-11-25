@@ -1,7 +1,7 @@
 import assert = require('assert');
 import MacroArgDefinitions = require('./MacroArgDefinitions');
 import Scope = require("../scopes/Scope");
-import Options = require("../Options");
+import Context = require("../Context");
 import _ = require('../utilities');
 import Expression = require('../expressions/Expression');
 
@@ -14,13 +14,13 @@ class MacroArgValues {
 
   // TODO make all factory methods into overloaded constructors
   // TODO add types to arguments
-  static createFromExpressions(args:Value[], scope:Scope, options:Options) {
+  static createFromExpressions(args:Value[], scope:Scope, context:Context) {
     var positionalArgs:Value[] = [];
     var namedArgs:{[s:string]:Value} = {};
 
     for (var i in args) {
       var arg = args[i];
-      var argValues = arg.expression.toValues(scope, options)
+      var argValues = arg.expression.toValues(scope, context)
 
       if (arg.name) {
         assert(argValues.length == 1);
@@ -77,7 +77,7 @@ class MacroArgValues {
 
   toArguments(
       argDefinition:MacroArgDefinitions,
-      options:Options
+      context:Context
   ):{[s:string]: any} {
 
     assert(this.matches(argDefinition));
@@ -105,7 +105,7 @@ class MacroArgValues {
           if (positionalIndex < this.positionalArgs.length) {
             args[definition.name] = this.positionalArgs[positionalIndex++]
           } else {
-            args[definition.name] = definition.expression.toValue(argDefinition.scope, options)
+            args[definition.name] = definition.expression.toValue(argDefinition.scope, context)
           }
         }
       }

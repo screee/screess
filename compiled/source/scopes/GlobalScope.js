@@ -7,7 +7,7 @@ var __extends = this.__extends || function (d, b) {
 var Scope = require("./Scope");
 var LayerScope = require('./LayerScope');
 var ValueMacro = require('../macros/ValueMacro');
-var Options = require('../Options');
+var Context = require('../Context');
 var Value = require('../values/Value');
 var _ = require("../utilities");
 var Globals = require('../globals');
@@ -36,9 +36,9 @@ var GlobalScope = (function (_super) {
     GlobalScope.prototype.getGlobalScope = function () {
         return this;
     };
-    GlobalScope.prototype.getValueMacro = function (name, argValues, options) {
+    GlobalScope.prototype.getValueMacro = function (name, argValues, context) {
         var macro;
-        if (macro = _super.prototype.getValueMacro.call(this, name, argValues, options)) {
+        if (macro = _super.prototype.getValueMacro.call(this, name, argValues, context)) {
             return macro;
         }
         else if (argValues.length == 0) {
@@ -57,16 +57,16 @@ var GlobalScope = (function (_super) {
         }
         return this.layerScopes[name] = new LayerScope(name, this);
     };
-    GlobalScope.prototype.evaluateGlobalScope = function (options) {
-        if (options === void 0) { options = new Options(); }
-        options.scopeStack.push(this);
+    GlobalScope.prototype.evaluateGlobalScope = function (context) {
+        if (context === void 0) { context = new Context(); }
+        context.scopeStack.push(this);
         var layers = _.map(this.layerScopes, function (layer) {
-            return layer.evaluateLayerScope(options);
+            return layer.evaluateLayerScope(context);
         });
-        var properties = this.evaluateProperties(options, this.properties);
+        var properties = this.evaluateProperties(context, this.properties);
         var sources = _.objectMapValues(this.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
-                return Value.evaluate(value, options);
+                return Value.evaluate(value, context);
             });
         });
         var transition = {
@@ -75,7 +75,7 @@ var GlobalScope = (function (_super) {
         };
         delete properties["transition-delay"];
         delete properties["transition-duration"];
-        options.scopeStack.pop();
+        context.scopeStack.pop();
         return _.extend(properties, {
             version: 6,
             layers: layers,

@@ -2,7 +2,7 @@ import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Expression = require("./Expression");
 import Scope = require("../scopes/Scope");
-import Options = require("../Options");
+import Context = require("../Context");
 import _ = require("../utilities");
 
 class BooleanLogicExpression extends Expression {
@@ -16,18 +16,18 @@ class BooleanLogicExpression extends Expression {
     super();
   }
 
-  evaluateFilter(scope:Scope, options:Options):any[] {
+  evaluateFilter(scope:Scope, context:Context):any[] {
 
-    options.pushFilter();
+    context.pushFilter();
 
     var filter = [BooleanLogicExpression.operators[this.operator]].concat(
       _.map(
         this.expressions,
-        (expression) => { return expression.evaluateFilter(scope, options) }
+        (expression) => { return expression.evaluateFilter(scope, context) }
       )
     )
 
-    options.popFilter();
+    context.popFilter();
 
     return filter;
   }

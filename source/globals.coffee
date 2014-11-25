@@ -8,12 +8,12 @@ module.exports =
 
   valueMacros:
 
-    source: (source, options) ->
+    source: (source, context) ->
       if source["tile-size"]
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
 
-      return [options.getGlobalScope().addSource(source)]
+      return [context.getGlobalScope().addSource(source)]
 
     identity: (args) -> _.values args
 

@@ -14,12 +14,12 @@
 
   module.exports = {
     valueMacros: {
-      source: function(source, options) {
+      source: function(source, context) {
         if (source["tile-size"]) {
           source.tileSize = source["tile-size"];
           delete source["tile-size"];
         }
-        return [options.getGlobalScope().addSource(source)];
+        return [context.getGlobalScope().addSource(source)];
       },
       identity: function(args) {
         return _.values(args);

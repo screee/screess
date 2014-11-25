@@ -4,7 +4,7 @@ import MacroArgValues = require('../macros/MacroArgValues')
 import Scope = require('../scopes/Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
-import Options = require('../Options')
+import Context = require('../Context')
 import _ = require("../utilities")
 
 class ValueMacro {
@@ -23,13 +23,13 @@ class ValueMacro {
   static createFromExpressions(name, argDefinition, parentScope, expressions:Expression[]) {
     assert(_.isArray(expressions));
 
-    return this.createFromFunction(name, argDefinition, parentScope, (args, options) => {
+    return this.createFromFunction(name, argDefinition, parentScope, (args, context) => {
       var scope = new Scope(parentScope)
       scope.addLiteralValueMacros(args)
 
-      options.scopeStack.push(scope);
-      var values = _.map(expressions, (expression) => { return expression.toValue(scope, options) } )
-      options.scopeStack.pop();
+      context.scopeStack.push(scope);
+      var values = _.map(expressions, (expression) => { return expression.toValue(scope, context) } )
+      context.scopeStack.pop();
       return values;
     });
   }
@@ -46,9 +46,9 @@ class ValueMacro {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  toValues(argValues:MacroArgValues, options:Options) {
-    var args = argValues.toArguments(this.argDefinition, options);
-    var values = this.body(args, options);
+  toValues(argValues:MacroArgValues, context:Context) {
+    var args = argValues.toArguments(this.argDefinition, context);
+    var values = this.body(args, context);
     return values;
   }
 

@@ -2,14 +2,14 @@ import Expression = require("./Expression");
 import assert = require("assert");
 import _ = require("../utilities");
 import Scope = require("../scopes/Scope");
-import Options = require("../Options");
+import Context = require("../Context");
 
 class SetOperatorExpression extends Expression {
 
   constructor(public expression:Expression) { super(); }
 
-  evaluateFilter(scope:Scope, options:Options):any[] {
-    return ["none", this.expression.evaluateFilter(scope, options)];
+  evaluateFilter(scope:Scope, context:Context):any[] {
+    return ["none", this.expression.evaluateFilter(scope, context)];
   }
 
 }

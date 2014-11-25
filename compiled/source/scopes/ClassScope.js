@@ -10,10 +10,10 @@ var ClassScope = (function (_super) {
     function ClassScope() {
         _super.apply(this, arguments);
     }
-    ClassScope.prototype.evaluateClassScope = function (options) {
-        options.scopeStack.push(this);
-        this.evaluateProperties(options, this.properties);
-        options.scopeStack.pop();
+    ClassScope.prototype.evaluateClassScope = function (context) {
+        context.scopeStack.push(this);
+        this.evaluateProperties(context, this.properties);
+        context.scopeStack.pop();
     };
     return ClassScope;
 })(Scope);

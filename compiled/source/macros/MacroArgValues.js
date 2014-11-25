@@ -9,12 +9,12 @@ var MacroArgValues = (function () {
     }
     // TODO make all factory methods into overloaded constructors
     // TODO add types to arguments
-    MacroArgValues.createFromExpressions = function (args, scope, options) {
+    MacroArgValues.createFromExpressions = function (args, scope, context) {
         var positionalArgs = [];
         var namedArgs = {};
         for (var i in args) {
             var arg = args[i];
-            var argValues = arg.expression.toValues(scope, options);
+            var argValues = arg.expression.toValues(scope, context);
             if (arg.name) {
                 assert(argValues.length == 1);
                 namedArgs[arg.name] = argValues[0];
@@ -58,7 +58,7 @@ var MacroArgValues = (function () {
         }
         return _.all(indicies);
     };
-    MacroArgValues.prototype.toArguments = function (argDefinition, options) {
+    MacroArgValues.prototype.toArguments = function (argDefinition, context) {
         assert(this.matches(argDefinition));
         if (!argDefinition) {
             return _.extend(_.objectMap(this.positionalArgs, function (values, index) {
@@ -79,7 +79,7 @@ var MacroArgValues = (function () {
                         args[definition.name] = this.positionalArgs[positionalIndex++];
                     }
                     else {
-                        args[definition.name] = definition.expression.toValue(argDefinition.scope, options);
+                        args[definition.name] = definition.expression.toValue(argDefinition.scope, context);
                     }
                 }
             }

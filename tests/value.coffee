@@ -3,11 +3,11 @@ assert = require("assert")
 
 describe "value", ->
 
-  parseValue = (value, options = {}) ->
-    if options.filterLvalue
+  parseValue = (value, context = {}) ->
+    if context.filterLvalue
       stylesheet = parse "#layer { $type: background; $filter: #{value} == 1 }"
       stylesheet.layers[0].filter[1]
-    else if options.filterRvalue
+    else if context.filterRvalue
       stylesheet = parse "#layer { $type: background; $filter: @test == #{value} }"
       stylesheet.layers[0].filter[2]
     else
