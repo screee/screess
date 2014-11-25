@@ -1,5 +1,0 @@
-class ScopeContext {
-
-}
-
-export = ScopeContext;

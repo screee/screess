@@ -31,15 +31,15 @@
       }
     }
 
-    RuleMacro.prototype.evaluateScope = function(argValues, context) {
+    RuleMacro.prototype.evaluateScope = function(argValues, stack) {
       var args, name, scope, value, _ref;
-      args = this.processArgs(argValues, this.parentScope, context);
+      args = this.processArgs(argValues, this.parentScope, stack);
       scope = new Scope(this.scope);
       for (name in args) {
         value = args[name];
         scope.addValueMacro(name, [], [literalExpression(value)]);
       }
-      return _.extend(scope.evaluateRules(context, this.scope.rules), (_ref = this.body) != null ? _ref.call({}, argValues, context) : void 0);
+      return _.extend(scope.evaluateRules(stack, this.scope.rules), (_ref = this.body) != null ? _ref.call({}, argValues, stack) : void 0);
     };
 
     RuleMacro.prototype.matches = function(name, argValues) {
@@ -54,7 +54,7 @@
       }
     };
 
-    RuleMacro.prototype.processArgs = function(argValues, scope, context) {
+    RuleMacro.prototype.processArgs = function(argValues, scope, stack) {
       var argDefinition, argValue, args, positionaIndex, positionalIndex, _i, _j, _len, _len1;
       assert(this.matchesArgValues(argValues));
       args = {};
@@ -73,7 +73,7 @@
         }
         while (positionaIndex < this.argDefinitions.length) {
           argDefinition = this.argDefinitions[positionaIndex++];
-          args[argDefinition.name] = argDefinition.expression.toValue(scope, context);
+          args[argDefinition.name] = argDefinition.expression.toValue(scope, stack);
         }
       }
       return args;

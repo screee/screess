@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import LiteralExpression = require("./LiteralExpression");
 import Scope = require("../scopes/Scope");
-import Context = require("../Context");
+import Stack = require("../Stack");
 
 import _ = require("../utilities");
 
@@ -11,9 +11,9 @@ class ArrayExpression extends Expression {
     super()
   }
 
-  toValues(scope:Scope, context:Context):any[] {
+  toValues(scope:Scope, stack:Stack):any[] {
     var value = _.flatten(_.map(this.expressions, (expression) => {
-      return expression.toValues(scope, context)
+      return expression.toValues(scope, stack)
     }));
 
     return [value];

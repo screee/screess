@@ -2,20 +2,20 @@ var _ = require('underscore');
 var Utilities = (function () {
     function Utilities() {
     }
-    Utilities.prototype.objectMapValues = function (input, iterator, context) {
-        if (context === void 0) { context = {}; }
+    Utilities.prototype.objectMapValues = function (input, iterator, stack) {
+        if (stack === void 0) { stack = {}; }
         return this.objectMap(input, function (value, key) {
             return [key, iterator(value, key)];
         });
     };
-    Utilities.prototype.objectMapKeys = function (input, iterator, context) {
-        if (context === void 0) { context = {}; }
+    Utilities.prototype.objectMapKeys = function (input, iterator, stack) {
+        if (stack === void 0) { stack = {}; }
         return this.objectMap(input, function (value, key) {
             return [iterator(value, key), value];
-        }, context);
+        }, stack);
     };
-    Utilities.prototype.objectMap = function (input, iterator, context) {
-        if (context === void 0) { context = {}; }
+    Utilities.prototype.objectMap = function (input, iterator, stack) {
+        if (stack === void 0) { stack = {}; }
         var output = {};
         _.each(input, function (inputValue, inputKey) {
             var tuple = iterator(inputValue, inputKey);

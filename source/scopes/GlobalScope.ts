@@ -3,7 +3,7 @@ import LayerScope = require('./LayerScope');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
 import assert = require('assert');
-import Context = require('../Context');
+import Stack = require('../Stack');
 import Value = require('../values/Value');
 import MacroArgValues = require('../macros/MacroArgValues');
 import _ = require("../utilities");
@@ -45,9 +45,9 @@ class GlobalScope extends Scope {
     return this
   }
 
-  getValueMacro(name:string, argValues:MacroArgValues, context:Context):ValueMacro {
+  getValueMacro(name:string, argValues:MacroArgValues, stack:Stack):ValueMacro {
     var macro;
-    if (macro = super.getValueMacro(name, argValues, context)) {
+    if (macro = super.getValueMacro(name, argValues, stack)) {
       return macro;
     } else if (argValues.length == 0) {
       return ValueMacro.createFromValue(name, this, name);
@@ -67,18 +67,18 @@ class GlobalScope extends Scope {
     return this.layerScopes[name] = new LayerScope(name, this);
   }
 
-  evaluateGlobalScope(context:Context = new Context()):any {
-    context.scopeStack.push(this)
+  evaluateGlobalScope(stack:Stack = new Stack()):any {
+    stack.scopeStack.push(this)
 
     var layers = _.map(this.layerScopes, (layer) => {
-      return layer.evaluateLayerScope(context)
+      return layer.evaluateLayerScope(stack)
     })
 
-    var properties = this.evaluateProperties(context, this.properties)
+    var properties = this.evaluateProperties(stack, this.properties)
 
     var sources = _.objectMapValues(this.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
-        return Value.evaluate(value, context);
+        return Value.evaluate(value, stack);
       });
     });
 
@@ -89,7 +89,7 @@ class GlobalScope extends Scope {
     delete properties["transition-delay"];
     delete properties["transition-duration"];
 
-    context.scopeStack.pop();
+    stack.scopeStack.pop();
 
     return _.extend(properties, {
       version: 6,

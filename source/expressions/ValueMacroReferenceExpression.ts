@@ -2,7 +2,7 @@ import Expression = require("./Expression");
 import util = require('util');
 import Scope = require("../scopes/Scope");
 import MacroArgValues = require('../macros/MacroArgValues');
-import Context = require("../Context");
+import Stack = require("../Stack");
 import _ = require("../utilities");
 
 class ValueMacroReferenceExpression extends Expression {
@@ -12,19 +12,19 @@ class ValueMacroReferenceExpression extends Expression {
     super()
   }
 
-  toValues(scope:Scope, context:Context):any[] {
+  toValues(scope:Scope, stack:Stack):any[] {
     var argValues = MacroArgValues.createFromExpressions(
       this.argumentExpressions,
       scope,
-      context
+      stack
     );
 
-    var macro = scope.getValueMacro(this.name, argValues, context);
+    var macro = scope.getValueMacro(this.name, argValues, stack);
     if (!macro ) {
       throw new Error("Could not find value macro '#{this.name}'");
     }
 
-    return macro.toValues(argValues, context);
+    return macro.toValues(argValues, stack);
   }
 }
 

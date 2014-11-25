@@ -2,8 +2,8 @@ import Value = require('../values/Value')
 
 class Expression {
 
-  toValue(scope, context):any {
-    var values = this.toValues(scope, context);
+  toValue(scope, stack):any {
+    var values = this.toValues(scope, stack);
 
     if (values.length > 1) {
       console.log(values);
@@ -14,15 +14,15 @@ class Expression {
   }
 
   // TODO use union types on return type
-  toValues(scope, context):any[] {
+  toValues(scope, stack):any[] {
     throw new Error("Abstract method");
   }
 
-  evaluate(scope, context):any[] {
-    return Value.evaluate(this.toValue(scope, context), context);
+  evaluate(scope, stack):any[] {
+    return Value.evaluate(this.toValue(scope, stack), stack);
   }
 
-  evaluateFilter(scope, context):any[] {
+  evaluateFilter(scope, stack):any[] {
     throw new Error("Abstract method");
   }
 

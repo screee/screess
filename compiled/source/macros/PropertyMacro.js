@@ -14,13 +14,13 @@ var PropertyMacro = (function () {
         });
         this.argLengthMax = this.argDefinition.length;
     }
-    PropertyMacro.prototype.evaluateScope = function (argValues, context) {
-        var args = argValues.toArguments(this.argDefinition, context);
+    PropertyMacro.prototype.evaluateScope = function (argValues, stack) {
+        var args = argValues.toArguments(this.argDefinition, stack);
         var scope = new Scope(this.scope);
         scope.addLiteralValueMacros(args);
-        context.scopeStack.push(scope);
-        var values = _.extend(scope.evaluateProperties(context, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);
-        context.scopeStack.pop();
+        stack.scopeStack.push(scope);
+        var values = _.extend(scope.evaluateProperties(stack, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);
+        stack.scopeStack.pop();
         return values;
     };
     PropertyMacro.prototype.matches = function (name, argValues) {

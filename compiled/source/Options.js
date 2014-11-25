@@ -1,5 +1,5 @@
-var Context = (function () {
-    function Context() {
+var Stack = (function () {
+    function Stack() {
         this.valueMacroStack = [];
         this.propertyMacroStack = [];
         this.scopeStack = [];
@@ -7,22 +7,22 @@ var Context = (function () {
         this.property = null;
         this.isMetaProperty = false;
     }
-    Context.prototype.getGlobalScope = function () {
+    Stack.prototype.getGlobalScope = function () {
         return this.scopeStack[0];
     };
-    Context.prototype.getScope = function () {
+    Stack.prototype.getScope = function () {
         return this.scopeStack[this.scopeStack.length - 1];
     };
-    Context.prototype.pushFilter = function () {
+    Stack.prototype.pushFilter = function () {
         this.filters++;
     };
-    Context.prototype.popFilter = function () {
+    Stack.prototype.popFilter = function () {
         --this.filters;
     };
-    Context.prototype.isFilter = function () {
+    Stack.prototype.isFilter = function () {
         return this.filters > 0;
     };
-    return Context;
+    return Stack;
 })();
-module.exports = Context;
-//# sourceMappingURL=Context.js.map
+module.exports = Stack;
+//# sourceMappingURL=Stack.js.map

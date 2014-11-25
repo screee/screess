@@ -21,14 +21,14 @@ var ValueMacro = (function () {
     // TODO make overloaded constructors
     ValueMacro.createFromExpressions = function (name, argDefinition, parentScope, expressions) {
         assert(_.isArray(expressions));
-        return this.createFromFunction(name, argDefinition, parentScope, function (args, context) {
+        return this.createFromFunction(name, argDefinition, parentScope, function (args, stack) {
             var scope = new Scope(parentScope);
             scope.addLiteralValueMacros(args);
-            context.scopeStack.push(scope);
+            stack.scopeStack.push(scope);
             var values = _.map(expressions, function (expression) {
-                return expression.toValue(scope, context);
+                return expression.toValue(scope, stack);
             });
-            context.scopeStack.pop();
+            stack.scopeStack.pop();
             return values;
         });
     };
@@ -40,9 +40,9 @@ var ValueMacro = (function () {
     ValueMacro.prototype.matches = function (name, argValues) {
         return name == this.name && argValues.matches(this.argDefinition);
     };
-    ValueMacro.prototype.toValues = function (argValues, context) {
-        var args = argValues.toArguments(this.argDefinition, context);
-        var values = this.body(args, context);
+    ValueMacro.prototype.toValues = function (argValues, stack) {
+        var args = argValues.toArguments(this.argDefinition, stack);
+        var values = this.body(args, stack);
         return values;
     };
     return ValueMacro;

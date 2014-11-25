@@ -2,15 +2,15 @@ import Expression = require("./Expression");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Scope = require("../scopes/Scope");
-import Context = require("../Context");
+import Stack = require("../Stack");
 import _ = require("../utilities");
 
 class TypeCheckExpression extends Expression {
 
   constructor(public type:Expression) { super() }
 
-  evaluateFilter(scope:Scope, context:Context) {
-    return ["==", "$type", this.type.evaluate(scope, context)]
+  evaluateFilter(scope:Scope, stack:Stack) {
+    return ["==", "$type", this.type.evaluate(scope, stack)]
   }
 }
 

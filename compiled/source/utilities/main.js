@@ -9,14 +9,14 @@ var Utilities = (function () {
         }
         return _.map(list, function (value) { return value[method].apply(value, args); });
     };
-    Utilities.prototype.none = function (list, iterator, context) {
+    Utilities.prototype.none = function (list, iterator, stack) {
         if (iterator === void 0) { iterator = _.identity; }
-        if (context === void 0) { context = {}; }
-        return !_.some(list, iterator, context);
+        if (stack === void 0) { stack = {}; }
+        return !_.some(list, iterator, stack);
     };
-    Utilities.prototype.count = function (list, iterator, context) {
+    Utilities.prototype.count = function (list, iterator, stack) {
         if (iterator === void 0) { iterator = _.identity; }
-        if (context === void 0) { context = {}; }
+        if (stack === void 0) { stack = {}; }
         var count = 0;
         _.each(list, function (value, key) {
             if (iterator(value, key)) {

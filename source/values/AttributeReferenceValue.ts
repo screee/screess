@@ -1,9 +1,9 @@
 import Value = require("./Value");
-import Context = require('../Context');
+import Stack = require('../Stack');
 
 class AttributeReferenceValue extends Value {
   constructor(public name:string) { super() }
-  evaluate(context:Context):string { return "{" + this.name + "}" }
+  evaluate(stack:Stack):string { return "{" + this.name + "}" }
 }
 
 export = AttributeReferenceValue;

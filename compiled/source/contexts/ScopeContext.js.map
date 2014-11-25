@@ -1,1 +1,1 @@
-{"version":3,"file":"ScopeContext.js","sourceRoot":"","sources":["../../../source/contexts/ScopeContext.ts"],"names":["ScopeContext","ScopeContext.constructor"],"mappings":"AAAA,IAAM,YAAY;IAAlBA,SAAMA,YAAYA;IAElBC,CAACA;IAADD,mBAACA;AAADA,CAACA,AAFD,IAEC;AAEqB,AAAtB,iBAAS,YAAY,CAAC"}
+{"version":3,"file":"ScopeStack.js","sourceRoot":"","sources":["../../../source/stacks/ScopeStack.ts"],"names":["ScopeStack","ScopeStack.constructor"],"mappings":"AAAA,IAAM,YAAY;IAAlBA,SAAMA,YAAYA;IAElBC,CAACA;IAADD,mBAACA;AAADA,CAACA,AAFD,IAEC;AAEqB,AAAtB,iBAAS,YAAY,CAAC"}

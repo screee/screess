@@ -16,15 +16,15 @@ export class Utilities {
   none<T>(
     list: _.List<T>,
     iterator: (value:T, key:number) => boolean = _.identity,
-    context: any = {}
+    stack: any = {}
   ):boolean {
-    return !_.some(list, iterator, context);
+    return !_.some(list, iterator, stack);
   }
 
   count<T>(
     list: _.List<T>,
     iterator: (value:T, key:number) => boolean = _.identity,
-    context: any = {}
+    stack: any = {}
   ):number {
     var count:number = 0;
     _.each(

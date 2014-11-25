@@ -5,16 +5,16 @@ export class Utilities {
   objectMapValues<T, U>(
     input:_.Dictionary<T>,
     iterator:_.ObjectIterator<T, U>,
-    context?:any
+    stack?:any
   ):_.Dictionary<U>;
 
   objectMapValues<T, U>(
     input:_.List<T>,
     iterator:_.ListIterator<T, U>,
-    context?:any
+    stack?:any
   ):_.Dictionary<U>;
 
-  objectMapValues(input, iterator, context = {}):any {
+  objectMapValues(input, iterator, stack = {}):any {
     return this.objectMap(
       input,
       (value, key) => { return [key, iterator(value, key)] }
@@ -24,36 +24,36 @@ export class Utilities {
   objectMapKeys<T>(
     input:_.Dictionary<T>,
     iterator:_.ObjectIterator<T, string>,
-    context?:any
+    stack?:any
   ):_.Dictionary<T>;
 
   objectMapKeys<T>(
     input:_.List<T>,
     iterator:_.ListIterator<T, string>,
-    context?:any
+    stack?:any
   ):_.Dictionary<T>;
 
-  objectMapKeys<T>(input, iterator, context = {}):any {
+  objectMapKeys<T>(input, iterator, stack = {}):any {
     return this.objectMap(
       input,
       (value, key) => { return [iterator(value, key), value] },
-      context
+      stack
     )
   }
 
   objectMap<T, U>(
     input:_.Dictionary<T>,
     iterator:_.ObjectIterator<T, [string, U]>,
-    context?:any
+    stack?:any
   ):_.Dictionary<U>;
 
   objectMap<T, U>(
     input:_.List<T>,
     iterator:_.ListIterator<T, [string, U]>,
-    context?:any
+    stack?:any
   ):_.Dictionary<U>;
 
-  objectMap(input, iterator, context = {}):any {
+  objectMap(input, iterator, stack = {}):any {
     var output = {}
     _.each(input, (inputValue, inputKey) => {
       var tuple = iterator(inputValue, inputKey);

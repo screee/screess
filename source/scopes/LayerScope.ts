@@ -1,7 +1,7 @@
 import Scope = require("./Scope")
 import ClassScope = require('./ClassScope')
 import Expression = require('../expressions/Expression');
-import Context = require('../Context')
+import Stack = require('../Stack')
 import _ = require('../utilities')
 import MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 import assert = require('assert');
@@ -47,27 +47,15 @@ class LayerScope extends Scope {
     this.metaProperties = {}
   }
 
-  evaluateFilterProperty(context:Context):{} {
+  evaluateFilterProperty(stack:Stack):{} {
     if (this.filterExpression) {
-
-      // TODO move inside evaluate filter?
-      context.pushFilter()
-      context.isMetaProperty = true
-      context.property = "filter"
-
-      var filter = this.filterExpression.evaluateFilter(this, context);
-
-      context.popFilter()
-      context.isMetaProperty = false
-      context.property = null
-
-      return filter;
+      return this.filterExpression.evaluateFilter(this, stack);;
     } else {
       return null
     }
   }
 
-  evaluateSourceProperty(context:Context):{} {
+  evaluateSourceProperty(stack:Stack):{} {
     var metaSourceProperty;
 
     if (this.source) {
@@ -81,19 +69,19 @@ class LayerScope extends Scope {
     }
   }
 
-  evaluateClassPaintProperties(type:string, context:Context):{} {
+  evaluateClassPaintProperties(type:string, stack:Stack):{} {
     // TODO ensure all properties are paint properties, not layout properties
     return _.objectMap(
       this.classScopes,
       (scope, name) => {
-        return ["paint.#{name}", scope.evaluateClassScope(context)]
+        return ["paint.#{name}", scope.evaluateClassScope(stack)]
       }
     )
   }
 
-  evaluatePaintProperties(type:string, context:Context):{} {
+  evaluatePaintProperties(type:string, stack:Stack):{} {
     var properties = this.evaluateProperties(
-      context,
+      stack,
       this.properties
     );
 
@@ -115,20 +103,16 @@ class LayerScope extends Scope {
     return {layout: layout, paint: paint};
   }
 
-  evaluateMetaProperties(context:Context):{} {
-    context.isMetaProperty = true;
-    var properties = this.evaluateProperties(context, this.metaProperties);
-    context.isMetaProperty = false;
-
-    return properties;
+  evaluateMetaProperties(stack:Stack):{} {
+    return this.evaluateProperties(stack, this.metaProperties);;
   }
 
-  evaluateLayerScope(context:Context):any {
-    context.scopeStack.push(this);
+  evaluateLayerScope(stack:Stack):any {
+    stack.scopeStack.push(this);
 
     // TODO ensure layer has a source and type
 
-    var metaProperties = this.evaluateMetaProperties(context);
+    var metaProperties = this.evaluateMetaProperties(stack);
     var type = metaProperties['type'];
     assert(type, "Layer must have a type");
 
@@ -136,15 +120,15 @@ class LayerScope extends Scope {
       {
         // TODO calcualte name with _.hash
         id: this.name,
-        source: this.evaluateSourceProperty(context),
-        filter: this.evaluateFilterProperty(context)
+        source: this.evaluateSourceProperty(stack),
+        filter: this.evaluateFilterProperty(stack)
       },
-      this.evaluatePaintProperties(type, context),
+      this.evaluatePaintProperties(type, stack),
       metaProperties,
-      this.evaluateClassPaintProperties(type, context)
+      this.evaluateClassPaintProperties(type, stack)
     ));
 
-    context.scopeStack.pop();
+    stack.scopeStack.pop();
 
     return properties;
   }

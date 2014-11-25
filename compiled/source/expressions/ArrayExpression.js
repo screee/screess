@@ -12,9 +12,9 @@ var ArrayExpression = (function (_super) {
         _super.call(this);
         this.expressions = expressions;
     }
-    ArrayExpression.prototype.toValues = function (scope, context) {
+    ArrayExpression.prototype.toValues = function (scope, stack) {
         var value = _.flatten(_.map(this.expressions, function (expression) {
-            return expression.toValues(scope, context);
+            return expression.toValues(scope, stack);
         }));
         return [value];
     };

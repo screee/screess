@@ -1,16 +1,16 @@
-import Context = require('../Context');
+import Stack = require('../Stack');
 
 class Value {
 
-  static evaluate(value:any, context:Context):any {
+  static evaluate(value:any, stack:Stack):any {
     if (value.evaluate) {
-      return value.evaluate(context);
+      return value.evaluate(stack);
     } else {
       return value;
     }
   }
 
-  evaluate(context:Context):any {
+  evaluate(stack:Stack):any {
     throw "Abstract method"
   }
 

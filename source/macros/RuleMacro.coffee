@@ -18,16 +18,16 @@ module.exports = class RuleMacro
       @argLengthMin = _.count @argDefinitions, (argDefinition) -> !argDefinition.expression
       @argLengthMax = @argDefinitions.length
 
-  evaluateScope: (argValues, context) ->
-    args = @processArgs(argValues, @parentScope, context)
+  evaluateScope: (argValues, stack) ->
+    args = @processArgs(argValues, @parentScope, stack)
 
     scope = new Scope(@scope)
     for name, value of args
       scope.addValueMacro(name, [], [literalExpression(value)])
 
     _.extend(
-      scope.evaluateRules(context, @scope.rules),
-      @body?.call({}, argValues, context)
+      scope.evaluateRules(stack, @scope.rules),
+      @body?.call({}, argValues, stack)
     )
 
   matches: (name, argValues) -> name == @name && @matchesArgValues(argValues)
@@ -38,7 +38,7 @@ module.exports = class RuleMacro
     else
       argValues.length <= @argLengthMax && argValues.length >= @argLengthMin
 
-  processArgs: (argValues, scope, context) ->
+  processArgs: (argValues, scope, stack) ->
     assert @matchesArgValues(argValues)
 
     args = {}
@@ -56,6 +56,6 @@ module.exports = class RuleMacro
 
       while positionaIndex < @argDefinitions.length
         argDefinition = @argDefinitions[positionaIndex++]
-        args[argDefinition.name] = argDefinition.expression.toValue(scope, context)
+        args[argDefinition.name] = argDefinition.expression.toValue(scope, stack)
 
     args

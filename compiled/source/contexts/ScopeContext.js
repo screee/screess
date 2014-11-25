@@ -1,7 +1,7 @@
-var ScopeContext = (function () {
-    function ScopeContext() {
+var ScopeStack = (function () {
+    function ScopeStack() {
     }
-    return ScopeContext;
+    return ScopeStack;
 })();
-module.exports = ScopeContext;
-//# sourceMappingURL=ScopeContext.js.map
+module.exports = ScopeStack;
+//# sourceMappingURL=ScopeStack.js.map

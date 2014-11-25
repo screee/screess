@@ -1,6 +1,6 @@
 import Value = require("./Value");
 import assert = require("assert");
-import Context = require('../Context');
+import Stack = require('../Stack');
 import _ = require('../utilities');
 
 class ColorValue extends Value {
@@ -26,7 +26,7 @@ class ColorValue extends Value {
 
   constructor(public red:number, public green:number, public blue:number, public alpha:number) { super(); }
 
-  evaluate(context:Context):string {
+  evaluate(stack:Stack):string {
     return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
   }
 }

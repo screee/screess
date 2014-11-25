@@ -1,7 +1,7 @@
-var PropertyContext = (function () {
-    function PropertyContext() {
+var PropertyStack = (function () {
+    function PropertyStack() {
     }
-    return PropertyContext;
+    return PropertyStack;
 })();
-module.exports = PropertyContext;
-//# sourceMappingURL=PropertyContext.js.map
+module.exports = PropertyStack;
+//# sourceMappingURL=PropertyStack.js.map

@@ -51,47 +51,45 @@ var Scope = (function () {
         this.propertyMacros.unshift(macro);
         return macro.scope;
     };
-    Scope.prototype.getValueMacro = function (name, argValues, context) {
+    Scope.prototype.getValueMacro = function (name, argValues, stack) {
         for (var i in this.valueMacros) {
             var macro = this.valueMacros[i];
-            if (macro.matches(name, argValues) && !_.contains(context.valueMacroStack, macro)) {
+            if (macro.matches(name, argValues) && !_.contains(stack.valueMacroStack, macro)) {
                 return macro;
             }
         }
-        return this.parent ? this.parent.getValueMacro(name, argValues, context) : null;
+        return this.parent ? this.parent.getValueMacro(name, argValues, stack) : null;
     };
-    Scope.prototype.getPropertyMacro = function (name, argValues, context) {
+    Scope.prototype.getPropertyMacro = function (name, argValues, stack) {
         for (var i in this.propertyMacros) {
             var macro = this.propertyMacros[i];
-            if (macro.matches(name, argValues) && !_.contains(context.propertyMacroStack, macro)) {
+            if (macro.matches(name, argValues) && !_.contains(stack.propertyMacroStack, macro)) {
                 return macro;
             }
         }
         // TODO create super parent class that returns null for everything to
         // avoid this.
-        return this.parent ? this.parent.getPropertyMacro(name, argValues, context) : null;
+        return this.parent ? this.parent.getPropertyMacro(name, argValues, stack) : null;
     };
-    Scope.prototype.evaluateProperties = function (context, properties) {
+    Scope.prototype.evaluateProperties = function (stack, properties) {
         var output = {};
         for (var name in properties) {
             var expressions = properties[name];
-            context.property = name;
             var argValues = MacroArgValues.createFromExpressions(_.map(expressions, function (expression) {
                 return { expression: expression };
-            }), this, context);
+            }), this, stack);
             var propertyMacro;
-            if (propertyMacro = this.getPropertyMacro(name, argValues, context)) {
-                context.propertyMacroStack.push(propertyMacro);
-                _.extend(output, propertyMacro.evaluateScope(argValues, context));
-                context.propertyMacroStack.pop();
+            if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
+                stack.propertyMacroStack.push(propertyMacro);
+                _.extend(output, propertyMacro.evaluateScope(argValues, stack));
+                stack.propertyMacroStack.pop();
             }
             else {
                 if (argValues.length != 1 || argValues.positionalArgs.length != 1) {
                     throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'");
                 }
-                output[name] = Value.evaluate(argValues.positionalArgs[0], context);
+                output[name] = Value.evaluate(argValues.positionalArgs[0], stack);
             }
-            context.property = null;
         }
         return output;
     };

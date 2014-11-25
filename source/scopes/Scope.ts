@@ -4,7 +4,7 @@ import MacroArgDefinitions = require('../macros/MacroArgDefinitions')
 import assert = require("assert")
 import LiteralExpression = require('../expressions/LiteralExpression')
 import GlobalScope = require('./GlobalScope');
-import Context = require('../Context')
+import Stack = require('../Stack')
 import Expression = require('../expressions/Expression');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
@@ -69,57 +69,54 @@ class Scope {
     return macro.scope
   }
 
-  getValueMacro(name:string, argValues:MacroArgValues, context:Context):ValueMacro {
+  getValueMacro(name:string, argValues:MacroArgValues, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(context.valueMacroStack, macro)) {
+      if (macro.matches(name, argValues) && !_.contains(stack.valueMacroStack, macro)) {
         return macro;
       }
     }
 
-    return this.parent ? this.parent.getValueMacro(name, argValues, context) : null;
+    return this.parent ? this.parent.getValueMacro(name, argValues, stack) : null;
   }
 
-  getPropertyMacro(name:string, argValues:MacroArgValues, context:Context):PropertyMacro {
+  getPropertyMacro(name:string, argValues:MacroArgValues, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(context.propertyMacroStack, macro)) {
+      if (macro.matches(name, argValues) && !_.contains(stack.propertyMacroStack, macro)) {
         return macro;
       }
     }
 
     // TODO create super parent class that returns null for everything to
     // avoid this.
-    return this.parent ? this.parent.getPropertyMacro(name, argValues, context) : null;
+    return this.parent ? this.parent.getPropertyMacro(name, argValues, stack) : null;
   }
 
-  evaluateProperties(context:Context, properties:{[name:string]: Expression[]}):any {
+  evaluateProperties(stack:Stack, properties:{[name:string]: Expression[]}):any {
     var output = {}
 
     for (var name in properties) {
       var expressions = properties[name];
-      context.property = name
 
       var argValues = MacroArgValues.createFromExpressions(
         _.map(expressions, (expression) => { return { expression: expression } }),
         this,
-        context
+        stack
       );
 
       var propertyMacro;
-      if (propertyMacro = this.getPropertyMacro(name, argValues, context)) {
-        context.propertyMacroStack.push(propertyMacro);
-        _.extend(output, propertyMacro.evaluateScope(argValues, context));
-        context.propertyMacroStack.pop()
+      if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
+        stack.propertyMacroStack.push(propertyMacro);
+        _.extend(output, propertyMacro.evaluateScope(argValues, stack));
+        stack.propertyMacroStack.pop()
       } else {
         if (argValues.length != 1 || argValues.positionalArgs.length != 1) {
           throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
         }
 
-        output[name] = Value.evaluate(argValues.positionalArgs[0], context);
+        output[name] = Value.evaluate(argValues.positionalArgs[0], stack);
       }
-
-      context.property = null;
     }
 
     return output

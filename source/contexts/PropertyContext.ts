@@ -1,5 +1,0 @@
-class PropertyContext {
-
-}
-
-export = PropertyContext;

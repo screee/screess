@@ -3,7 +3,7 @@ import Scope  = require('../scopes/Scope');
 import assert = require("assert");
 import MacroArgValues = require("./MacroArgValues");
 import MacroArgDefinitions = require("./MacroArgDefinitions");
-import Context = require("../Context");
+import Stack = require("../Stack");
 import _ = require("../utilities");
 
 class PropertyMacro {
@@ -23,18 +23,18 @@ class PropertyMacro {
     this.argLengthMax = this.argDefinition.length;
   }
 
-  evaluateScope(argValues:MacroArgValues, context:Context) {
-    var args = argValues.toArguments(this.argDefinition, context)
+  evaluateScope(argValues:MacroArgValues, stack:Stack) {
+    var args = argValues.toArguments(this.argDefinition, stack)
 
     var scope = new Scope(this.scope)
     scope.addLiteralValueMacros(args)
 
-    context.scopeStack.push(scope)
+    stack.scopeStack.push(scope)
     var values = _.extend(
-      scope.evaluateProperties(context, this.scope.properties),
+      scope.evaluateProperties(stack, this.scope.properties),
       this.body ? this.body.apply({}, argValues) : null
     )
-    context.scopeStack.pop()
+    stack.scopeStack.pop()
     return values
   }
 
