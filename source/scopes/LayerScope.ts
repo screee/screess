@@ -8,6 +8,15 @@ import assert = require('assert');
 
 class LayerScope extends Scope {
 
+  public layerScopes:{[name:string]: LayerScope};
+
+  addLayerScope(name:string, scope:Scope):Scope {
+    if (this.layerScopes[name]) {
+      throw new Error("Duplicate entries for layer scope " + name)
+    }
+    return this.layerScopes[name] = new LayerScope(name, this);
+  }
+
   addMetaProperty(name:string, expressions:Expression[]):void {
     if (this.metaProperties[name]) {
       throw new Error("Duplicate entries for metaproperty '" + name + "'")
@@ -45,6 +54,7 @@ class LayerScope extends Scope {
     super(parent)
     this.classScopes = {}
     this.metaProperties = {}
+    this.layerScopes = {}
   }
 
   evaluateFilterProperty(stack:Stack):{} {
@@ -109,6 +119,10 @@ class LayerScope extends Scope {
 
   evaluateLayerScope(stack:Stack):any {
     stack.scopeStack.push(this);
+
+    var layers = _.map(this.layerScopes, (layer) => {
+      return layer.evaluateLayerScope(stack);
+    })
 
     // TODO ensure layer has a source and type
 
