@@ -16,7 +16,14 @@ var LayerScope = (function (_super) {
         this.name = name;
         this.classScopes = {};
         this.metaProperties = {};
+        this.sublayerScopes = {};
     }
+    LayerScope.prototype.addLayerScope = function (name, scope) {
+        if (this.sublayerScopes[name]) {
+            throw new Error("Duplicate entries for layer scope " + name);
+        }
+        return this.sublayerScopes[name] = new LayerScope(name, this);
+    };
     LayerScope.prototype.addMetaProperty = function (name, expressions) {
         if (this.metaProperties[name]) {
             throw new Error("Duplicate entries for metaproperty '" + name + "'");
@@ -91,16 +98,26 @@ var LayerScope = (function (_super) {
     };
     LayerScope.prototype.evaluateLayerScope = function (stack) {
         stack.scopeStack.push(this);
-        // TODO ensure layer has a source and type
         var metaProperties = this.evaluateMetaProperties(stack);
-        var type = metaProperties['type'];
-        assert(type, "Layer must have a type");
+        var hasSublayers = false;
+        var sublayers = _.map(this.sublayerScopes, function (layer) {
+            hasSublayers = true;
+            return layer.evaluateLayerScope(stack);
+        });
+        if (hasSublayers && metaProperties['type']) {
+            assert.equal(metaProperties['type'], 'raster');
+        }
+        else if (hasSublayers) {
+            metaProperties['type'] = 'raster';
+        }
+        // TODO ensure layer has a source and type
         var properties = _.objectCompact(_.extend({
             // TODO calcualte name with _.hash
             id: this.name,
             source: this.evaluateSourceProperty(stack),
-            filter: this.evaluateFilterProperty(stack)
-        }, this.evaluatePaintProperties(type, stack), metaProperties, this.evaluateClassPaintProperties(type, stack)));
+            filter: this.evaluateFilterProperty(stack),
+            layers: sublayers
+        }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));
         stack.scopeStack.pop();
         return properties;
     };

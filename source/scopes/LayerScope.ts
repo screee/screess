@@ -8,13 +8,13 @@ import assert = require('assert');
 
 class LayerScope extends Scope {
 
-  public layerScopes:{[name:string]: LayerScope};
+  public sublayerScopes:{[name:string]: LayerScope};
 
   addLayerScope(name:string, scope:Scope):Scope {
-    if (this.layerScopes[name]) {
+    if (this.sublayerScopes[name]) {
       throw new Error("Duplicate entries for layer scope " + name)
     }
-    return this.layerScopes[name] = new LayerScope(name, this);
+    return this.sublayerScopes[name] = new LayerScope(name, this);
   }
 
   addMetaProperty(name:string, expressions:Expression[]):void {
@@ -54,7 +54,7 @@ class LayerScope extends Scope {
     super(parent)
     this.classScopes = {}
     this.metaProperties = {}
-    this.layerScopes = {}
+    this.sublayerScopes = {}
   }
 
   evaluateFilterProperty(stack:Stack):{} {
@@ -120,26 +120,33 @@ class LayerScope extends Scope {
   evaluateLayerScope(stack:Stack):any {
     stack.scopeStack.push(this);
 
-    var layers = _.map(this.layerScopes, (layer) => {
+    var metaProperties = this.evaluateMetaProperties(stack);
+
+    var hasSublayers = false;
+    var sublayers = _.map(this.sublayerScopes, (layer) => {
+      hasSublayers = true;
       return layer.evaluateLayerScope(stack);
-    })
+    });
+
+    if (hasSublayers && metaProperties['type']) {
+      assert.equal(metaProperties['type'], 'raster');
+    } else if (hasSublayers) {
+      metaProperties['type'] = 'raster'
+    }
 
     // TODO ensure layer has a source and type
-
-    var metaProperties = this.evaluateMetaProperties(stack);
-    var type = metaProperties['type'];
-    assert(type, "Layer must have a type");
 
     var properties = _.objectCompact(_.extend(
       {
         // TODO calcualte name with _.hash
         id: this.name,
         source: this.evaluateSourceProperty(stack),
-        filter: this.evaluateFilterProperty(stack)
+        filter: this.evaluateFilterProperty(stack),
+        layers: sublayers
       },
-      this.evaluatePaintProperties(type, stack),
+      this.evaluatePaintProperties(metaProperties['type'], stack),
       metaProperties,
-      this.evaluateClassPaintProperties(type, stack)
+      this.evaluateClassPaintProperties(metaProperties['type'], stack)
     ));
 
     stack.scopeStack.pop();

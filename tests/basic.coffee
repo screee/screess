@@ -46,3 +46,36 @@ describe "layers", ->
   it "should respect its filter", ->
     stylesheet = parse '#test { $type: background; $filter: @name == "foo" }'
     assert stylesheet.layers[0].filter
+
+describe "sublayers", ->
+
+  it "should allow sublayers", ->
+    stylesheet = parse """
+      #parent {
+
+        #child {
+          $type: background
+          background-color: red
+        }
+
+        raster-opacity: 1;
+      }
+    """
+    assert.equal stylesheet.layers[0].type, 'raster'
+    assert.equal stylesheet.layers[0].paint['raster-opacity'], 1
+    assert.equal stylesheet.layers[0].layers.length, 1
+    assert.equal stylesheet.layers[0].layers[0].type, 'background'
+    assert.equal stylesheet.layers[0].layers[0].paint['background-color'], 'red'
+
+  it "should fail if sublayers are defined but type is not 'raster'", ->
+
+    assert.throws ->
+
+      stylesheet = parse """
+        #parent {
+          $type: background
+          #child {
+            $type: background
+          }
+        }
+      """
