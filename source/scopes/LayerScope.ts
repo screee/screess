@@ -52,6 +52,11 @@ class LayerScope extends Scope {
 
   constructor(public name:string, parent:Scope) {
     super(parent)
+
+    if (!this.name) {
+      this.name = _.uniqueId("layer");
+    }
+
     this.classScopes = {}
     this.metaProperties = {}
     this.sublayerScopes = {}

@@ -60,7 +60,7 @@ scope =
   propertyMacroDefinitionScope
 
 layerScope =
-  ("#" name:identifier { @pushScope(@scope.addLayerScope(name)) }) scopeBody
+  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scopeBody
 
 classScope =
   ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody

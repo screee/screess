@@ -14,6 +14,9 @@ var LayerScope = (function (_super) {
     function LayerScope(name, parent) {
         _super.call(this, parent);
         this.name = name;
+        if (!this.name) {
+            this.name = _.uniqueId("layer");
+        }
         this.classScopes = {};
         this.metaProperties = {};
         this.sublayerScopes = {};

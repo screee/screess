@@ -862,6 +862,9 @@ module.exports = (function() {
       }
       if (s2 !== peg$FAILED) {
         s3 = peg$parseidentifier();
+        if (s3 === peg$FAILED) {
+          s3 = peg$c17;
+        }
         if (s3 !== peg$FAILED) {
           peg$reportedPos = s1;
           s2 = peg$c28(s3);

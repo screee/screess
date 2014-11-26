@@ -32,6 +32,15 @@ describe "layers", ->
     stylesheet = parse '#test {$type: background}'
     assert stylesheet.layers[0]
 
+  it "should be allowed to be anonymous", ->
+    stylesheet = parse '# {$type: background}'
+    assert.equal stylesheet.layers[0].type, "background"
+    assert stylesheet.layers[0].id
+
+  it "should respect its name", ->
+    stylesheet = parse '#test {$type: background}'
+    assert.equal stylesheet.layers[0].id, "test"
+
   it "should respect layout properties", ->
     stylesheet = parse '#test { $type: line; line-cap: square }'
     assert.equal stylesheet.layers[0].layout['line-cap'], 'square'
