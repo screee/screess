@@ -29,12 +29,12 @@ class PropertyMacro {
     var scope = new Scope(this.scope)
     scope.addLiteralValueMacros(args)
 
-    stack.scopeStack.push(scope)
+    stack.scope.push(scope)
     var values = _.extend(
       scope.evaluateProperties(stack, this.scope.properties),
       this.body ? this.body.apply({}, argValues) : null
     )
-    stack.scopeStack.pop()
+    stack.scope.pop()
     return values
   }
 

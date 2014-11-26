@@ -97,7 +97,7 @@ var LayerScope = (function (_super) {
         ;
     };
     LayerScope.prototype.evaluateLayerScope = function (stack) {
-        stack.scopeStack.push(this);
+        stack.scope.push(this);
         var metaProperties = this.evaluateMetaProperties(stack);
         var hasSublayers = false;
         var sublayers = _.map(this.sublayerScopes, function (layer) {
@@ -118,7 +118,7 @@ var LayerScope = (function (_super) {
             filter: this.evaluateFilterProperty(stack),
             layers: sublayers
         }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));
-        stack.scopeStack.pop();
+        stack.scope.pop();
         return properties;
     };
     return LayerScope;

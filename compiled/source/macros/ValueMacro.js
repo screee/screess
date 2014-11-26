@@ -24,11 +24,11 @@ var ValueMacro = (function () {
         return this.createFromFunction(name, argDefinition, parentScope, function (args, stack) {
             var scope = new Scope(parentScope);
             scope.addLiteralValueMacros(args);
-            stack.scopeStack.push(scope);
+            stack.scope.push(scope);
             var values = _.map(expressions, function (expression) {
                 return expression.toValue(scope, stack);
             });
-            stack.scopeStack.pop();
+            stack.scope.pop();
             return values;
         });
     };

@@ -72,7 +72,7 @@ class Scope {
   getValueMacro(name:string, argValues:MacroArgValues, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(stack.valueMacroStack, macro)) {
+      if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
         return macro;
       }
     }
@@ -83,7 +83,7 @@ class Scope {
   getPropertyMacro(name:string, argValues:MacroArgValues, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(stack.propertyMacroStack, macro)) {
+      if (macro.matches(name, argValues) && !_.contains(stack.propertyMacro, macro)) {
         return macro;
       }
     }
@@ -107,9 +107,9 @@ class Scope {
 
       var propertyMacro;
       if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
-        stack.propertyMacroStack.push(propertyMacro);
+        stack.propertyMacro.push(propertyMacro);
         _.extend(output, propertyMacro.evaluateScope(argValues, stack));
-        stack.propertyMacroStack.pop()
+        stack.propertyMacro.pop()
       } else {
         if (argValues.length != 1 || argValues.positionalArgs.length != 1) {
           throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")

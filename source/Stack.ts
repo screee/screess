@@ -1,17 +1,17 @@
 class Stack {
 
-  getGlobalScope() { return this.scopeStack[0] }
-  getScope() { return this.scopeStack[this.scopeStack.length - 1] }
+  getGlobalScope() { return this.scope[0] }
+  getScope() { return this.scope[this.scope.length - 1] }
 
   // TODO drop Stack suffix
-  public valueMacroStack;
-  public propertyMacroStack;
-  public scopeStack;
+  public valueMacro;
+  public propertyMacro;
+  public scope;
 
   constructor() {
-    this.valueMacroStack = []
-    this.propertyMacroStack = []
-    this.scopeStack = []
+    this.valueMacro = []
+    this.propertyMacro = []
+    this.scope = []
   }
 
 }

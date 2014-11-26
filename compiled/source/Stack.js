@@ -1,14 +1,14 @@
 var Stack = (function () {
     function Stack() {
-        this.valueMacroStack = [];
-        this.propertyMacroStack = [];
-        this.scopeStack = [];
+        this.valueMacro = [];
+        this.propertyMacro = [];
+        this.scope = [];
     }
     Stack.prototype.getGlobalScope = function () {
-        return this.scopeStack[0];
+        return this.scope[0];
     };
     Stack.prototype.getScope = function () {
-        return this.scopeStack[this.scopeStack.length - 1];
+        return this.scope[this.scope.length - 1];
     };
     return Stack;
 })();

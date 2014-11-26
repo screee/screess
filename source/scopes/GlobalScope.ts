@@ -68,7 +68,7 @@ class GlobalScope extends Scope {
   }
 
   evaluateGlobalScope(stack:Stack = new Stack()):any {
-    stack.scopeStack.push(this)
+    stack.scope.push(this)
 
     var layers = _.map(this.layerScopes, (layer) => {
       return layer.evaluateLayerScope(stack)
@@ -89,7 +89,7 @@ class GlobalScope extends Scope {
     delete properties["transition-delay"];
     delete properties["transition-duration"];
 
-    stack.scopeStack.pop();
+    stack.scope.pop();
 
     return _.extend(properties, {
       version: 6,

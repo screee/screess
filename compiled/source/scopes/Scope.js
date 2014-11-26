@@ -54,7 +54,7 @@ var Scope = (function () {
     Scope.prototype.getValueMacro = function (name, argValues, stack) {
         for (var i in this.valueMacros) {
             var macro = this.valueMacros[i];
-            if (macro.matches(name, argValues) && !_.contains(stack.valueMacroStack, macro)) {
+            if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
                 return macro;
             }
         }
@@ -63,7 +63,7 @@ var Scope = (function () {
     Scope.prototype.getPropertyMacro = function (name, argValues, stack) {
         for (var i in this.propertyMacros) {
             var macro = this.propertyMacros[i];
-            if (macro.matches(name, argValues) && !_.contains(stack.propertyMacroStack, macro)) {
+            if (macro.matches(name, argValues) && !_.contains(stack.propertyMacro, macro)) {
                 return macro;
             }
         }
@@ -80,9 +80,9 @@ var Scope = (function () {
             }), this, stack);
             var propertyMacro;
             if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
-                stack.propertyMacroStack.push(propertyMacro);
+                stack.propertyMacro.push(propertyMacro);
                 _.extend(output, propertyMacro.evaluateScope(argValues, stack));
-                stack.propertyMacroStack.pop();
+                stack.propertyMacro.pop();
             }
             else {
                 if (argValues.length != 1 || argValues.positionalArgs.length != 1) {

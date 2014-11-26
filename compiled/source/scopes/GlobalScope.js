@@ -59,7 +59,7 @@ var GlobalScope = (function (_super) {
     };
     GlobalScope.prototype.evaluateGlobalScope = function (stack) {
         if (stack === void 0) { stack = new Stack(); }
-        stack.scopeStack.push(this);
+        stack.scope.push(this);
         var layers = _.map(this.layerScopes, function (layer) {
             return layer.evaluateLayerScope(stack);
         });
@@ -75,7 +75,7 @@ var GlobalScope = (function (_super) {
         };
         delete properties["transition-delay"];
         delete properties["transition-duration"];
-        stack.scopeStack.pop();
+        stack.scope.pop();
         return _.extend(properties, {
             version: 6,
             layers: layers,

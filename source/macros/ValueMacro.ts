@@ -27,9 +27,9 @@ class ValueMacro {
       var scope = new Scope(parentScope)
       scope.addLiteralValueMacros(args)
 
-      stack.scopeStack.push(scope);
+      stack.scope.push(scope);
       var values = _.map(expressions, (expression) => { return expression.toValue(scope, stack) } )
-      stack.scopeStack.pop();
+      stack.scope.pop();
       return values;
     });
   }

@@ -11,9 +11,9 @@ var ClassScope = (function (_super) {
         _super.apply(this, arguments);
     }
     ClassScope.prototype.evaluateClassScope = function (stack) {
-        stack.scopeStack.push(this);
+        stack.scope.push(this);
         this.evaluateProperties(stack, this.properties);
-        stack.scopeStack.pop();
+        stack.scope.pop();
     };
     return ClassScope;
 })(Scope);

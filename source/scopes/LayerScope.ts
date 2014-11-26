@@ -118,7 +118,7 @@ class LayerScope extends Scope {
   }
 
   evaluateLayerScope(stack:Stack):any {
-    stack.scopeStack.push(this);
+    stack.scope.push(this);
 
     var metaProperties = this.evaluateMetaProperties(stack);
 
@@ -149,7 +149,7 @@ class LayerScope extends Scope {
       this.evaluateClassPaintProperties(metaProperties['type'], stack)
     ));
 
-    stack.scopeStack.pop();
+    stack.scope.pop();
 
     return properties;
   }

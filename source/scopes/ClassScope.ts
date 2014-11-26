@@ -5,9 +5,9 @@ import _ = require("../utilities");
 class ClassScope extends Scope {
 
   evaluateClassScope(stack:Stack):any {
-    stack.scopeStack.push(this);
+    stack.scope.push(this);
     this.evaluateProperties(stack, this.properties);
-    stack.scopeStack.pop();
+    stack.scope.pop();
   }
 }
 
