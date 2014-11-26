@@ -32,7 +32,7 @@ class Scope {
 
   addProperty(name:string, expressions:Expression[]) {
     if (this.properties[name]) {
-      throw new Error("Duplicate entries for property '#{name}'")
+      throw new Error("Duplicate entries for property " + name)
     }
 
     return this.properties[name] = expressions;
@@ -112,7 +112,7 @@ class Scope {
         stack.propertyMacro.pop()
       } else {
         if (argValues.length != 1 || argValues.positional.length != 1) {
-          throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
+          throw new Error("Cannot apply " + argValues.length + " args to primitive property " + name)
         }
 
         output[name] = Value.evaluate(argValues.positional[0], stack);

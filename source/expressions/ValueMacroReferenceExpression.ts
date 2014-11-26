@@ -21,7 +21,7 @@ class ValueMacroReferenceExpression extends Expression {
 
     var macro = scope.getValueMacro(this.name, argValues, stack);
     if (!macro ) {
-      throw new Error("Could not find value macro '#{this.name}'");
+      throw new Error("Could not find value macro " + this.name);
     }
 
     return macro.toValues(argValues, stack);

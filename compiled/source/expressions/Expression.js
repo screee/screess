@@ -5,7 +5,6 @@ var Expression = (function () {
     Expression.prototype.toValue = function (scope, stack) {
         var values = this.toValues(scope, stack);
         if (values.length > 1) {
-            console.log(values);
             throw new Error("Expected 1 value but found " + values.length + " values");
         }
         return values[0];

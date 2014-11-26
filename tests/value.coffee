@@ -22,6 +22,11 @@ describe "value", ->
     it "should parse with space seperators", ->
       assert.deepEqual parseValue("[1 2 3]"), [1,2,3]
 
+  describe "map", ->
+
+    it "should parse with named parameters", ->
+      assert.deepEqual parseValue("[one:1 two:2 three:3]"), {one: 1, two: 2, three: 3}
+
   describe "number", ->
 
     it "should parse an integer", ->

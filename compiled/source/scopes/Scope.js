@@ -19,7 +19,7 @@ var Scope = (function () {
     };
     Scope.prototype.addProperty = function (name, expressions) {
         if (this.properties[name]) {
-            throw new Error("Duplicate entries for property '#{name}'");
+            throw new Error("Duplicate entries for property " + name);
         }
         return this.properties[name] = expressions;
     };
@@ -86,7 +86,7 @@ var Scope = (function () {
             }
             else {
                 if (argValues.length != 1 || argValues.positional.length != 1) {
-                    throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'");
+                    throw new Error("Cannot apply " + argValues.length + " args to primitive property " + name);
                 }
                 output[name] = Value.evaluate(argValues.positional[0], stack);
             }

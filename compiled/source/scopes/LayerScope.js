@@ -72,7 +72,7 @@ var LayerScope = (function (_super) {
     LayerScope.prototype.evaluateClassPaintProperties = function (type, stack) {
         // TODO ensure all properties are paint properties, not layout properties
         return _.objectMap(this.classScopes, function (scope, name) {
-            return ["paint.#{name}", scope.evaluateClassScope(stack)];
+            return ["paint." + name, scope.evaluateClassScope(stack)];
         });
     };
     LayerScope.prototype.evaluatePaintProperties = function (type, stack) {

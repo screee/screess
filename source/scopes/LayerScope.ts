@@ -84,7 +84,7 @@ class LayerScope extends Scope {
     return _.objectMap(
       this.classScopes,
       (scope, name) => {
-        return ["paint.#{name}", scope.evaluateClassScope(stack)]
+        return ["paint." + name, scope.evaluateClassScope(stack)]
       }
     )
   }

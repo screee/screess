@@ -19,6 +19,7 @@
   @SetOperatorExpression = require('./expressions/SetOperatorExpression')
   @NotOperatorExpression = require('./expressions/NotOperatorExpression')
   @ArrayExpression = require('./expressions/ArrayExpression')
+  @MapExpression = require('./expressions/MapExpression')
 
   @globalScope = @scope = new @GlobalScope()
   @stack = []
@@ -174,6 +175,7 @@ valueExpression =
   literalValueExpression /
   valueMacroReferenceValueExpression /
   stringExpression /
+  mapExpression /
   arrayExpression
 
 valueMacroReferenceValueExpression =
@@ -195,6 +197,16 @@ literalValueExpression =
 
 arrayExpression =
   "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { new @ArrayExpression(expressions) }
+
+mapExpression =
+  "[" whitespace* expressions:mapExpressionItems whitespace* "]" { new @MapExpression(expressions) }
+
+mapExpressionItems =
+  head:mapExpressionItem tail:(argumentSeperatorStrong mapExpressionItem)* { [head].concat(tail.map (e) -> e[1]) }
+
+mapExpressionItem =
+  name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
