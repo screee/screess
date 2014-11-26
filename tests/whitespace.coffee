@@ -89,3 +89,28 @@ describe "whitespace", ->
       }
     """
     assert.deepEqual stylesheet.layers[0].type, 'background'
+
+describe 'comments', ->
+  it "should be ignored at the end of a line", ->
+    stylesheet = parse '''
+      #test { // test
+        $type: background // test
+        background-color: red // test
+      }
+    '''
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
+
+  it "should be ignored on its own line", ->
+    stylesheet = parse '''
+      // test
+      #test {
+        // test
+        $type: background
+        // test
+        background-color: red
+        // test
+      }
+    '''
+    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'

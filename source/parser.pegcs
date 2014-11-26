@@ -37,12 +37,14 @@ global = statements { @globalScope.evaluateGlobalScope() }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
+comment = "//" [^\n\r]* { null }
+
 whitespaceWeak = " " / "\t" { null }
-whitespaceStrong = "\n" / "\r" { null }
+whitespaceStrong = comment? "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
 
 statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
-argumentSeperatorWeak = (((whitespaceWeak)* "," (whitespaceWeak)*) / (whitespaceWeak)+) { null }
+argumentSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
 argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +87,7 @@ scopeBody =
 statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)?
 
 statement =
+  comment /
   filterProperty /
   metaProperty /
   valueMacroDefinition /
