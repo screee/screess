@@ -60,6 +60,9 @@ describe "value", ->
     it "should parse with literal values interpolated", ->
       assert.equal parseValue('"test #{7} test"'), "test 7 test"
 
+    it "should parse with attribute reference values", ->
+      assert.equal parseValue('"test @foo test"'), "test {foo} test"
+
     it "should parse with attribute reference values interpolated", ->
       assert.equal parseValue('"test #{@foo} test"'), "test {foo} test"
 

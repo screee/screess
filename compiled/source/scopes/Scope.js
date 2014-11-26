@@ -1,6 +1,6 @@
 var Value = require("../values/value");
-var MacroArgValues = require("../macros/MacroArgValues");
-var MacroArgDefinitions = require('../macros/MacroArgDefinitions');
+var Values = require("../Values");
+var ValuesDefinition = require('../ValuesDefinition');
 var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var _ = require("../utilities");
@@ -26,7 +26,7 @@ var Scope = (function () {
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (name in values) {
             var value = values[name];
-            this.addValueMacro(name, MacroArgDefinitions.ZERO, [new LiteralExpression(value)]);
+            this.addValueMacro(name, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
         }
     };
     // TODO overload function for different arg types
@@ -75,7 +75,7 @@ var Scope = (function () {
         var output = {};
         for (var name in properties) {
             var expressions = properties[name];
-            var argValues = MacroArgValues.createFromExpressions(_.map(expressions, function (expression) {
+            var argValues = Values.createFromExpressions(_.map(expressions, function (expression) {
                 return { expression: expression };
             }), this, stack);
             var propertyMacro;
@@ -85,10 +85,10 @@ var Scope = (function () {
                 stack.propertyMacro.pop();
             }
             else {
-                if (argValues.length != 1 || argValues.positionalArgs.length != 1) {
+                if (argValues.length != 1 || argValues.positional.length != 1) {
                     throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'");
                 }
-                output[name] = Value.evaluate(argValues.positionalArgs[0], stack);
+                output[name] = Value.evaluate(argValues.positional[0], stack);
             }
         }
         return output;

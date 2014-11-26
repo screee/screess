@@ -1,6 +1,6 @@
 import Value = require("../values/value")
-import MacroArgValues = require("../macros/MacroArgValues")
-import MacroArgDefinitions = require('../macros/MacroArgDefinitions')
+import Values = require("../Values")
+import ValuesDefinition = require('../ValuesDefinition')
 import assert = require("assert")
 import LiteralExpression = require('../expressions/LiteralExpression')
 import GlobalScope = require('./GlobalScope');
@@ -41,12 +41,12 @@ class Scope {
   addLiteralValueMacros(values:{[name:string]:any}):void {
     for (name in values) {
       var value = values[name];
-      this.addValueMacro(name, MacroArgDefinitions.ZERO, [new LiteralExpression(value)]);
+      this.addValueMacro(name, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
     }
   }
 
   // TODO overload function for different arg types
-  addValueMacro(name:String, argDefinition:MacroArgDefinitions, body:any) {
+  addValueMacro(name:String, argDefinition:ValuesDefinition, body:any) {
     var ValueMacro = require("../macros/ValueMacro");
     // TODO move this logic to ValueMacro
     var macro;
@@ -61,7 +61,7 @@ class Scope {
     return this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:MacroArgDefinitions, body:MacroArgDefinitions):Scope {
+  addPropertyMacro(name:string, argDefinition:ValuesDefinition, body:ValuesDefinition):Scope {
     var PropertyMacro = require("../macros/PropertyMacro");
     var macro = new PropertyMacro(this, name, argDefinition, body)
     this.propertyMacros.unshift(macro)
@@ -69,7 +69,7 @@ class Scope {
     return macro.scope
   }
 
-  getValueMacro(name:string, argValues:MacroArgValues, stack:Stack):ValueMacro {
+  getValueMacro(name:string, argValues:Values, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
@@ -80,7 +80,7 @@ class Scope {
     return this.parent ? this.parent.getValueMacro(name, argValues, stack) : null;
   }
 
-  getPropertyMacro(name:string, argValues:MacroArgValues, stack:Stack):PropertyMacro {
+  getPropertyMacro(name:string, argValues:Values, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
       if (macro.matches(name, argValues) && !_.contains(stack.propertyMacro, macro)) {
@@ -99,7 +99,7 @@ class Scope {
     for (var name in properties) {
       var expressions = properties[name];
 
-      var argValues = MacroArgValues.createFromExpressions(
+      var argValues = Values.createFromExpressions(
         _.map(expressions, (expression) => { return { expression: expression } }),
         this,
         stack
@@ -111,11 +111,11 @@ class Scope {
         _.extend(output, propertyMacro.evaluateScope(argValues, stack));
         stack.propertyMacro.pop()
       } else {
-        if (argValues.length != 1 || argValues.positionalArgs.length != 1) {
+        if (argValues.length != 1 || argValues.positional.length != 1) {
           throw new Error("Cannot apply #{argValues.length} args to primitive property '#{name}'")
         }
 
-        output[name] = Value.evaluate(argValues.positionalArgs[0], stack);
+        output[name] = Value.evaluate(argValues.positional[0], stack);
       }
     }
 

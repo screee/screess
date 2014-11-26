@@ -1,6 +1,6 @@
 import Expression = require('../expressions/Expression')
-import MacroArgDefinitions = require('../macros/MacroArgDefinitions')
-import MacroArgValues = require('../macros/MacroArgValues')
+import ValuesDefinition = require('../ValuesDefinition')
+import Values = require('../Values')
 import Scope = require('../scopes/Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
@@ -11,7 +11,7 @@ class ValueMacro {
 
   // TODO make overloaded constructors
   static createFromValue(name, scope, value) {
-    return this.createFromExpression(name, MacroArgDefinitions.ZERO, scope, new LiteralExpression(value))
+    return this.createFromExpression(name, ValuesDefinition.ZERO, scope, new LiteralExpression(value))
   }
 
   // TODO make overloaded constructors
@@ -40,14 +40,14 @@ class ValueMacro {
     return new ValueMacro(name, argDefinition, parentScope, body);
   }
 
-  constructor(public name:string, public argDefinition:MacroArgDefinitions, public parentScope:Scope, public body:Function) {}
+  constructor(public name:string, public argDefinition:ValuesDefinition, public parentScope:Scope, public body:Function) {}
 
-  matches(name:string, argValues:MacroArgValues):boolean {
+  matches(name:string, argValues:Values):boolean {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  toValues(argValues:MacroArgValues, stack:Stack) {
-    var args = argValues.toArguments(this.argDefinition, stack);
+  toValues(argValues:Values, stack:Stack) {
+    var args = argValues.evaluate(this.argDefinition, stack);
     var values = this.body(args, stack);
     return values;
   }

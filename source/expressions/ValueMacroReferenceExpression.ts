@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import util = require('util');
 import Scope = require("../scopes/Scope");
-import MacroArgValues = require('../macros/MacroArgValues');
+import Values = require('../Values');
 import Stack = require("../Stack");
 import _ = require("../utilities");
 
@@ -13,7 +13,7 @@ class ValueMacroReferenceExpression extends Expression {
   }
 
   toValues(scope:Scope, stack:Stack):any[] {
-    var argValues = MacroArgValues.createFromExpressions(
+    var argValues = Values.createFromExpressions(
       this.argumentExpressions,
       scope,
       stack

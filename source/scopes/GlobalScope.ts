@@ -5,7 +5,7 @@ import PropertyMacro = require('../macros/PropertyMacro');
 import assert = require('assert');
 import Stack = require('../Stack');
 import Value = require('../values/Value');
-import MacroArgValues = require('../macros/MacroArgValues');
+import Values = require('../Values');
 import _ = require("../utilities");
 var Globals = require('../globals');
 
@@ -45,7 +45,7 @@ class GlobalScope extends Scope {
     return this
   }
 
-  getValueMacro(name:string, argValues:MacroArgValues, stack:Stack):ValueMacro {
+  getValueMacro(name:string, argValues:Values, stack:Stack):ValueMacro {
     var macro;
     if (macro = super.getValueMacro(name, argValues, stack)) {
       return macro;

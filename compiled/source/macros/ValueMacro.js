@@ -1,4 +1,4 @@
-var MacroArgDefinitions = require('../macros/MacroArgDefinitions');
+var ValuesDefinition = require('../ValuesDefinition');
 var Scope = require('../scopes/Scope');
 var LiteralExpression = require('../expressions/LiteralExpression');
 var assert = require('assert');
@@ -12,7 +12,7 @@ var ValueMacro = (function () {
     }
     // TODO make overloaded constructors
     ValueMacro.createFromValue = function (name, scope, value) {
-        return this.createFromExpression(name, MacroArgDefinitions.ZERO, scope, new LiteralExpression(value));
+        return this.createFromExpression(name, ValuesDefinition.ZERO, scope, new LiteralExpression(value));
     };
     // TODO make overloaded constructors
     ValueMacro.createFromExpression = function (name, argDefinition, parentScope, expression) {
@@ -41,7 +41,7 @@ var ValueMacro = (function () {
         return name == this.name && argValues.matches(this.argDefinition);
     };
     ValueMacro.prototype.toValues = function (argValues, stack) {
-        var args = argValues.toArguments(this.argDefinition, stack);
+        var args = argValues.evaluate(this.argDefinition, stack);
         var values = this.body(args, stack);
         return values;
     };

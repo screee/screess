@@ -1,22 +1,22 @@
 import assert = require('assert');
-import MacroArgDefinitions = require('./MacroArgDefinitions');
-import Scope = require("../scopes/Scope");
-import Stack = require("../Stack");
-import _ = require('../utilities');
-import Expression = require('../expressions/Expression');
+import ValuesDefinition = require('./ValuesDefinition');
+import Scope = require("./scopes/Scope");
+import Stack = require("./Stack");
+import _ = require('./utilities');
+import Expression = require('./expressions/Expression');
 
 interface Value {
   name?: string;
   expression: Expression;
 }
 
-class MacroArgValues {
+class Values {
 
   // TODO make all factory methods into overloaded constructors
   // TODO add types to arguments
   static createFromExpressions(args:Value[], scope:Scope, stack:Stack) {
-    var positionalArgs:Value[] = [];
-    var namedArgs:{[s:string]:Value} = {};
+    var positional:Value[] = [];
+    var named:{[s:string]:Value} = {};
 
     for (var i in args) {
       var arg = args[i];
@@ -24,41 +24,41 @@ class MacroArgValues {
 
       if (arg.name) {
         assert(argValues.length == 1);
-        namedArgs[arg.name] = argValues[0]
+        named[arg.name] = argValues[0]
       } else {
-        positionalArgs = positionalArgs.concat(argValues)
+        positional = positional.concat(argValues)
       }
     }
 
-    return new MacroArgValues(positionalArgs, namedArgs);
+    return new Values(positional, named);
   }
 
   public length:number;
 
   // TODO add types to arguments
   constructor(
-      public positionalArgs:Value[],
-      public namedArgs:{[s:string]:Value}
+      public positional:Value[],
+      public named:{[s:string]:Value}
   ) {
-    this.length = this.positionalArgs.length + _.values(this.namedArgs).length
+    this.length = this.positional.length + _.values(this.named).length
   }
 
-  matches(argDefinition:MacroArgDefinitions):boolean {
+  matches(argDefinition:ValuesDefinition):boolean {
     if (!argDefinition) { return true }
 
     var indicies = _.times(argDefinition.length, () => { return false });
 
     // Mark named arguments
-    for (var name in this.namedArgs) {
-      var value = this.namedArgs[name];
-      if (!argDefinition.namedArgs[name]) { return false; }
-      indicies[argDefinition.namedArgs[name].index] = true
+    for (var name in this.named) {
+      var value = this.named[name];
+      if (!argDefinition.named[name]) { return false; }
+      indicies[argDefinition.named[name].index] = true
     }
 
     // Mark positional arguments
     var positionalIndex = -1
-    for (var i in this.positionalArgs) {
-      var value = this.positionalArgs[i]
+    for (var i in this.positional) {
+      var value = this.positional[i]
       while (indicies[++positionalIndex] && positionalIndex < argDefinition.definitions.length) {}
       if (positionalIndex >= argDefinition.definitions.length) { return false  }
       indicies[positionalIndex] = true;
@@ -75,8 +75,8 @@ class MacroArgValues {
     return _.all(indicies);
   }
 
-  toArguments(
-      argDefinition:MacroArgDefinitions,
+  evaluate(
+      argDefinition:ValuesDefinition,
       stack:Stack
   ):{[s:string]: any} {
 
@@ -85,16 +85,16 @@ class MacroArgValues {
     if (!argDefinition) {
       return _.extend(
         _.objectMap(
-          this.positionalArgs,
+          this.positional,
           (values, index) => { return [index.toString(), values]; }
         ),
-        this.namedArgs
+        this.named
       );
     } else {
       var args:{[s:string]: any} = {}
 
-      for (var name in this.namedArgs) {
-        var value = this.namedArgs[name];
+      for (var name in this.named) {
+        var value = this.named[name];
         args[name] = value
       }
 
@@ -102,8 +102,8 @@ class MacroArgValues {
       for (var i in argDefinition.definitions) {
         var definition = argDefinition.definitions[i];
         if (!args[definition.name]) {
-          if (positionalIndex < this.positionalArgs.length) {
-            args[definition.name] = this.positionalArgs[positionalIndex++]
+          if (positionalIndex < this.positional.length) {
+            args[definition.name] = this.positional[positionalIndex++]
           } else {
             args[definition.name] = definition.expression.toValue(argDefinition.scope, stack)
           }
@@ -115,6 +115,6 @@ class MacroArgValues {
   }
 }
 
-export = MacroArgValues;
+export = Values;
 
 

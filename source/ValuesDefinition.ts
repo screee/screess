@@ -1,7 +1,7 @@
 import assert = require('assert')
-import Scope = require('../scopes/Scope')
-import _ = require('../utilities')
-import Expression = require('../expressions/Expression');
+import Scope = require('./scopes/Scope')
+import _ = require('./utilities')
+import Expression = require('./expressions/Expression');
 
 interface Definition {
   name: string;
@@ -9,12 +9,12 @@ interface Definition {
   expression?: Expression;
 }
 
-class MacroArgDefinitions {
+class ValuesDefinition {
 
-  static ZERO:MacroArgDefinitions = new MacroArgDefinitions([], null);
+  static ZERO:ValuesDefinition = new ValuesDefinition([], null);
 
-  // TODO create type for namedArgs
-  public namedArgs;
+  // TODO create type for named
+  public named;
   public length:number;
 
   // TODO create type for definitions
@@ -23,13 +23,13 @@ class MacroArgDefinitions {
       assert(this.scope != null);
     }
 
-    this.namedArgs = {};
+    this.named = {};
 
     for (var index in this.definitions) {
       var definition = this.definitions[index];
       definition.index = index
       if (definition.name) {
-        this.namedArgs[definition.name] = definition;
+        this.named[definition.name] = definition;
       }
     }
 
@@ -37,4 +37,4 @@ class MacroArgDefinitions {
   }
 }
 
-export = MacroArgDefinitions;
+export = ValuesDefinition;

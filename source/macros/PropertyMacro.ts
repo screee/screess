@@ -1,8 +1,8 @@
 import LiteralExpression = require("../expressions/LiteralExpression")
 import Scope  = require('../scopes/Scope');
 import assert = require("assert");
-import MacroArgValues = require("./MacroArgValues");
-import MacroArgDefinitions = require("./MacroArgDefinitions");
+import Values = require("../Values");
+import ValuesDefinition = require("../ValuesDefinition");
 import Stack = require("../Stack");
 import _ = require("../utilities");
 
@@ -12,7 +12,7 @@ class PropertyMacro {
   public argLengthMin:number;
   public argLengthMax:number;
 
-  constructor(public parentScope:Scope, public name:string, public argDefinition:MacroArgDefinitions, public body:Function = null) {
+  constructor(public parentScope:Scope, public name:string, public argDefinition:ValuesDefinition, public body:Function = null) {
     var ClassScope = require("../scopes/ClassScope")
     this.scope = new ClassScope(this.parentScope)
 
@@ -23,8 +23,8 @@ class PropertyMacro {
     this.argLengthMax = this.argDefinition.length;
   }
 
-  evaluateScope(argValues:MacroArgValues, stack:Stack) {
-    var args = argValues.toArguments(this.argDefinition, stack)
+  evaluateScope(argValues:Values, stack:Stack) {
+    var args = argValues.evaluate(this.argDefinition, stack)
 
     var scope = new Scope(this.scope)
     scope.addLiteralValueMacros(args)
@@ -38,7 +38,7 @@ class PropertyMacro {
     return values
   }
 
-  matches(name:string, argValues:MacroArgValues):boolean {
+  matches(name:string, argValues:Values):boolean {
     return name == this.name && argValues.matches(this.argDefinition)
   }
 

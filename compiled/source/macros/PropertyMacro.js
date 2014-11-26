@@ -15,7 +15,7 @@ var PropertyMacro = (function () {
         this.argLengthMax = this.argDefinition.length;
     }
     PropertyMacro.prototype.evaluateScope = function (argValues, stack) {
-        var args = argValues.toArguments(this.argDefinition, stack);
+        var args = argValues.evaluate(this.argDefinition, stack);
         var scope = new Scope(this.scope);
         scope.addLiteralValueMacros(args);
         stack.scope.push(scope);

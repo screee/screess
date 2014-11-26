@@ -15,4 +15,4 @@ var Value = (function () {
     return Value;
 })();
 module.exports = Value;
-//# sourceMappingURL=Value.js.map
+//# sourceMappingURL=value.js.map
