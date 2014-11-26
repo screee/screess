@@ -96,7 +96,7 @@ describe 'comments', ->
       #test { // test
         $type: background // test
         background-color: red // test
-      }
+      } // test
     '''
     assert.deepEqual stylesheet.layers[0].type, 'background'
     assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
@@ -111,6 +111,7 @@ describe 'comments', ->
         background-color: red
         // test
       }
+      //test
     '''
     assert.deepEqual stylesheet.layers[0].type, 'background'
     assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'

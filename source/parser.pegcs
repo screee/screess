@@ -84,7 +84,7 @@ scopeBody =
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)?
+statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)? comment? whitespace*
 
 statement =
   comment /
