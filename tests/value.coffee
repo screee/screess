@@ -36,7 +36,8 @@ describe "value", ->
     it "should allow property access by subscript notation", ->
       assert.deepEqual parseValue('[one:1 two:2 three:3]["three"]'), 3
 
-    it "should allow maps inside maps"
+    it "should allow maps inside maps", ->
+      assert.deepEqual parseValue("[one:[two:[three: 3]]]"), {one: {two: {three: 3}}}
 
     it "shoud allow recursive property accesses"
 
