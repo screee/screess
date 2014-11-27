@@ -52,8 +52,7 @@ var Scope = (function () {
     };
     Scope.prototype.addClassScope = function (name) {
         if (!this.classScopes[name]) {
-            var _ClassScope = require('./ClassScope');
-            this.classScopes[name] = new _ClassScope(this);
+            this.classScopes[name] = new Scope(this);
         }
         return this.classScopes[name];
     };
@@ -176,6 +175,12 @@ var Scope = (function () {
             sources: sources,
             transition: transition
         });
+    };
+    Scope.prototype.evaluateClassScope = function (stack) {
+        // TODO assert there are no child layers or classes
+        stack.scope.push(this);
+        this.evaluateProperties(stack, this.properties);
+        stack.scope.pop();
     };
     return Scope;
 })();

@@ -9,7 +9,6 @@ import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
 import _ = require("../utilities")
 import LayerScope = require('./LayerScope')
-import ClassScope = require('./ClassScope')
 import ScopeType = require('./ScopeType')
 var Globals = require('../globals');
 
@@ -26,7 +25,7 @@ class Scope {
   public propertyMacros:PropertyMacro[];
   public loops:Loop[]
   public layerScopes:{[name:string]: LayerScope}
-  public classScopes:{[name:string]: ClassScope}
+  public classScopes:{[name:string]: Scope}
   public sources:{[name:string]: any};
   public isGlobal:boolean;
 
@@ -81,8 +80,7 @@ class Scope {
 
   addClassScope(name:string):Scope {
     if (!this.classScopes[name]) {
-      var _ClassScope = require('./ClassScope')
-      this.classScopes[name] = new _ClassScope(this)
+      this.classScopes[name] = new Scope(this)
     }
     return this.classScopes[name];
   }
@@ -227,6 +225,14 @@ class Scope {
       sources: sources,
       transition: transition
     })
+  }
+
+  evaluateClassScope(stack:Stack):any {
+    // TODO assert there are no child layers or classes
+
+    stack.scope.push(this);
+    this.evaluateProperties(stack, this.properties);
+    stack.scope.pop();
   }
 
 }

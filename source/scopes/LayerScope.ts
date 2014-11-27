@@ -1,5 +1,4 @@
 import Scope = require("./Scope")
-import ClassScope = require('./ClassScope')
 import Expression = require('../expressions/Expression');
 import Stack = require('../Stack')
 import _ = require('../utilities')
@@ -33,7 +32,6 @@ class LayerScope extends Scope {
     this.source = source
   }
 
-  public classScopes:{[name:string]: ClassScope};
   public metaProperties:{[name:string]: Expression[]};
   public filterExpression:Expression;
   public source:string;
