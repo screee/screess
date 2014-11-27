@@ -214,7 +214,7 @@ class Scope {
   evaluateGlobalScope(stack:Stack = new Stack()):any {
     stack.scope.push(this)
 
-    var layers = this.evaluateLayers(stack).concat(this.evaluateLoopLayers(stack));
+    var layers = this.evaluateLayers(stack);
 
     var properties = this.evaluateProperties(stack)
 
@@ -321,17 +321,13 @@ class Scope {
   evaluateLayerScope(stack:Stack):any {
     stack.scope.push(this);
 
-    var hasSublayers = false;
-    var sublayers = _.map(this.layerScopes, (layer) => {
-      hasSublayers = true;
-      return layer.evaluateLayerScope(stack);
-    });
+    var layers = this.evaluateLayers(stack);
 
     var metaProperties = this.evaluateMetaProperties(stack);
 
-    if (hasSublayers && metaProperties['type']) {
+    if (layers.length && metaProperties['type']) {
       assert.equal(metaProperties['type'], 'raster');
-    } else if (hasSublayers) {
+    } else if (layers.length) {
       metaProperties['type'] = 'raster'
     }
 
@@ -342,7 +338,7 @@ class Scope {
       {
         id: this.name,
         filter: this.evaluateFilterProperty(stack),
-        layers: sublayers
+        layers: layers
       },
       metaProperties,
       this.evaluatePaintProperties(metaProperties['type'], stack),
@@ -383,8 +379,10 @@ class Scope {
     }
   }
 
-  evaluateLoopLayers(stack:Stack):{}[] {
-    var layers = []
+  evaluateLayers(stack:Stack):{}[] {
+    var layers = _.map(this.layerScopes, (layer) => {
+      return layer.evaluateLayerScope(stack);
+    });
 
     this.eachLoopScope(stack, (scope) => {
       console.log(scope.evaluateLayers(stack))
@@ -392,12 +390,6 @@ class Scope {
     });
 
     return layers;
-  }
-
-  evaluateLayers(stack:Stack):{}[] {
-    return _.map(this.layerScopes, (layer) => {
-      return layer.evaluateLayerScope(stack);
-    });
   }
 
 }

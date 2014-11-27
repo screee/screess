@@ -166,7 +166,7 @@ var Scope = (function () {
     Scope.prototype.evaluateGlobalScope = function (stack) {
         if (stack === void 0) { stack = new Stack(); }
         stack.scope.push(this);
-        var layers = this.evaluateLayers(stack).concat(this.evaluateLoopLayers(stack));
+        var layers = this.evaluateLayers(stack);
         var properties = this.evaluateProperties(stack);
         var sources = _.objectMapValues(this.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
@@ -244,16 +244,12 @@ var Scope = (function () {
     };
     Scope.prototype.evaluateLayerScope = function (stack) {
         stack.scope.push(this);
-        var hasSublayers = false;
-        var sublayers = _.map(this.layerScopes, function (layer) {
-            hasSublayers = true;
-            return layer.evaluateLayerScope(stack);
-        });
+        var layers = this.evaluateLayers(stack);
         var metaProperties = this.evaluateMetaProperties(stack);
-        if (hasSublayers && metaProperties['type']) {
+        if (layers.length && metaProperties['type']) {
             assert.equal(metaProperties['type'], 'raster');
         }
-        else if (hasSublayers) {
+        else if (layers.length) {
             metaProperties['type'] = 'raster';
         }
         // TODO ensure layer has a source and type
@@ -261,7 +257,7 @@ var Scope = (function () {
         var properties = _.objectCompact(_.extend({
             id: this.name,
             filter: this.evaluateFilterProperty(stack),
-            layers: sublayers
+            layers: layers
         }, metaProperties, this.evaluatePaintProperties(metaProperties['type'], stack), this.evaluateClassPaintProperties(metaProperties['type'], stack)));
         stack.scope.pop();
         return properties;
@@ -294,18 +290,15 @@ var Scope = (function () {
             }
         }
     };
-    Scope.prototype.evaluateLoopLayers = function (stack) {
-        var layers = [];
+    Scope.prototype.evaluateLayers = function (stack) {
+        var layers = _.map(this.layerScopes, function (layer) {
+            return layer.evaluateLayerScope(stack);
+        });
         this.eachLoopScope(stack, function (scope) {
             console.log(scope.evaluateLayers(stack));
             layers = layers.concat(scope.evaluateLayers(stack));
         });
         return layers;
-    };
-    Scope.prototype.evaluateLayers = function (stack) {
-        return _.map(this.layerScopes, function (layer) {
-            return layer.evaluateLayerScope(stack);
-        });
     };
     return Scope;
 })();
