@@ -1,8 +1,10 @@
 {
   require 'coffee-script'
   @_ = require './utilities'
+  assert = require 'assert'
 
-  @GlobalScope = require('./scopes/GlobalScope')
+  @Scope = require('./scopes/Scope')
+  @ScopeType = require('./scopes/ScopeType')
 
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
@@ -21,9 +23,13 @@
   @ArrayExpression = require('./expressions/ArrayExpression')
   @MapExpression = require('./expressions/MapExpression')
 
-  @globalScope = @scope = new @GlobalScope()
-  @pushScope = (scope) -> @scope = scope
-  @popScope = -> @scope = @scope.parent
+  @globalScope = @scope = new @Scope(@ScopeType.GLOBAL, null)
+  @pushScope = (scope) =>
+    assert(scope instanceof @Scope, "Malformed arguments to pushScope")
+    assert(scope.parent == @scope, "Child scope must be parent of current scope")
+    @scope = scope
+  @popScope = =>
+    @scope = @scope.parent
 }
 
 global = statements { @globalScope.evaluateGlobalScope() }
@@ -45,6 +51,7 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 expressionsSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
 expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
+// TODO these should return a Values object
 expressionsUnnamedWeak =
   head:valueExpression tail:(expressionsSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
   "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
@@ -70,6 +77,7 @@ statement =
   layer /
   class /
   propertyMacroDefinition /
+  loop /
   property
 
 filterProperty =
@@ -92,6 +100,9 @@ valueMacroDefinitionArguments =
 valueMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
   name:identifier { name: name }
+
+loop =
+  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, collection)) }) scope
 
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope

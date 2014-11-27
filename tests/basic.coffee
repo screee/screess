@@ -26,6 +26,18 @@ describe "sources", ->
     """
     assert.deepEqual  _.values(stylesheet.sources)[0].tileSize, 17
 
+# describe "loops", ->
+
+#   it "should iterate over an array", ->
+#     stylesheet = parse """
+#       for value in [0,1,2] {
+#         # { $value: value }
+#       }
+#     """
+#     assert.equal stylesheet.layers[0].value, 0
+#     assert.equal stylesheet.layers[1].value, 1
+#     assert.equal stylesheet.layers[2].value, 2
+
 describe "layers", ->
 
   it "should be in the stylesheet", ->

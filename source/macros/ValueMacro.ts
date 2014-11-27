@@ -24,7 +24,7 @@ class ValueMacro {
     assert(_.isArray(expressions));
 
     return this.createFromFunction(name, argDefinition, parentScope, (args, stack) => {
-      var scope = new Scope(parentScope)
+      var scope = new Scope(null, parentScope)
       scope.addLiteralValueMacros(args)
 
       stack.scope.push(scope);

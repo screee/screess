@@ -8,15 +8,15 @@ var PropertyMacro = (function () {
         this.argDefinition = argDefinition;
         this.body = body;
         var ClassScope = require("../scopes/ClassScope");
-        this.scope = new ClassScope(this.parentScope);
+        this.scope = new ClassScope(null, this.parentScope);
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
             return !argDefinition.expression;
         });
         this.argLengthMax = this.argDefinition.length;
     }
-    PropertyMacro.prototype.evaluateScope = function (argValues, stack) {
+    PropertyMacro.prototype.evaluate = function (argValues, stack) {
         var args = argValues.evaluate(this.argDefinition, stack);
-        var scope = new Scope(this.scope);
+        var scope = new Scope(this.scope.type, this.scope);
         scope.addLiteralValueMacros(args);
         stack.scope.push(scope);
         var values = _.extend(scope.evaluateProperties(stack, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);

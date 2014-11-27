@@ -3,31 +3,72 @@ import Values = require("../Values")
 import ValuesDefinition = require('../ValuesDefinition')
 import assert = require("assert")
 import LiteralExpression = require('../expressions/LiteralExpression')
-import GlobalScope = require('./GlobalScope');
 import Stack = require('../Stack')
 import Expression = require('../expressions/Expression');
 import ValueMacro = require('../macros/ValueMacro');
 import PropertyMacro = require('../macros/PropertyMacro');
 import _ = require("../utilities")
+import LayerScope = require('./LayerScope')
+import ClassScope = require('./ClassScope')
+import ScopeType = require('./ScopeType')
+var Globals = require('../globals');
+
+interface Loop {
+  scope:Scope;
+  valueIdentifier:string;
+  collection:Expression;
+}
 
 class Scope {
 
-  public properties;
-  public valueMacros;
-  public propertyMacros;
+  public properties:{[x: string]: Expression[]};
+  public valueMacros:ValueMacro[];
+  public propertyMacros:PropertyMacro[];
+  public loops:Loop[]
+  public layerScopes:{[name:string]: LayerScope}
+  public classScopes:{[name:string]: ClassScope}
+  public sources:{[name:string]: any};
 
-  constructor(public parent:Scope) {
+  constructor(public type:ScopeType, public parent:Scope) {
+    assert(!this.parent || this.parent instanceof Scope)
+
     this.properties = {};
     this.valueMacros = [];
     this.propertyMacros = [];
+    this.loops = [];
+    this.classScopes = {}
+    this.layerScopes = {}
+    this.sources = {}
+
+    if (type == ScopeType.GLOBAL) {
+      for (var name in Globals.valueMacros) {
+        var fn = Globals.valueMacros[name];
+        this.addValueMacro(name, null, fn);
+      }
+
+      for (var name in Globals.propertyMacros) {
+        var fn = Globals.propertyMacros[name];
+        this.addPropertyMacro(name, null, fn);
+      }
+    }
   }
 
-  getGlobalScope():GlobalScope {
-    return this.parent.getGlobalScope()
+  addSource(source:{}):string {
+    if (this.type == ScopeType.GLOBAL) {
+      var hash = _.hash(JSON.stringify(source)).toString();
+      this.sources[hash] = source;
+      return hash;
+    } else {
+      return this.parent.addSource(source);
+    }
+  }
+
+  getGlobalScope():Scope {
+    return this.type == ScopeType.GLOBAL ? this : this.parent.getGlobalScope();
   }
 
   getSource(name:string):any {
-    return this.parent.getSource(name);
+    return this.type == ScopeType.GLOBAL ? this.getSource(name) : this.parent.getSource(name);
   }
 
   addProperty(name:string, expressions:Expression[]) {
@@ -38,6 +79,22 @@ class Scope {
     return this.properties[name] = expressions;
   }
 
+  addClassScope(name:string):Scope {
+    if (!this.classScopes[name]) {
+      var _ClassScope = require('./ClassScope')
+      this.classScopes[name] = new _ClassScope(this)
+    }
+    return this.classScopes[name];
+  }
+
+  addLayerScope(name:string, scope:Scope):Scope {
+    if (this.layerScopes[name]) {
+      throw new Error("Duplicate entries for layer scope " + name)
+    }
+    var _LayerScope = require('./LayerScope')
+    return this.layerScopes[name] = new _LayerScope(name, this);
+  }
+
   addLiteralValueMacros(values:{[name:string]:any}):void {
     for (name in values) {
       var value = values[name];
@@ -46,14 +103,15 @@ class Scope {
   }
 
   // TODO overload function for different arg types
+  addValueMacro(name:String, argDefinition:ValuesDefinition, body:Function);
+  addValueMacro(name:String, argDefinition:ValuesDefinition, body:Expression[]);
   addValueMacro(name:String, argDefinition:ValuesDefinition, body:any) {
-    var ValueMacro = require("../macros/ValueMacro");
-    // TODO move this logic to ValueMacro
+    var ValueMacro_ = require("../macros/ValueMacro");
     var macro;
     if (_.isArray(body)) {
-      macro = ValueMacro.createFromExpressions(name, argDefinition, this, body);
+      macro = ValueMacro_.createFromExpressions(name, argDefinition, this, body);
     } else if (_.isFunction(body)) {
-      macro = ValueMacro.createFromFunction(name, argDefinition, this, body);
+      macro = ValueMacro_.createFromFunction(name, argDefinition, this, body);
     } else {
       assert(false);
     }
@@ -69,7 +127,18 @@ class Scope {
     return macro.scope
   }
 
+  addLoop(valueIdentifier, collection):Scope {
+    var loop = {
+      valueIdentifier: valueIdentifier,
+      collection: collection,
+      scope: new Scope(this.type, this)
+    }
+    this.loops.push(loop);
+    return loop.scope;
+  }
+
   getValueMacro(name:string, argValues:Values, stack:Stack):ValueMacro {
+    var ValueMacro_ = require("../macros/ValueMacro");
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
@@ -77,7 +146,13 @@ class Scope {
       }
     }
 
-    return this.parent ? this.parent.getValueMacro(name, argValues, stack) : null;
+    if (this.type == ScopeType.GLOBAL && argValues.length == 0) {
+      return ValueMacro_.createFromValue(name, this, name);
+    } else if (this.parent) {
+      return this.parent.getValueMacro(name, argValues, stack);
+    } else {
+      return null;
+    }
   }
 
   getPropertyMacro(name:string, argValues:Values, stack:Stack):PropertyMacro {
@@ -99,6 +174,7 @@ class Scope {
     for (var name in properties) {
       var expressions = properties[name];
 
+      // TODO refactor Values constructor to accept this
       var argValues = Values.createFromExpressions(
         _.map(expressions, (expression) => { return { expression: expression } }),
         this,
@@ -108,7 +184,7 @@ class Scope {
       var propertyMacro;
       if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
         stack.propertyMacro.push(propertyMacro);
-        _.extend(output, propertyMacro.evaluateScope(argValues, stack));
+        _.extend(output, propertyMacro.evaluate(argValues, stack));
         stack.propertyMacro.pop()
       } else {
         if (argValues.length != 1 || argValues.positional.length != 1) {
@@ -120,6 +196,38 @@ class Scope {
     }
 
     return output
+  }
+
+  evaluateGlobalScope(stack:Stack = new Stack()):any {
+    stack.scope.push(this)
+
+    var layers = _.map(this.layerScopes, (layer) => {
+      return layer.evaluateLayerScope(stack)
+    })
+
+    var properties = this.evaluateProperties(stack, this.properties)
+
+    var sources = _.objectMapValues(this.sources, (source, name) => {
+      return _.objectMapValues(source, (value, key) => {
+        return Value.evaluate(value, stack);
+      });
+    });
+
+    var transition = {
+      duration: properties["transition-delay"],
+      delay: properties["transition-duration"]
+    }
+    delete properties["transition-delay"];
+    delete properties["transition-duration"];
+
+    stack.scope.pop();
+
+    return _.extend(properties, {
+      version: 6,
+      layers: layers,
+      sources: sources,
+      transition: transition
+    })
   }
 
 }

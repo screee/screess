@@ -5,46 +5,35 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Scope = require("./Scope");
-var ClassScope = require('./ClassScope');
 var _ = require('../utilities');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var assert = require('assert');
+var ScopeType = require('./ScopeType');
 var LayerScope = (function (_super) {
     __extends(LayerScope, _super);
     function LayerScope(name, parent) {
-        _super.call(this, parent);
+        _super.call(this, 1 /* LAYER */, parent);
         this.name = name;
         if (!this.name) {
             this.name = _.uniqueId("layer");
         }
-        this.classScopes = {};
         this.metaProperties = {};
-        this.sublayerScopes = {};
     }
-    LayerScope.prototype.addLayerScope = function (name, scope) {
-        if (this.sublayerScopes[name]) {
-            throw new Error("Duplicate entries for layer scope " + name);
-        }
-        return this.sublayerScopes[name] = new LayerScope(name, this);
-    };
+    // TODO deprecate
     LayerScope.prototype.addMetaProperty = function (name, expressions) {
         if (this.metaProperties[name]) {
             throw new Error("Duplicate entries for metaproperty '" + name + "'");
         }
         this.metaProperties[name] = expressions;
     };
-    LayerScope.prototype.addClassScope = function (name) {
-        if (!this.classScopes[name]) {
-            this.classScopes[name] = new ClassScope(this);
-        }
-        return this.classScopes[name];
-    };
+    // TODO deprecate
     LayerScope.prototype.setFilter = function (filterExpression) {
         if (this.filterExpression) {
             throw new Error("Duplicate filters");
         }
         this.filterExpression = filterExpression;
     };
+    // TODO deprecate
     LayerScope.prototype.setSource = function (source) {
         if (this.source) {
             throw new Error("Duplicate sources");
@@ -103,7 +92,7 @@ var LayerScope = (function (_super) {
         stack.scope.push(this);
         var metaProperties = this.evaluateMetaProperties(stack);
         var hasSublayers = false;
-        var sublayers = _.map(this.sublayerScopes, function (layer) {
+        var sublayers = _.map(this.layerScopes, function (layer) {
             hasSublayers = true;
             return layer.evaluateLayerScope(stack);
         });

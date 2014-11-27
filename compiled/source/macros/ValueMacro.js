@@ -22,7 +22,7 @@ var ValueMacro = (function () {
     ValueMacro.createFromExpressions = function (name, argDefinition, parentScope, expressions) {
         assert(_.isArray(expressions));
         return this.createFromFunction(name, argDefinition, parentScope, function (args, stack) {
-            var scope = new Scope(parentScope);
+            var scope = new Scope(null, parentScope);
             scope.addLiteralValueMacros(args);
             stack.scope.push(scope);
             var values = _.map(expressions, function (expression) {
