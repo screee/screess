@@ -389,7 +389,6 @@ class Scope {
     });
 
     this.eachLoopScope(stack, (scope) => {
-      console.log(scope.evaluateLayers(stack))
       layers = layers.concat(scope.evaluateLayers(stack));
     });
 

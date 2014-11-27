@@ -300,7 +300,6 @@ var Scope = (function () {
             return layer.evaluateLayerScope(stack);
         });
         this.eachLoopScope(stack, function (scope) {
-            console.log(scope.evaluateLayers(stack));
             layers = layers.concat(scope.evaluateLayers(stack));
         });
         return layers;

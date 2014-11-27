@@ -5,7 +5,6 @@ _ = require('../compiled/source/utilities')
 it "should mark the stylesheet as version 6", ->
   assert.deepEqual parse("").version, 6
 
-
 describe "sources", ->
   it "should be respected", ->
     stylesheet = parse """

@@ -24,8 +24,21 @@ describe "value", ->
 
   describe "map", ->
 
-    it "should parse with named parameters", ->
+    it "should parse with comma seperators", ->
+      assert.deepEqual parseValue("[one:1,two:2 , three:3]"), {one: 1, two: 2, three: 3}
+
+    it "should parse with space seperators", ->
       assert.deepEqual parseValue("[one:1 two:2 three:3]"), {one: 1, two: 2, three: 3}
+
+    it "should allow property access by dot notation", ->
+      assert.deepEqual parseValue("[one:1 two:2 three:3].three"), 3
+
+    it "should allow property access by subscript notation", ->
+      assert.deepEqual parseValue('[one:1 two:2 three:3]["three"]'), 3
+
+    it "should allow maps inside maps"
+
+    it "shoud allow recursive property accesses"
 
   describe "number", ->
 
@@ -58,6 +71,8 @@ describe "value", ->
       assert.equal parseValue("@foo", filterLvalue:true), "foo"
 
   describe "string", ->
+
+    # TODO allow single quoted strings
 
     it "should parse", ->
       assert.equal parseValue('"foo"'), "foo"

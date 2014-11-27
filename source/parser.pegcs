@@ -22,6 +22,8 @@
   @NotOperatorExpression = require('./expressions/NotOperatorExpression')
   @ArrayExpression = require('./expressions/ArrayExpression')
   @MapExpression = require('./expressions/MapExpression')
+  @DotExpression = require('./expressions/DotExpression')
+  @SubscriptExpression = require('./expressions/SubscriptExpression')
 
   @globalScope = @scope = new @Scope(null)
   @pushScope = (scope) =>
@@ -79,6 +81,7 @@ statement =
   loop /
   property
 
+// TODO deprecate
 filterProperty =
  "$filter:" whitespace* expression:expression { @scope.setFilter(expression) }
 
@@ -172,7 +175,13 @@ setOperatorExpression =
 //           Value Expression              //
 /////////////////////////////////////////////
 
+// TODO use more realer parser generator so that I don't have to do this stuff
 valueExpression =
+  dotExpression /
+  subscriptExpression /
+  baseValueExpression
+
+baseValueExpression =
   literalExpression /
   valueMacroReferenceExpression /
   stringExpression /
@@ -207,6 +216,12 @@ mapExpressionItems =
 
 mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression }
+
+dotExpression =
+  base:baseValueExpression "." property:identifier { new @DotExpression(base, property) }
+
+subscriptExpression =
+  base:baseValueExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
 
 
 ////////////////////////////////////////////////////////////////////////////////
