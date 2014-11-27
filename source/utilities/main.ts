@@ -48,4 +48,20 @@ export class Utilities {
   startsWith(value:string, prefix:string) {
     return value.slice(0, prefix.length) == prefix;
   }
+
+  isCollection(value:any) {
+    return _.isArray(value) || _.isObject(value)
+  }
+
+  deepExtend(target, source):{} {
+    for (var prop in source)
+      if (prop in target && _.isObject(target[prop]) && _.isObject(source[prop])) {
+        this.deepExtend(target[prop], source[prop]);
+      } else if (prop in target && _.isArray(target[prop]) && _.isArray(source[prop])) {
+        target[prop] = target[prop].concat(source[prop]);
+      } else {
+        target[prop] = source[prop];
+      }
+    return target;
+  }
 }

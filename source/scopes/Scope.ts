@@ -15,7 +15,7 @@ var Globals = require('../globals');
 interface Loop {
   scope:Scope;
   valueIdentifier:string;
-  collection:Expression;
+  collectionExpression:Expression;
 }
 
 class Scope {
@@ -56,6 +56,10 @@ class Scope {
         this.addPropertyMacro(macroName, null, fn);
       }
     }
+  }
+
+  getProperties():{} {
+    return this.properties;
   }
 
   isGlobal():boolean {
@@ -103,10 +107,13 @@ class Scope {
   }
 
   addLiteralValueMacros(values:{[name:string]:any}):void {
-    for (name in values) {
-      var value = values[name];
-      this.addValueMacro(name, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
+    for (var identifier in values) {
+      this.addLiteralValueMacro(identifier, values[identifier]);
     }
+  }
+
+  addLiteralValueMacro(identifier:string, value:any) {
+    this.addValueMacro(identifier, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
   }
 
   addValueMacro(name:String, argDefinition:ValuesDefinition, body:Function);
@@ -133,10 +140,10 @@ class Scope {
     return macro.scope
   }
 
-  addLoop(valueIdentifier, collection):Scope {
+  addLoop(valueIdentifier, collectionExpression):Scope {
     var loop = {
       valueIdentifier: valueIdentifier,
-      collection: collection,
+      collectionExpression: collectionExpression,
       scope: new Scope(this)
     }
     this.loops.push(loop);
@@ -174,7 +181,7 @@ class Scope {
     return this.parent ? this.parent.getPropertyMacro(name, argValues, stack) : null;
   }
 
-  evaluateProperties(stack:Stack, properties:{[name:string]: Expression[]}):any {
+  evaluateProperties(stack:Stack, properties:{[name:string]: Expression[]} = this.properties):any {
     var output = {}
 
     for (var name in properties) {
@@ -207,11 +214,9 @@ class Scope {
   evaluateGlobalScope(stack:Stack = new Stack()):any {
     stack.scope.push(this)
 
-    var layers = _.map(this.layerScopes, (layer) => {
-      return layer.evaluateLayerScope(stack)
-    })
+    var layers = this.evaluateLayers(stack).concat(this.evaluateLoopLayers(stack));
 
-    var properties = this.evaluateProperties(stack, this.properties)
+    var properties = this.evaluateProperties(stack)
 
     var sources = _.objectMapValues(this.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
@@ -228,19 +233,21 @@ class Scope {
 
     stack.scope.pop();
 
-    return _.extend(properties, {
-      version: 6,
-      layers: layers,
-      sources: sources,
-      transition: transition
-    })
+    return _.extend(
+      properties,
+      {
+        version: 6,
+        layers: layers,
+        sources: sources,
+        transition: transition
+      }
+    )
   }
 
   evaluateClassScope(stack:Stack):any {
     // TODO assert there are no child layers or classes
-
     stack.scope.push(this);
-    this.evaluateProperties(stack, this.properties);
+    this.evaluateProperties(stack);
     stack.scope.pop();
   }
 
@@ -330,6 +337,7 @@ class Scope {
 
     // TODO ensure layer has a source and type
 
+    // TODO remove this _.objectCompact call -- some falsey values are important.
     var properties = _.objectCompact(_.extend(
       {
         id: this.name,
@@ -346,7 +354,52 @@ class Scope {
     return properties;
   }
 
+  evaluate(type:ScopeType, stack:Stack):{} {
+    if (type == ScopeType.GLOBAL) {
+      return this.evaluateGlobalScope(stack)
+    } else if (type == ScopeType.LAYER) {
+      return this.evaluateLayerScope(stack)
+    } else if (type == ScopeType.CLASS) {
+      return this.evaluateClassScope(stack)
+    } else {
+      assert(false);
+    }
+  }
+
+  eachLoopScope(stack:Stack, callback:(Scope) => void):void {
+    for (var i in this.loops) {
+      var scope = this.loops[i].scope;
+      var collectionExpression = this.loops[i].collectionExpression;
+      var valueIdentifier = this.loops[i].valueIdentifier;
+
+      var collection = collectionExpression.toValue(this, stack);
+      assert(_.isArray(collection) || _.isObject(collection))
+
+      for (var key in collection) {
+        var value = collection[key];
+        scope.addLiteralValueMacro(valueIdentifier, value);
+        callback(scope);
+      }
+    }
+  }
+
+  evaluateLoopLayers(stack:Stack):{}[] {
+    var layers = []
+
+    this.eachLoopScope(stack, (scope) => {
+      console.log(scope.evaluateLayers(stack))
+      layers = layers.concat(scope.evaluateLayers(stack));
+    });
+
+    return layers;
+  }
+
+  evaluateLayers(stack:Stack):{}[] {
+    return _.map(this.layerScopes, (layer) => {
+      return layer.evaluateLayerScope(stack);
+    });
+  }
+
 }
 
 export = Scope
-

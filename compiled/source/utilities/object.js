@@ -43,7 +43,7 @@ var Utilities = (function () {
     };
     Utilities.prototype.objectCompact = function (input) {
         return this.objectFilter(input, function (value) {
-            return !!value;
+            return !(value === undefined || value === null);
         });
     };
     return Utilities;

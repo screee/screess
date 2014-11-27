@@ -91,7 +91,7 @@ export class Utilities {
   objectCompact<T>(
     input:_.Dictionary<T>
   ):_.Dictionary<T> {
-    return this.objectFilter(input, (value) => { return !!value });
+    return this.objectFilter(input, (value) => { return !(value === undefined || value === null) });
   }
 
 }

@@ -5,6 +5,7 @@ var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var Stack = require('../Stack');
 var _ = require("../utilities");
+var ScopeType = require('./ScopeType');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var Globals = require('../globals');
 var Scope = (function () {
@@ -32,6 +33,9 @@ var Scope = (function () {
             }
         }
     }
+    Scope.prototype.getProperties = function () {
+        return this.properties;
+    };
     Scope.prototype.isGlobal = function () {
         return !this.parent;
     };
@@ -70,10 +74,12 @@ var Scope = (function () {
         return this.layerScopes[name] = new Scope(this, name);
     };
     Scope.prototype.addLiteralValueMacros = function (values) {
-        for (name in values) {
-            var value = values[name];
-            this.addValueMacro(name, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
+        for (var identifier in values) {
+            this.addLiteralValueMacro(identifier, values[identifier]);
         }
+    };
+    Scope.prototype.addLiteralValueMacro = function (identifier, value) {
+        this.addValueMacro(identifier, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         var ValueMacro_ = require("../macros/ValueMacro");
@@ -95,10 +101,10 @@ var Scope = (function () {
         this.propertyMacros.unshift(macro);
         return macro.scope;
     };
-    Scope.prototype.addLoop = function (valueIdentifier, collection) {
+    Scope.prototype.addLoop = function (valueIdentifier, collectionExpression) {
         var loop = {
             valueIdentifier: valueIdentifier,
-            collection: collection,
+            collectionExpression: collectionExpression,
             scope: new Scope(this)
         };
         this.loops.push(loop);
@@ -134,6 +140,7 @@ var Scope = (function () {
         return this.parent ? this.parent.getPropertyMacro(name, argValues, stack) : null;
     };
     Scope.prototype.evaluateProperties = function (stack, properties) {
+        if (properties === void 0) { properties = this.properties; }
         var output = {};
         for (var name in properties) {
             var expressions = properties[name];
@@ -159,10 +166,8 @@ var Scope = (function () {
     Scope.prototype.evaluateGlobalScope = function (stack) {
         if (stack === void 0) { stack = new Stack(); }
         stack.scope.push(this);
-        var layers = _.map(this.layerScopes, function (layer) {
-            return layer.evaluateLayerScope(stack);
-        });
-        var properties = this.evaluateProperties(stack, this.properties);
+        var layers = this.evaluateLayers(stack).concat(this.evaluateLoopLayers(stack));
+        var properties = this.evaluateProperties(stack);
         var sources = _.objectMapValues(this.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
                 return Value.evaluate(value, stack);
@@ -185,7 +190,7 @@ var Scope = (function () {
     Scope.prototype.evaluateClassScope = function (stack) {
         // TODO assert there are no child layers or classes
         stack.scope.push(this);
-        this.evaluateProperties(stack, this.properties);
+        this.evaluateProperties(stack);
         stack.scope.pop();
     };
     // TODO deprecate
@@ -252,6 +257,7 @@ var Scope = (function () {
             metaProperties['type'] = 'raster';
         }
         // TODO ensure layer has a source and type
+        // TODO remove this _.objectCompact call -- some falsey values are important.
         var properties = _.objectCompact(_.extend({
             id: this.name,
             filter: this.evaluateFilterProperty(stack),
@@ -259,6 +265,47 @@ var Scope = (function () {
         }, metaProperties, this.evaluatePaintProperties(metaProperties['type'], stack), this.evaluateClassPaintProperties(metaProperties['type'], stack)));
         stack.scope.pop();
         return properties;
+    };
+    Scope.prototype.evaluate = function (type, stack) {
+        if (type == 0 /* GLOBAL */) {
+            return this.evaluateGlobalScope(stack);
+        }
+        else if (type == 1 /* LAYER */) {
+            return this.evaluateLayerScope(stack);
+        }
+        else if (type == 2 /* CLASS */) {
+            return this.evaluateClassScope(stack);
+        }
+        else {
+            assert(false);
+        }
+    };
+    Scope.prototype.eachLoopScope = function (stack, callback) {
+        for (var i in this.loops) {
+            var scope = this.loops[i].scope;
+            var collectionExpression = this.loops[i].collectionExpression;
+            var valueIdentifier = this.loops[i].valueIdentifier;
+            var collection = collectionExpression.toValue(this, stack);
+            assert(_.isArray(collection) || _.isObject(collection));
+            for (var key in collection) {
+                var value = collection[key];
+                scope.addLiteralValueMacro(valueIdentifier, value);
+                callback(scope);
+            }
+        }
+    };
+    Scope.prototype.evaluateLoopLayers = function (stack) {
+        var layers = [];
+        this.eachLoopScope(stack, function (scope) {
+            console.log(scope.evaluateLayers(stack));
+            layers = layers.concat(scope.evaluateLayers(stack));
+        });
+        return layers;
+    };
+    Scope.prototype.evaluateLayers = function (stack) {
+        return _.map(this.layerScopes, function (layer) {
+            return layer.evaluateLayerScope(stack);
+        });
     };
     return Scope;
 })();
