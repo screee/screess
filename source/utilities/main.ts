@@ -44,4 +44,8 @@ export class Utilities {
     }
     return hash;
   }
+
+  startsWith(value:string, prefix:string) {
+    return value.slice(0, prefix.length) == prefix;
+  }
 }

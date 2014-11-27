@@ -36,6 +36,9 @@ var Utilities = (function () {
         }
         return hash;
     };
+    Utilities.prototype.startsWith = function (value, prefix) {
+        return value.slice(0, prefix.length) == prefix;
+    };
     return Utilities;
 })();
 exports.Utilities = Utilities;

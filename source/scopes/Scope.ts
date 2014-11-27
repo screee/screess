@@ -20,15 +20,18 @@ interface Loop {
 
 class Scope {
 
+  // TODO move to a global class
+  public sources:{[name:string]: any};
+
   public properties:{[x: string]: Expression[]};
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
   public loops:Loop[]
+
   public layerScopes:{[name:string]: Scope}
   public classScopes:{[name:string]: Scope}
-  public sources:{[name:string]: any};
-  public isGlobal:boolean;
-  public metaProperties:{[name:string]: Expression[]};
+
+  // TODO deprecate
   public filterExpression:Expression;
 
   constructor(public parent:Scope, public name?:string) {
@@ -39,8 +42,6 @@ class Scope {
     this.classScopes = {};
     this.layerScopes = {};
     this.sources = {};
-    this.isGlobal = !this.parent;
-    this.metaProperties = {}
 
     if (!this.name) { this.name = _.uniqueId('scope') }
 
@@ -57,8 +58,12 @@ class Scope {
     }
   }
 
+  isGlobal():boolean {
+    return !this.parent
+  }
+
   addSource(source:{}):string {
-    if (this.isGlobal) {
+    if (this.isGlobal()) {
       var hash = _.hash(JSON.stringify(source)).toString();
       this.sources[hash] = source;
       return hash;
@@ -68,11 +73,11 @@ class Scope {
   }
 
   getGlobalScope():Scope {
-    return this.isGlobal ? this : this.parent.getGlobalScope();
+    return this.isGlobal() ? this : this.parent.getGlobalScope();
   }
 
   getSource(name:string):any {
-    return this.isGlobal ? this.getSource(name) : this.parent.getSource(name);
+    return this.isGlobal() ? this.getSource(name) : this.parent.getSource(name);
   }
 
   addProperty(name:string, expressions:Expression[]) {
@@ -146,7 +151,7 @@ class Scope {
       }
     }
 
-    if (this.isGlobal && argValues.length == 0) {
+    if (this.isGlobal() && argValues.length == 0) {
       var ValueMacro_ = require("../macros/ValueMacro");
       return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
     } else if (this.parent) {
@@ -239,14 +244,6 @@ class Scope {
     stack.scope.pop();
   }
 
-    // TODO deprecate
-  addMetaProperty(name:string, expressions:Expression[]):void {
-    if (this.metaProperties[name]) {
-      throw new Error("Duplicate entries for metaproperty '" + name + "'")
-    }
-    this.metaProperties[name] = expressions
-  }
-
   // TODO deprecate
   setFilter(filterExpression:Expression):void {
     if (this.filterExpression) {
@@ -255,7 +252,7 @@ class Scope {
     this.filterExpression = filterExpression
   }
 
-  evaluateProperty(stack:Stack):{} {
+  evaluateFilterProperty(stack:Stack):{} {
     if (this.filterExpression) {
       return this.filterExpression.evaluate(this, stack);;
     } else {
@@ -275,9 +272,12 @@ class Scope {
 
   evaluatePaintProperties(type:string, stack:Stack):{} {
     var properties = this.evaluateProperties(
-      stack,
-      this.properties
-    );
+        stack,
+        _.objectFilter(
+          this.properties,
+          (property, name) => { return !_.startsWith(name, "$") }
+        )
+      )
 
     var layout = {};
     var paint = {};
@@ -297,20 +297,30 @@ class Scope {
     return {layout: layout, paint: paint};
   }
 
+  // TODO merge this method with evaluatePaintProperties
   evaluateMetaProperties(stack:Stack):{} {
-    return this.evaluateProperties(stack, this.metaProperties);;
+    return this.evaluateProperties(
+      stack,
+      _.objectMapKeys(
+        _.objectFilter(
+          this.properties,
+          (property, name) => { return _.startsWith(name, "$") }
+        ),
+        (property, name) => { return name.slice(1) }
+      )
+    );
   }
 
   evaluateLayerScope(stack:Stack):any {
     stack.scope.push(this);
-
-    var metaProperties = this.evaluateMetaProperties(stack);
 
     var hasSublayers = false;
     var sublayers = _.map(this.layerScopes, (layer) => {
       hasSublayers = true;
       return layer.evaluateLayerScope(stack);
     });
+
+    var metaProperties = this.evaluateMetaProperties(stack);
 
     if (hasSublayers && metaProperties['type']) {
       assert.equal(metaProperties['type'], 'raster');
@@ -322,13 +332,12 @@ class Scope {
 
     var properties = _.objectCompact(_.extend(
       {
-        // TODO calcualte name with _.hash
         id: this.name,
-        filter: this.evaluateProperty(stack),
+        filter: this.evaluateFilterProperty(stack),
         layers: sublayers
       },
-      this.evaluatePaintProperties(metaProperties['type'], stack),
       metaProperties,
+      this.evaluatePaintProperties(metaProperties['type'], stack),
       this.evaluateClassPaintProperties(metaProperties['type'], stack)
     ));
 

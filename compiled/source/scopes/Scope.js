@@ -18,8 +18,6 @@ var Scope = (function () {
         this.classScopes = {};
         this.layerScopes = {};
         this.sources = {};
-        this.isGlobal = !this.parent;
-        this.metaProperties = {};
         if (!this.name) {
             this.name = _.uniqueId('scope');
         }
@@ -34,8 +32,11 @@ var Scope = (function () {
             }
         }
     }
+    Scope.prototype.isGlobal = function () {
+        return !this.parent;
+    };
     Scope.prototype.addSource = function (source) {
-        if (this.isGlobal) {
+        if (this.isGlobal()) {
             var hash = _.hash(JSON.stringify(source)).toString();
             this.sources[hash] = source;
             return hash;
@@ -45,10 +46,10 @@ var Scope = (function () {
         }
     };
     Scope.prototype.getGlobalScope = function () {
-        return this.isGlobal ? this : this.parent.getGlobalScope();
+        return this.isGlobal() ? this : this.parent.getGlobalScope();
     };
     Scope.prototype.getSource = function (name) {
-        return this.isGlobal ? this.getSource(name) : this.parent.getSource(name);
+        return this.isGlobal() ? this.getSource(name) : this.parent.getSource(name);
     };
     Scope.prototype.addProperty = function (name, expressions) {
         if (this.properties[name]) {
@@ -110,7 +111,7 @@ var Scope = (function () {
                 return macro;
             }
         }
-        if (this.isGlobal && argValues.length == 0) {
+        if (this.isGlobal() && argValues.length == 0) {
             var ValueMacro_ = require("../macros/ValueMacro");
             return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
         }
@@ -188,20 +189,13 @@ var Scope = (function () {
         stack.scope.pop();
     };
     // TODO deprecate
-    Scope.prototype.addMetaProperty = function (name, expressions) {
-        if (this.metaProperties[name]) {
-            throw new Error("Duplicate entries for metaproperty '" + name + "'");
-        }
-        this.metaProperties[name] = expressions;
-    };
-    // TODO deprecate
     Scope.prototype.setFilter = function (filterExpression) {
         if (this.filterExpression) {
             throw new Error("Duplicate filters");
         }
         this.filterExpression = filterExpression;
     };
-    Scope.prototype.evaluateProperty = function (stack) {
+    Scope.prototype.evaluateFilterProperty = function (stack) {
         if (this.filterExpression) {
             return this.filterExpression.evaluate(this, stack);
             ;
@@ -217,7 +211,9 @@ var Scope = (function () {
         });
     };
     Scope.prototype.evaluatePaintProperties = function (type, stack) {
-        var properties = this.evaluateProperties(stack, this.properties);
+        var properties = this.evaluateProperties(stack, _.objectFilter(this.properties, function (property, name) {
+            return !_.startsWith(name, "$");
+        }));
         var layout = {};
         var paint = {};
         _.each(properties, function (value, name) {
@@ -233,18 +229,22 @@ var Scope = (function () {
         });
         return { layout: layout, paint: paint };
     };
+    // TODO merge this method with evaluatePaintProperties
     Scope.prototype.evaluateMetaProperties = function (stack) {
-        return this.evaluateProperties(stack, this.metaProperties);
-        ;
+        return this.evaluateProperties(stack, _.objectMapKeys(_.objectFilter(this.properties, function (property, name) {
+            return _.startsWith(name, "$");
+        }), function (property, name) {
+            return name.slice(1);
+        }));
     };
     Scope.prototype.evaluateLayerScope = function (stack) {
         stack.scope.push(this);
-        var metaProperties = this.evaluateMetaProperties(stack);
         var hasSublayers = false;
         var sublayers = _.map(this.layerScopes, function (layer) {
             hasSublayers = true;
             return layer.evaluateLayerScope(stack);
         });
+        var metaProperties = this.evaluateMetaProperties(stack);
         if (hasSublayers && metaProperties['type']) {
             assert.equal(metaProperties['type'], 'raster');
         }
@@ -253,11 +253,10 @@ var Scope = (function () {
         }
         // TODO ensure layer has a source and type
         var properties = _.objectCompact(_.extend({
-            // TODO calcualte name with _.hash
             id: this.name,
-            filter: this.evaluateProperty(stack),
+            filter: this.evaluateFilterProperty(stack),
             layers: sublayers
-        }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));
+        }, metaProperties, this.evaluatePaintProperties(metaProperties['type'], stack), this.evaluateClassPaintProperties(metaProperties['type'], stack)));
         stack.scope.pop();
         return properties;
     };

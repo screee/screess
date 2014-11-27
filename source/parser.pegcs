@@ -34,7 +34,7 @@
 
 global = statements { @globalScope.evaluateGlobalScope() }
 
-identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
+identifier = a:[A-Za-z$]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
 comment = "//" [^\n\r]* { null }
 
@@ -72,7 +72,6 @@ statements = whitespace* (statement (statementSeperator statement)* statementSep
 statement =
   comment /
   filterProperty /
-  metaProperty /
   valueMacroDefinition /
   layer /
   class /
@@ -82,9 +81,6 @@ statement =
 
 filterProperty =
  "$filter:" whitespace* expression:expression { @scope.setFilter(expression) }
-
-metaProperty =
-  "$" name:identifier ":" whitespace* expressions:expressionsUnnamedWeak { @scope.addMetaProperty(name, expressions) }
 
 property =
   name:identifier ":" whitespace* expressions:expressionsUnnamedWeak { @scope.addProperty(name, expressions) } /
