@@ -5,10 +5,12 @@ var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var Stack = require('../Stack');
 var _ = require("../utilities");
+var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var Globals = require('../globals');
 var Scope = (function () {
-    function Scope(parent) {
+    function Scope(parent, name) {
         this.parent = parent;
+        this.name = name;
         this.properties = {};
         this.valueMacros = [];
         this.propertyMacros = [];
@@ -17,14 +19,18 @@ var Scope = (function () {
         this.layerScopes = {};
         this.sources = {};
         this.isGlobal = !this.parent;
+        this.metaProperties = {};
+        if (!this.name) {
+            this.name = _.uniqueId('scope');
+        }
         if (this.parent == null) {
-            for (var name in Globals.valueMacros) {
-                var fn = Globals.valueMacros[name];
-                this.addValueMacro(name, null, fn);
+            for (var macroName in Globals.valueMacros) {
+                var fn = Globals.valueMacros[macroName];
+                this.addValueMacro(macroName, null, fn);
             }
-            for (var name in Globals.propertyMacros) {
-                var fn = Globals.propertyMacros[name];
-                this.addPropertyMacro(name, null, fn);
+            for (var macroName in Globals.propertyMacros) {
+                var fn = Globals.propertyMacros[macroName];
+                this.addPropertyMacro(macroName, null, fn);
             }
         }
     }
@@ -52,16 +58,15 @@ var Scope = (function () {
     };
     Scope.prototype.addClassScope = function (name) {
         if (!this.classScopes[name]) {
-            this.classScopes[name] = new Scope(this);
+            this.classScopes[name] = new Scope(this, name);
         }
         return this.classScopes[name];
     };
-    Scope.prototype.addLayerScope = function (name, scope) {
+    Scope.prototype.addLayerScope = function (name) {
         if (this.layerScopes[name]) {
             throw new Error("Duplicate entries for layer scope " + name);
         }
-        var _LayerScope = require('./LayerScope');
-        return this.layerScopes[name] = new _LayerScope(name, this);
+        return this.layerScopes[name] = new Scope(this, name);
     };
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (name in values) {
@@ -181,6 +186,100 @@ var Scope = (function () {
         stack.scope.push(this);
         this.evaluateProperties(stack, this.properties);
         stack.scope.pop();
+    };
+    // TODO deprecate
+    Scope.prototype.addMetaProperty = function (name, expressions) {
+        if (this.metaProperties[name]) {
+            throw new Error("Duplicate entries for metaproperty '" + name + "'");
+        }
+        this.metaProperties[name] = expressions;
+    };
+    // TODO deprecate
+    Scope.prototype.setFilter = function (filterExpression) {
+        if (this.filterExpression) {
+            throw new Error("Duplicate filters");
+        }
+        this.filterExpression = filterExpression;
+    };
+    // TODO deprecate
+    Scope.prototype.setSource = function (source) {
+        if (this.source) {
+            throw new Error("Duplicate sources");
+        }
+        this.source = source;
+    };
+    Scope.prototype.evaluateProperty = function (stack) {
+        if (this.filterExpression) {
+            return this.filterExpression.evaluate(this, stack);
+            ;
+        }
+        else {
+            return null;
+        }
+    };
+    Scope.prototype.evaluateSourceProperty = function (stack) {
+        var metaSourceProperty;
+        if (this.source) {
+            if (!this.getSource(this.source)) {
+                throw new Error("Unknown source " + this.source);
+            }
+            return this.source;
+        }
+        else {
+            return null;
+        }
+    };
+    Scope.prototype.evaluateClassPaintProperties = function (type, stack) {
+        // TODO ensure all properties are paint properties, not layout properties
+        return _.objectMap(this.classScopes, function (scope, name) {
+            return ["paint." + name, scope.evaluateClassScope(stack)];
+        });
+    };
+    Scope.prototype.evaluatePaintProperties = function (type, stack) {
+        var properties = this.evaluateProperties(stack, this.properties);
+        var layout = {};
+        var paint = {};
+        _.each(properties, function (value, name) {
+            if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+                paint[name] = value;
+            }
+            else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+                layout[name] = value;
+            }
+            else {
+                throw new Error("Unknown property name " + name + " for layer type " + type);
+            }
+        });
+        return { layout: layout, paint: paint };
+    };
+    Scope.prototype.evaluateMetaProperties = function (stack) {
+        return this.evaluateProperties(stack, this.metaProperties);
+        ;
+    };
+    Scope.prototype.evaluateLayerScope = function (stack) {
+        stack.scope.push(this);
+        var metaProperties = this.evaluateMetaProperties(stack);
+        var hasSublayers = false;
+        var sublayers = _.map(this.layerScopes, function (layer) {
+            hasSublayers = true;
+            return layer.evaluateLayerScope(stack);
+        });
+        if (hasSublayers && metaProperties['type']) {
+            assert.equal(metaProperties['type'], 'raster');
+        }
+        else if (hasSublayers) {
+            metaProperties['type'] = 'raster';
+        }
+        // TODO ensure layer has a source and type
+        var properties = _.objectCompact(_.extend({
+            // TODO calcualte name with _.hash
+            id: this.name,
+            source: this.evaluateSourceProperty(stack),
+            filter: this.evaluateProperty(stack),
+            layers: sublayers
+        }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));
+        stack.scope.pop();
+        return properties;
     };
     return Scope;
 })();
