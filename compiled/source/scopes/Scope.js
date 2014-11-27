@@ -76,10 +76,10 @@ var Scope = (function () {
         var ValueMacro_ = require("../macros/ValueMacro");
         var macro;
         if (_.isArray(body)) {
-            macro = ValueMacro_.createFromExpressions(name, argDefinition, this, body);
+            macro = new ValueMacro_(name, argDefinition, this, body);
         }
         else if (_.isFunction(body)) {
-            macro = ValueMacro_.createFromFunction(name, argDefinition, this, body);
+            macro = new ValueMacro_(name, argDefinition, this, body);
         }
         else {
             assert(false);
@@ -102,7 +102,6 @@ var Scope = (function () {
         return loop.scope;
     };
     Scope.prototype.getValueMacro = function (name, argValues, stack) {
-        var ValueMacro_ = require("../macros/ValueMacro");
         for (var i in this.valueMacros) {
             var macro = this.valueMacros[i];
             if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
@@ -110,7 +109,8 @@ var Scope = (function () {
             }
         }
         if (this.type == 0 /* GLOBAL */ && argValues.length == 0) {
-            return ValueMacro_.createFromValue(name, this, name);
+            var ValueMacro_ = require("../macros/ValueMacro");
+            return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
         }
         else if (this.parent) {
             return this.parent.getValueMacro(name, argValues, stack);
