@@ -218,10 +218,10 @@ mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression }
 
 dotExpression =
-  base:baseValueExpression "." property:identifier { new @DotExpression(base, property) }
+  base:valueExpression "." property:identifier { new @DotExpression(base, property) }
 
 subscriptExpression =
-  base:baseValueExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
+  base:valueExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
 
 
 ////////////////////////////////////////////////////////////////////////////////
