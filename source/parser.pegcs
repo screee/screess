@@ -22,16 +22,8 @@
   @MapExpression = require('./expressions/MapExpression')
 
   @globalScope = @scope = new @GlobalScope()
-  @stack = []
-
-  {@literalExpression} = @LiteralExpression
-
-  @pushScope = (scope) ->
-    @stack.push(@scope)
-    @scope = scope
-
-  @popScope = ->
-    @scope = @stack.pop()
+  @pushScope = (scope) -> @scope = scope
+  @popScope = -> @scope = @scope.parent
 }
 
 global = statements { @globalScope.evaluateGlobalScope() }
@@ -47,6 +39,8 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
 argumentSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
 argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -96,7 +90,7 @@ statement =
   property
 
 filterProperty =
- "$filter:" whitespace* expression:filterExpression { @scope.setFilter(expression) }
+ "$filter:" whitespace* expression:expression { @scope.setFilter(expression) }
 
 metaProperty =
   "$" name:identifier ":" whitespace* expressions:valueExpressions { @scope.addMetaProperty(name, expressions) }
@@ -118,9 +112,30 @@ valueMacroDefinitionArgument =
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
+//                                Expressions                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+valueExpressionsWeak =
+  head:valueExpression tail:(argumentSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+
+valueExpressionsStrong =
+  head:valueExpression tail:(argumentSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+
+valueExpressions =
+  valueExpressionsWeak /
+  "(" whitespace* expressions:valueExpressionsStrong whitespace* ")" { expressions }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
 //                                 Expression                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+expression =
+  filterExpression /
+  valueExpression
 
 /////////////////////////////////////////////
 //           Filter Expression             //
@@ -129,24 +144,26 @@ valueMacroDefinitionArgument =
 filterExpression =
   notOperatorExpression /
   booleanLogicExpression /
-  leafExpression
+  filterOperatorExpression /
 
 booleanLogicExpression =
-  whitespace* left:leafExpression whitespace* operator:("||" / "&&") whitespace* right:filterExpression { new @BooleanLogicExpression(operator, [left, right]) }
+  whitespace* left:filterOperatorExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorExpression =
-  "!" whitespace* expression:filterExpression { new @NotOperatorExpression(expression) }
+  "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
 
-// Leaf Filter Expressions
+/////////////////////////////////////////////
+//       Filter Leaf Expression            //
+/////////////////////////////////////////////
 
-leafExpression =
+filterOperatorExpression =
   groupExpression /
   setOperatorExpression /
   comparisonOperatorExpression /
   typeCheckOperatorExpression
 
 groupExpression =
-  whitespace* "(" expression:filterExpression ")" { expression }
+  whitespace* "(" expression:expression ")" { expression }
 
 typeCheckOperatorExpression =
   whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) } /
@@ -161,22 +178,15 @@ setOperatorExpression =
 //           Value Expression              //
 /////////////////////////////////////////////
 
-valueExpressionsWeak =
-  head:valueExpression tail:(argumentSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
-
-valueExpressionsStrong =
-  head:valueExpression tail:(argumentSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
-
-valueExpressions =
-  valueExpressionsWeak /
-  "(" whitespace* expressions:valueExpressionsStrong whitespace* ")" { expressions }
-
 valueExpression =
   literalValueExpression /
   valueMacroReferenceValueExpression /
   stringExpression /
   mapExpression /
   arrayExpression
+
+literalValueExpression =
+  value:value { new @LiteralExpression(value) }
 
 valueMacroReferenceValueExpression =
   name:identifier expressions:valueMacroReferenceValueExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
@@ -191,9 +201,6 @@ valueMacroReferenceValueExpressionArgument =
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) }
-
-literalValueExpression =
-  value:value { @literalExpression value }
 
 arrayExpression =
   "[" whitespace* expressions:valueExpressionsStrong whitespace* "]" { new @ArrayExpression(expressions) }
