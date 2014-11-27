@@ -36,59 +36,29 @@ whitespaceWeak = " " / "\t" { null }
 whitespaceStrong = comment? "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
 
-statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
-argumentSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
-argumentSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
-
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                                Expressions                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+expressionsSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
+expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
+
 expressionsUnnamedWeak =
-  head:valueExpression tail:(argumentSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
+  head:valueExpression tail:(expressionsSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
   "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
 
 expressionsUnnamedStrong =
-  head:valueExpression tail:(argumentSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                  Scopes                                    //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-scope =
-  layerScope /
-  classScope /
-  propertyMacroDefinitionScope
-
-layerScope =
-  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scopeBody
-
-classScope =
-  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
-
-propertyMacroDefinitionScope =
-  (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
-
-propertyMacroDefinitionScopeArguments =
-  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(argumentSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
-  "" { @ValuesDefinition.ZERO }
-
-propertyMacroDefinitionScopeArgument =
-  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
-  name:identifier { name: name }
-
-scopeBody =
-  (whitespace* "{" body:statements "}" { @popScope() })
+  head:valueExpression tail:(expressionsSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                                 Statements                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
 
 statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)? comment? whitespace*
 
@@ -97,7 +67,9 @@ statement =
   filterProperty /
   metaProperty /
   valueMacroDefinition /
-  scope /
+  layerScope /
+  classScope /
+  propertyMacroDefinitionScope /
   property
 
 filterProperty =
@@ -114,12 +86,32 @@ valueMacroDefinition =
   name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:expressionsUnnamedWeak { @scope.addValueMacro(name, args, expressions) }
 
 valueMacroDefinitionArguments =
-  "(" whitespace* head:valueMacroDefinitionArgument tail:(argumentSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
+  "(" whitespace* head:valueMacroDefinitionArgument tail:(expressionsSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
   "" { @ValuesDefinition.ZERO }
 
 valueMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
   name:identifier { name: name }
+
+layerScope =
+  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scopeBody
+
+classScope =
+  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
+
+propertyMacroDefinitionScope =
+  (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
+
+propertyMacroDefinitionScopeArguments =
+  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(expressionsSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
+  "" { @ValuesDefinition.ZERO }
+
+propertyMacroDefinitionScopeArgument =
+  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
+  name:identifier { name: name }
+
+scopeBody =
+  (whitespace* "{" body:statements "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -186,7 +178,7 @@ valueMacroReferenceExpression =
   name:identifier expressions:valueMacroReferenceExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
 
 valueMacroReferenceExpressionArguments =
-  "(" whitespace* head:valueMacroReferenceExpressionArgument tail:(argumentSeperatorStrong valueMacroReferenceExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
+  "(" whitespace* head:valueMacroReferenceExpressionArgument tail:(expressionsSeperatorStrong valueMacroReferenceExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
   "" { [] }
 
 valueMacroReferenceExpressionArgument =
@@ -203,7 +195,7 @@ mapExpression =
   "[" whitespace* expressions:mapExpressionItems whitespace* "]" { new @MapExpression(expressions) }
 
 mapExpressionItems =
-  head:mapExpressionItem tail:(argumentSeperatorStrong mapExpressionItem)* { [head].concat(tail.map (e) -> e[1]) }
+  head:mapExpressionItem tail:(expressionsSeperatorStrong mapExpressionItem)* { [head].concat(tail.map (e) -> e[1]) }
 
 mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression }
