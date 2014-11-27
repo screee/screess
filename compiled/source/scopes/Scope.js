@@ -201,29 +201,10 @@ var Scope = (function () {
         }
         this.filterExpression = filterExpression;
     };
-    // TODO deprecate
-    Scope.prototype.setSource = function (source) {
-        if (this.source) {
-            throw new Error("Duplicate sources");
-        }
-        this.source = source;
-    };
     Scope.prototype.evaluateProperty = function (stack) {
         if (this.filterExpression) {
             return this.filterExpression.evaluate(this, stack);
             ;
-        }
-        else {
-            return null;
-        }
-    };
-    Scope.prototype.evaluateSourceProperty = function (stack) {
-        var metaSourceProperty;
-        if (this.source) {
-            if (!this.getSource(this.source)) {
-                throw new Error("Unknown source " + this.source);
-            }
-            return this.source;
         }
         else {
             return null;
@@ -274,7 +255,6 @@ var Scope = (function () {
         var properties = _.objectCompact(_.extend({
             // TODO calcualte name with _.hash
             id: this.name,
-            source: this.evaluateSourceProperty(stack),
             filter: this.evaluateProperty(stack),
             layers: sublayers
         }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));

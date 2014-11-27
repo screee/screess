@@ -30,7 +30,6 @@ class Scope {
   public isGlobal:boolean;
   public metaProperties:{[name:string]: Expression[]};
   public filterExpression:Expression;
-  public source:string;
 
   constructor(public parent:Scope, public name?:string) {
     this.properties = {};
@@ -256,33 +255,11 @@ class Scope {
     this.filterExpression = filterExpression
   }
 
-  // TODO deprecate
-  setSource(source:string):void {
-    if (this.source) {
-      throw new Error("Duplicate sources")
-    }
-    this.source = source
-  }
-
   evaluateProperty(stack:Stack):{} {
     if (this.filterExpression) {
       return this.filterExpression.evaluate(this, stack);;
     } else {
       return null
-    }
-  }
-
-  evaluateSourceProperty(stack:Stack):{} {
-    var metaSourceProperty;
-
-    if (this.source) {
-      if (!this.getSource(this.source)) {
-        throw new Error("Unknown source " + this.source);
-      }
-
-      return this.source;
-    } else {
-      return null;
     }
   }
 
@@ -347,7 +324,6 @@ class Scope {
       {
         // TODO calcualte name with _.hash
         id: this.name,
-        source: this.evaluateSourceProperty(stack),
         filter: this.evaluateProperty(stack),
         layers: sublayers
       },
