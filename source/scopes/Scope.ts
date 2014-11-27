@@ -175,7 +175,7 @@ class Scope {
       var expressions = properties[name];
 
       // TODO refactor Values constructor to accept this
-      var argValues = Values.createFromExpressions(
+      var argValues = new Values(
         _.map(expressions, (expression) => { return { expression: expression } }),
         this,
         stack

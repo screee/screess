@@ -13,11 +13,7 @@ class ValueMacroReferenceExpression extends Expression {
   }
 
   toValues(scope:Scope, stack:Stack):any[] {
-    var argValues = Values.createFromExpressions(
-      this.argumentExpressions,
-      scope,
-      stack
-    );
+    var argValues = new Values(this.argumentExpressions, scope, stack);
 
     var macro = scope.getValueMacro(this.name, argValues, stack);
     if (!macro ) {

@@ -2,29 +2,22 @@ var assert = require('assert');
 var _ = require('./utilities');
 var Values = (function () {
     // TODO add types to arguments
-    function Values(positional, named) {
-        this.positional = positional;
-        this.named = named;
-        this.length = this.positional.length + _.values(this.named).length;
-    }
-    // TODO make all factory methods into overloaded constructors
-    // TODO add types to arguments
-    Values.createFromExpressions = function (args, scope, stack) {
-        var positional = [];
-        var named = {};
+    function Values(args, scope, stack) {
+        this.positional = [];
+        this.named = {};
         for (var i in args) {
             var arg = args[i];
             var argValues = arg.expression.toValues(scope, stack);
             if (arg.name) {
                 assert(argValues.length == 1);
-                named[arg.name] = argValues[0];
+                this.named[arg.name] = argValues[0];
             }
             else {
-                positional = positional.concat(argValues);
+                this.positional = this.positional.concat(argValues);
             }
         }
-        return new Values(positional, named);
-    };
+        this.length = this.positional.length + _.values(this.named).length;
+    }
     Values.prototype.matches = function (argDefinition) {
         if (!argDefinition) {
             return true;

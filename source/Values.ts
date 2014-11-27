@@ -12,11 +12,14 @@ interface Value {
 
 class Values {
 
-  // TODO make all factory methods into overloaded constructors
+  public length:number;
+  public positional:Value[];
+  public named:{[s:string]:Value};
+
   // TODO add types to arguments
-  static createFromExpressions(args:Value[], scope:Scope, stack:Stack) {
-    var positional:Value[] = [];
-    var named:{[s:string]:Value} = {};
+  constructor(args:Value[], scope:Scope, stack:Stack) {
+    this.positional = [];
+    this.named = {};
 
     for (var i in args) {
       var arg = args[i];
@@ -24,23 +27,13 @@ class Values {
 
       if (arg.name) {
         assert(argValues.length == 1);
-        named[arg.name] = argValues[0]
+        this.named[arg.name] = argValues[0]
       } else {
-        positional = positional.concat(argValues)
+        this.positional = this.positional.concat(argValues)
       }
     }
 
-    return new Values(positional, named);
-  }
-
-  public length:number;
-
-  // TODO add types to arguments
-  constructor(
-      public positional:Value[],
-      public named:{[s:string]:Value}
-  ) {
-    this.length = this.positional.length + _.values(this.named).length
+    this.length = this.positional.length + _.values(this.named).length;
   }
 
   matches(argDefinition:ValuesDefinition):boolean {

@@ -15,7 +15,7 @@ var ValueMacroReferenceExpression = (function (_super) {
         this.argumentExpressions = argumentExpressions;
     }
     ValueMacroReferenceExpression.prototype.toValues = function (scope, stack) {
-        var argValues = Values.createFromExpressions(this.argumentExpressions, scope, stack);
+        var argValues = new Values(this.argumentExpressions, scope, stack);
         var macro = scope.getValueMacro(this.name, argValues, stack);
         if (!macro) {
             throw new Error("Could not find value macro " + this.name);

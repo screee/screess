@@ -135,7 +135,7 @@ var Scope = (function () {
         for (var name in properties) {
             var expressions = properties[name];
             // TODO refactor Values constructor to accept this
-            var argValues = Values.createFromExpressions(_.map(expressions, function (expression) {
+            var argValues = new Values(_.map(expressions, function (expression) {
                 return { expression: expression };
             }), this, stack);
             var propertyMacro;
