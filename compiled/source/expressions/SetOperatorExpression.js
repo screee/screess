@@ -16,7 +16,7 @@ var SetOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    SetOperatorExpression.prototype.evaluateFilter = function (scope, stack) {
+    SetOperatorExpression.prototype.evaluate = function (scope, stack) {
         var lvalue = this.left.toValue(scope, stack);
         // TODO allow for multiple rvalues
         var rvalue = this.right.toValue(scope, stack);

@@ -62,9 +62,9 @@ class LayerScope extends Scope {
     this.sublayerScopes = {}
   }
 
-  evaluateFilterProperty(stack:Stack):{} {
+  evaluateProperty(stack:Stack):{} {
     if (this.filterExpression) {
-      return this.filterExpression.evaluateFilter(this, stack);;
+      return this.filterExpression.evaluate(this, stack);;
     } else {
       return null
     }
@@ -146,7 +146,7 @@ class LayerScope extends Scope {
         // TODO calcualte name with _.hash
         id: this.name,
         source: this.evaluateSourceProperty(stack),
-        filter: this.evaluateFilterProperty(stack),
+        filter: this.evaluateProperty(stack),
         layers: sublayers
       },
       this.evaluatePaintProperties(metaProperties['type'], stack),

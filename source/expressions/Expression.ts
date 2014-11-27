@@ -21,10 +21,6 @@ class Expression {
     return Value.evaluate(this.toValue(scope, stack), stack);
   }
 
-  evaluateFilter(scope, stack):any[] {
-    throw new Error("Abstract method");
-  }
-
 }
 
 export = Expression

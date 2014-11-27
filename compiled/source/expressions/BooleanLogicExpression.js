@@ -13,9 +13,9 @@ var BooleanLogicExpression = (function (_super) {
         this.operator = operator;
         this.expressions = expressions;
     }
-    BooleanLogicExpression.prototype.evaluateFilter = function (scope, stack) {
+    BooleanLogicExpression.prototype.evaluate = function (scope, stack) {
         var filter = [BooleanLogicExpression.operators[this.operator]].concat(_.map(this.expressions, function (expression) {
-            return expression.evaluateFilter(scope, stack);
+            return expression.evaluate(scope, stack);
         }));
         return filter;
     };

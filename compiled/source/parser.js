@@ -29,7 +29,7 @@ module.exports = (function() {
 
         peg$FAILED = {},
 
-        peg$startRuleFunctions = { global: peg$parseglobal, valueExpression: peg$parsevalueExpression, propertyMacroDefinitionScopeArguments: peg$parsepropertyMacroDefinitionScopeArguments, valueMacroDefinitionArguments: peg$parsevalueMacroDefinitionArguments },
+        peg$startRuleFunctions = { global: peg$parseglobal, valueExpression: peg$parsevalueExpression, propertyMacroDefinitionArguments: peg$parsepropertyMacroDefinitionArguments, valueMacroDefinitionArguments: peg$parsevalueMacroDefinitionArguments },
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
@@ -1132,11 +1132,11 @@ module.exports = (function() {
           if (s0 === peg$FAILED) {
             s0 = peg$parsevalueMacroDefinition();
             if (s0 === peg$FAILED) {
-              s0 = peg$parselayerScope();
+              s0 = peg$parselayer();
               if (s0 === peg$FAILED) {
-                s0 = peg$parseclassScope();
+                s0 = peg$parseclass();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parsepropertyMacroDefinitionScope();
+                  s0 = peg$parsepropertyMacroDefinition();
                   if (s0 === peg$FAILED) {
                     s0 = peg$parseproperty();
                   }
@@ -1543,7 +1543,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselayerScope() {
+    function peg$parselayer() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
@@ -1573,7 +1573,7 @@ module.exports = (function() {
         s1 = peg$c1;
       }
       if (s1 !== peg$FAILED) {
-        s2 = peg$parsescopeBody();
+        s2 = peg$parsescope();
         if (s2 !== peg$FAILED) {
           s1 = [s1, s2];
           s0 = s1;
@@ -1589,7 +1589,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseclassScope() {
+    function peg$parseclass() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
@@ -1616,7 +1616,7 @@ module.exports = (function() {
         s1 = peg$c1;
       }
       if (s1 !== peg$FAILED) {
-        s2 = peg$parsescopeBody();
+        s2 = peg$parsescope();
         if (s2 !== peg$FAILED) {
           s1 = [s1, s2];
           s0 = s1;
@@ -1632,14 +1632,14 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsepropertyMacroDefinitionScope() {
+    function peg$parsepropertyMacroDefinition() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       s0 = peg$currPos;
       s1 = peg$currPos;
       s2 = peg$parseidentifier();
       if (s2 !== peg$FAILED) {
-        s3 = peg$parsepropertyMacroDefinitionScopeArguments();
+        s3 = peg$parsepropertyMacroDefinitionArguments();
         if (s3 !== peg$FAILED) {
           s4 = [];
           s5 = peg$parsewhitespace();
@@ -1687,7 +1687,7 @@ module.exports = (function() {
         s1 = peg$c1;
       }
       if (s1 !== peg$FAILED) {
-        s2 = peg$parsescopeBody();
+        s2 = peg$parsescope();
         if (s2 !== peg$FAILED) {
           s1 = [s1, s2];
           s0 = s1;
@@ -1703,7 +1703,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsepropertyMacroDefinitionScopeArguments() {
+    function peg$parsepropertyMacroDefinitionArguments() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       s0 = peg$currPos;
@@ -1722,13 +1722,13 @@ module.exports = (function() {
           s3 = peg$parsewhitespace();
         }
         if (s2 !== peg$FAILED) {
-          s3 = peg$parsepropertyMacroDefinitionScopeArgument();
+          s3 = peg$parsepropertyMacroDefinitionArgument();
           if (s3 !== peg$FAILED) {
             s4 = [];
             s5 = peg$currPos;
             s6 = peg$parseexpressionsSeperatorWeak();
             if (s6 !== peg$FAILED) {
-              s7 = peg$parsepropertyMacroDefinitionScopeArgument();
+              s7 = peg$parsepropertyMacroDefinitionArgument();
               if (s7 !== peg$FAILED) {
                 s6 = [s6, s7];
                 s5 = s6;
@@ -1745,7 +1745,7 @@ module.exports = (function() {
               s5 = peg$currPos;
               s6 = peg$parseexpressionsSeperatorWeak();
               if (s6 !== peg$FAILED) {
-                s7 = peg$parsepropertyMacroDefinitionScopeArgument();
+                s7 = peg$parsepropertyMacroDefinitionArgument();
                 if (s7 !== peg$FAILED) {
                   s6 = [s6, s7];
                   s5 = s6;
@@ -1814,7 +1814,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsepropertyMacroDefinitionScopeArgument() {
+    function peg$parsepropertyMacroDefinitionArgument() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
@@ -1880,7 +1880,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsescopeBody() {
+    function peg$parsescope() {
       var s0, s1, s2, s3, s4;
 
       s0 = peg$currPos;

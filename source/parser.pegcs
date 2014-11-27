@@ -46,11 +46,11 @@ expressionsSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceW
 expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 expressionsUnnamedWeak =
-  head:expression tail:(expressionsSeperatorWeak expression)* { [head].concat(tail.map (e) -> e[1]) } /
+  head:valueExpression tail:(expressionsSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
   "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
 
 expressionsUnnamedStrong =
-  head:expression tail:(expressionsSeperatorStrong expression)* { [head].concat(tail.map (e) -> e[1]) }
+  head:valueExpression tail:(expressionsSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -67,9 +67,9 @@ statement =
   filterProperty /
   metaProperty /
   valueMacroDefinition /
-  layerScope /
-  classScope /
-  propertyMacroDefinitionScope /
+  layer /
+  class /
+  propertyMacroDefinition /
   property
 
 filterProperty =
@@ -93,24 +93,24 @@ valueMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
   name:identifier { name: name }
 
-layerScope =
-  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scopeBody
+layer =
+  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope
 
-classScope =
-  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scopeBody
+class =
+  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scope
 
-propertyMacroDefinitionScope =
-  (name:identifier args:propertyMacroDefinitionScopeArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scopeBody
+propertyMacroDefinition =
+  (name:identifier args:propertyMacroDefinitionArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
 
-propertyMacroDefinitionScopeArguments =
-  "(" whitespace* head:propertyMacroDefinitionScopeArgument tail:(expressionsSeperatorWeak propertyMacroDefinitionScopeArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
+propertyMacroDefinitionArguments =
+  "(" whitespace* head:propertyMacroDefinitionArgument tail:(expressionsSeperatorWeak propertyMacroDefinitionArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
   "" { @ValuesDefinition.ZERO }
 
-propertyMacroDefinitionScopeArgument =
+propertyMacroDefinitionArgument =
   name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
   name:identifier { name: name }
 
-scopeBody =
+scope =
   (whitespace* "{" body:statements "}" { @popScope() })
 
 ////////////////////////////////////////////////////////////////////////////////

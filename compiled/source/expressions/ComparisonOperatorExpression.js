@@ -16,7 +16,7 @@ var ComparisonOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ComparisonOperatorExpression.prototype.evaluateFilter = function (scope, stack) {
+    ComparisonOperatorExpression.prototype.evaluate = function (scope, stack) {
         var lvalue = this.left.toValue(scope, stack);
         var rvalue = this.right.toValue(scope, stack);
         // Only one of the values can be an AttributeReferenceValue and it must be

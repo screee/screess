@@ -16,9 +16,6 @@ var Expression = (function () {
     Expression.prototype.evaluate = function (scope, stack) {
         return Value.evaluate(this.toValue(scope, stack), stack);
     };
-    Expression.prototype.evaluateFilter = function (scope, stack) {
-        throw new Error("Abstract method");
-    };
     return Expression;
 })();
 module.exports = Expression;

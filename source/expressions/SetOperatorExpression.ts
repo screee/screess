@@ -10,7 +10,7 @@ class SetOperatorExpression extends Expression {
 
   constructor(public left:Expression, public operator:string, public right:Expression) { super() }
 
-  evaluateFilter(scope:Scope, stack:Stack):any[] {
+  evaluate(scope:Scope, stack:Stack):any[] {
     var lvalue = this.left.toValue(scope, stack);
     // TODO allow for multiple rvalues
     var rvalue = this.right.toValue(scope, stack);

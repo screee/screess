@@ -16,11 +16,11 @@ class BooleanLogicExpression extends Expression {
     super();
   }
 
-  evaluateFilter(scope:Scope, stack:Stack):any[] {
+  evaluate(scope:Scope, stack:Stack):any[] {
     var filter = [BooleanLogicExpression.operators[this.operator]].concat(
       _.map(
         this.expressions,
-        (expression) => { return expression.evaluateFilter(scope, stack) }
+        (expression) => { return expression.evaluate(scope, stack) }
       )
     )
 

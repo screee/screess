@@ -51,9 +51,9 @@ var LayerScope = (function (_super) {
         }
         this.source = source;
     };
-    LayerScope.prototype.evaluateFilterProperty = function (stack) {
+    LayerScope.prototype.evaluateProperty = function (stack) {
         if (this.filterExpression) {
-            return this.filterExpression.evaluateFilter(this, stack);
+            return this.filterExpression.evaluate(this, stack);
             ;
         }
         else {
@@ -118,7 +118,7 @@ var LayerScope = (function (_super) {
             // TODO calcualte name with _.hash
             id: this.name,
             source: this.evaluateSourceProperty(stack),
-            filter: this.evaluateFilterProperty(stack),
+            filter: this.evaluateProperty(stack),
             layers: sublayers
         }, this.evaluatePaintProperties(metaProperties['type'], stack), metaProperties, this.evaluateClassPaintProperties(metaProperties['type'], stack)));
         stack.scope.pop();

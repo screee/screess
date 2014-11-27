@@ -8,7 +8,7 @@ class ComparisonOperatorExpression extends Expression {
 
   constructor(public left, public operator, public right) { super() }
 
-  evaluateFilter(scope, stack):any[] {
+  evaluate(scope, stack):any[] {
     var lvalue = this.left.toValue(scope, stack)
     var rvalue = this.right.toValue(scope, stack)
 
