@@ -15,6 +15,7 @@ var Globals = require('../globals');
 interface Loop {
   scope:Scope;
   valueIdentifier:string;
+  keyIdentifier:string;
   collectionExpression:Expression;
 }
 
@@ -140,9 +141,10 @@ class Scope {
     return macro.scope
   }
 
-  addLoop(valueIdentifier, collectionExpression):Scope {
+  addLoop(valueIdentifier:string, keyIdentifier:string, collectionExpression:Expression):Scope {
     var loop = {
       valueIdentifier: valueIdentifier,
+      keyIdentifier: keyIdentifier,
       collectionExpression: collectionExpression,
       scope: new Scope(this)
     }
@@ -367,6 +369,7 @@ class Scope {
       var scope = this.loops[i].scope;
       var collectionExpression = this.loops[i].collectionExpression;
       var valueIdentifier = this.loops[i].valueIdentifier;
+      var keyIdentifier = this.loops[i].keyIdentifier;
 
       var collection = collectionExpression.toValue(this, stack);
       assert(_.isArray(collection) || _.isObject(collection))
@@ -374,6 +377,7 @@ class Scope {
       for (var key in collection) {
         var value = collection[key];
         scope.addLiteralValueMacro(valueIdentifier, value);
+        if (keyIdentifier) { scope.addLiteralValueMacro(keyIdentifier, key); }
         callback(scope);
       }
     }

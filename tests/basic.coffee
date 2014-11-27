@@ -28,7 +28,7 @@ describe "sources", ->
 
 describe "loops", ->
 
-  it "should iterate over an array", ->
+  it "should iterate over an array's values to create layers", ->
     stylesheet = parse """
       for value in [0,1,2] {
         # { $value: value }
@@ -37,6 +37,42 @@ describe "loops", ->
     assert.equal stylesheet.layers[0].value, 0
     assert.equal stylesheet.layers[1].value, 1
     assert.equal stylesheet.layers[2].value, 2
+
+  it "should iterate over an object's values to create layers", ->
+    stylesheet = parse """
+      for value in [zero:0 , one:1, two:2] {
+        # { $value: value; $key:key }
+      }
+    """
+    assert.equal stylesheet.layers[0].value, 0
+    assert.equal stylesheet.layers[1].value, 1
+    assert.equal stylesheet.layers[2].value, 2
+
+  it "should iterate over an object's keys and values to create layers", ->
+    stylesheet = parse """
+      for key value in [zero:0 , one:1, two:2] {
+        # { $value: value; $key:key }
+      }
+    """
+    assert.equal stylesheet.layers[0].value, 0
+    assert.equal stylesheet.layers[0].key, "zero"
+    assert.equal stylesheet.layers[1].value, 1
+    assert.equal stylesheet.layers[1].key, "one"
+    assert.equal stylesheet.layers[2].value, 2
+    assert.equal stylesheet.layers[2].key, "two"
+
+  it "should iterate over an array's keys and values to create layers", ->
+    stylesheet = parse """
+      for key value in [2, 4, 6] {
+        # { $value: value; $key:key }
+      }
+    """
+    assert.equal stylesheet.layers[0].value, 2
+    assert.equal stylesheet.layers[0].key, 0
+    assert.equal stylesheet.layers[1].value, 4
+    assert.equal stylesheet.layers[1].key, 1
+    assert.equal stylesheet.layers[2].value, 6
+    assert.equal stylesheet.layers[2].key, 2
 
 describe "layers", ->
 

@@ -98,7 +98,8 @@ valueMacroDefinitionArgument =
   name:identifier { name: name }
 
 loop =
-  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, collection)) }) scope
+  ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
+  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
 
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope

@@ -101,9 +101,10 @@ var Scope = (function () {
         this.propertyMacros.unshift(macro);
         return macro.scope;
     };
-    Scope.prototype.addLoop = function (valueIdentifier, collectionExpression) {
+    Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
         var loop = {
             valueIdentifier: valueIdentifier,
+            keyIdentifier: keyIdentifier,
             collectionExpression: collectionExpression,
             scope: new Scope(this)
         };
@@ -281,11 +282,15 @@ var Scope = (function () {
             var scope = this.loops[i].scope;
             var collectionExpression = this.loops[i].collectionExpression;
             var valueIdentifier = this.loops[i].valueIdentifier;
+            var keyIdentifier = this.loops[i].keyIdentifier;
             var collection = collectionExpression.toValue(this, stack);
             assert(_.isArray(collection) || _.isObject(collection));
             for (var key in collection) {
                 var value = collection[key];
                 scope.addLiteralValueMacro(valueIdentifier, value);
+                if (keyIdentifier) {
+                    scope.addLiteralValueMacro(keyIdentifier, key);
+                }
                 callback(scope);
             }
         }

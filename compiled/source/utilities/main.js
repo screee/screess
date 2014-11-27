@@ -39,22 +39,6 @@ var Utilities = (function () {
     Utilities.prototype.startsWith = function (value, prefix) {
         return value.slice(0, prefix.length) == prefix;
     };
-    Utilities.prototype.isCollection = function (value) {
-        return _.isArray(value) || _.isObject(value);
-    };
-    Utilities.prototype.deepExtend = function (target, source) {
-        for (var prop in source)
-            if (prop in target && _.isObject(target[prop]) && _.isObject(source[prop])) {
-                this.deepExtend(target[prop], source[prop]);
-            }
-            else if (prop in target && _.isArray(target[prop]) && _.isArray(source[prop])) {
-                target[prop] = target[prop].concat(source[prop]);
-            }
-            else {
-                target[prop] = source[prop];
-            }
-        return target;
-    };
     return Utilities;
 })();
 exports.Utilities = Utilities;
