@@ -23,7 +23,7 @@
   @ArrayExpression = require('./expressions/ArrayExpression')
   @MapExpression = require('./expressions/MapExpression')
 
-  @globalScope = @scope = new @Scope(@ScopeType.GLOBAL, null)
+  @globalScope = @scope = new @Scope(null)
   @pushScope = (scope) =>
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
     assert(scope.parent == @scope, "Child scope must be parent of current scope")

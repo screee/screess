@@ -14,7 +14,7 @@ class PropertyMacro {
 
   constructor(public parentScope:Scope, public name:string, public argDefinition:ValuesDefinition, public body:Function = null) {
     var ClassScope = require("../scopes/ClassScope")
-    this.scope = new ClassScope(null, this.parentScope)
+    this.scope = new ClassScope(this.parentScope)
 
     this.argLengthMin = _.count(
       this.argDefinition.definitions,
@@ -26,7 +26,7 @@ class PropertyMacro {
   evaluate(argValues:Values, stack:Stack) {
     var args = argValues.evaluate(this.argDefinition, stack)
 
-    var scope = new Scope(this.scope.type, this.scope)
+    var scope = new Scope(this.scope)
     scope.addLiteralValueMacros(args)
 
     stack.scope.push(scope)

@@ -28,19 +28,19 @@ class Scope {
   public layerScopes:{[name:string]: LayerScope}
   public classScopes:{[name:string]: ClassScope}
   public sources:{[name:string]: any};
+  public isGlobal:boolean;
 
-  constructor(public type:ScopeType, public parent:Scope) {
-    assert(!this.parent || this.parent instanceof Scope)
-
+  constructor(public parent:Scope) {
     this.properties = {};
     this.valueMacros = [];
     this.propertyMacros = [];
     this.loops = [];
-    this.classScopes = {}
-    this.layerScopes = {}
-    this.sources = {}
+    this.classScopes = {};
+    this.layerScopes = {};
+    this.sources = {};
+    this.isGlobal = !this.parent;
 
-    if (type == ScopeType.GLOBAL) {
+    if (this.parent == null) {
       for (var name in Globals.valueMacros) {
         var fn = Globals.valueMacros[name];
         this.addValueMacro(name, null, fn);
@@ -54,7 +54,7 @@ class Scope {
   }
 
   addSource(source:{}):string {
-    if (this.type == ScopeType.GLOBAL) {
+    if (this.isGlobal) {
       var hash = _.hash(JSON.stringify(source)).toString();
       this.sources[hash] = source;
       return hash;
@@ -64,11 +64,11 @@ class Scope {
   }
 
   getGlobalScope():Scope {
-    return this.type == ScopeType.GLOBAL ? this : this.parent.getGlobalScope();
+    return this.isGlobal ? this : this.parent.getGlobalScope();
   }
 
   getSource(name:string):any {
-    return this.type == ScopeType.GLOBAL ? this.getSource(name) : this.parent.getSource(name);
+    return this.isGlobal ? this.getSource(name) : this.parent.getSource(name);
   }
 
   addProperty(name:string, expressions:Expression[]) {
@@ -102,7 +102,6 @@ class Scope {
     }
   }
 
-  // TODO overload function for different arg types
   addValueMacro(name:String, argDefinition:ValuesDefinition, body:Function);
   addValueMacro(name:String, argDefinition:ValuesDefinition, body:Expression[]);
   addValueMacro(name:String, argDefinition:ValuesDefinition, body:any) {
@@ -131,7 +130,7 @@ class Scope {
     var loop = {
       valueIdentifier: valueIdentifier,
       collection: collection,
-      scope: new Scope(this.type, this)
+      scope: new Scope(this)
     }
     this.loops.push(loop);
     return loop.scope;
@@ -145,7 +144,7 @@ class Scope {
       }
     }
 
-    if (this.type == ScopeType.GLOBAL && argValues.length == 0) {
+    if (this.isGlobal && argValues.length == 0) {
       var ValueMacro_ = require("../macros/ValueMacro");
       return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
     } else if (this.parent) {

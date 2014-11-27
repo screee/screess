@@ -5,13 +5,10 @@ var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var Stack = require('../Stack');
 var _ = require("../utilities");
-var ScopeType = require('./ScopeType');
 var Globals = require('../globals');
 var Scope = (function () {
-    function Scope(type, parent) {
-        this.type = type;
+    function Scope(parent) {
         this.parent = parent;
-        assert(!this.parent || this.parent instanceof Scope);
         this.properties = {};
         this.valueMacros = [];
         this.propertyMacros = [];
@@ -19,7 +16,8 @@ var Scope = (function () {
         this.classScopes = {};
         this.layerScopes = {};
         this.sources = {};
-        if (type == 0 /* GLOBAL */) {
+        this.isGlobal = !this.parent;
+        if (this.parent == null) {
             for (var name in Globals.valueMacros) {
                 var fn = Globals.valueMacros[name];
                 this.addValueMacro(name, null, fn);
@@ -31,7 +29,7 @@ var Scope = (function () {
         }
     }
     Scope.prototype.addSource = function (source) {
-        if (this.type == 0 /* GLOBAL */) {
+        if (this.isGlobal) {
             var hash = _.hash(JSON.stringify(source)).toString();
             this.sources[hash] = source;
             return hash;
@@ -41,10 +39,10 @@ var Scope = (function () {
         }
     };
     Scope.prototype.getGlobalScope = function () {
-        return this.type == 0 /* GLOBAL */ ? this : this.parent.getGlobalScope();
+        return this.isGlobal ? this : this.parent.getGlobalScope();
     };
     Scope.prototype.getSource = function (name) {
-        return this.type == 0 /* GLOBAL */ ? this.getSource(name) : this.parent.getSource(name);
+        return this.isGlobal ? this.getSource(name) : this.parent.getSource(name);
     };
     Scope.prototype.addProperty = function (name, expressions) {
         if (this.properties[name]) {
@@ -96,7 +94,7 @@ var Scope = (function () {
         var loop = {
             valueIdentifier: valueIdentifier,
             collection: collection,
-            scope: new Scope(this.type, this)
+            scope: new Scope(this)
         };
         this.loops.push(loop);
         return loop.scope;
@@ -108,7 +106,7 @@ var Scope = (function () {
                 return macro;
             }
         }
-        if (this.type == 0 /* GLOBAL */ && argValues.length == 0) {
+        if (this.isGlobal && argValues.length == 0) {
             var ValueMacro_ = require("../macros/ValueMacro");
             return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
         }

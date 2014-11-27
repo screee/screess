@@ -16,7 +16,7 @@ class ValueMacro {
   constructor(public name:string, public argDefinition:ValuesDefinition, public parentScope:Scope, body:any) {
     if (_.isArray(body)) {
       this.body = (args, stack) => {
-        var scope = new Scope(null, parentScope)
+        var scope = new Scope(parentScope)
         scope.addLiteralValueMacros(args)
 
         stack.scope.push(scope);

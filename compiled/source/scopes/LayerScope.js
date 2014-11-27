@@ -8,11 +8,10 @@ var Scope = require("./Scope");
 var _ = require('../utilities');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var assert = require('assert');
-var ScopeType = require('./ScopeType');
 var LayerScope = (function (_super) {
     __extends(LayerScope, _super);
     function LayerScope(name, parent) {
-        _super.call(this, 1 /* LAYER */, parent);
+        _super.call(this, parent);
         this.name = name;
         if (!this.name) {
             this.name = _.uniqueId("layer");

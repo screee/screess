@@ -3337,7 +3337,7 @@ module.exports = (function() {
       this.NotOperatorExpression = require('./expressions/NotOperatorExpression');
       this.ArrayExpression = require('./expressions/ArrayExpression');
       this.MapExpression = require('./expressions/MapExpression');
-      this.globalScope = this.scope = new this.Scope(this.ScopeType.GLOBAL, null);
+      this.globalScope = this.scope = new this.Scope(null);
       this.pushScope = function(scope) {
         assert(scope instanceof _this.Scope, "Malformed arguments to pushScope");
         assert(scope.parent === _this.scope, "Child scope must be parent of current scope");

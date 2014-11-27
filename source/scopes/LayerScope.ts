@@ -39,7 +39,7 @@ class LayerScope extends Scope {
   public source:string;
 
   constructor(public name:string, parent:Scope) {
-    super(ScopeType.LAYER, parent)
+    super(parent)
 
     if (!this.name) {
       this.name = _.uniqueId("layer");
