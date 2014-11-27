@@ -46,11 +46,11 @@ expressionsSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceW
 expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
 expressionsUnnamedWeak =
-  head:valueExpression tail:(expressionsSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
+  head:expression tail:(expressionsSeperatorWeak expression)* { [head].concat(tail.map (e) -> e[1]) } /
   "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
 
 expressionsUnnamedStrong =
-  head:valueExpression tail:(expressionsSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+  head:expression tail:(expressionsSeperatorStrong expression)* { [head].concat(tail.map (e) -> e[1]) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
