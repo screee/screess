@@ -25,6 +25,33 @@ describe "sources", ->
     """
     assert.deepEqual  _.values(stylesheet.sources)[0].tileSize, 17
 
+describe "z-index", ->
+
+  it "should work on layers", ->
+
+    stylesheet = parse """
+      #second { $type: background }
+      #third { $type: background }
+      #first { $type: background; z-index: -1 }
+    """
+    assert.deepEqual  stylesheet.layers[0].id, "first"
+    assert.deepEqual  stylesheet.layers[1].id, "second"
+    assert.deepEqual  stylesheet.layers[2].id, "third"
+
+  it "should work on sublayers", ->
+
+    stylesheet = parse """
+      # {
+        #second { $type: background }
+        #third { $type: background }
+        #first { $type: background; z-index: -1 }
+      }
+    """
+    assert.deepEqual  stylesheet.layers[0].layers[0].id, "first"
+    assert.deepEqual  stylesheet.layers[0].layers[1].id, "second"
+    assert.deepEqual  stylesheet.layers[0].layers[2].id, "third"
+
+
 describe "loops", ->
 
   it "should iterate over an array's values to create layers", ->

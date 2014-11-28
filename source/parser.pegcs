@@ -249,7 +249,7 @@ number =
   number:integer { number }
 
 integer =
-  head:[1-9] tail:[0-9]* { parseInt(head + tail.join("")) } /
+  head:[1-9-] tail:[0-9]* { parseInt(head + tail.join("")) } /
   "0" { 0 }
 
 attributeReferenceValue =

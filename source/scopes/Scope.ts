@@ -150,35 +150,35 @@ class Scope {
     return loop.scope;
   }
 
-  getValueMacro(name:string, argValues:Values, stack:Stack):ValueMacro {
+  getValueMacro(name:string, values:Values, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(stack.valueMacro, macro)) {
+      if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
         return macro;
       }
     }
 
-    if (this.isGlobal() && argValues.length == 0) {
+    if (this.isGlobal() && values.length == 0) {
       var ValueMacro_ = require("../macros/ValueMacro");
       return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
     } else if (this.parent) {
-      return this.parent.getValueMacro(name, argValues, stack);
+      return this.parent.getValueMacro(name, values, stack);
     } else {
       return null;
     }
   }
 
-  getPropertyMacro(name:string, argValues:Values, stack:Stack):PropertyMacro {
+  getPropertyMacro(name:string, values:Values, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
-      if (macro.matches(name, argValues) && !_.contains(stack.propertyMacro, macro)) {
+      if (macro.matches(name, values) && !_.contains(stack.propertyMacro, macro)) {
         return macro;
       }
     }
 
     // TODO create super parent class that returns null for everything to
     // avoid this.
-    return this.parent ? this.parent.getPropertyMacro(name, argValues, stack) : null;
+    return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
   }
 
   evaluateProperties(stack:Stack, properties:{[name:string]: Expression[]} = this.properties):any {
@@ -188,23 +188,23 @@ class Scope {
       var expressions = properties[name];
 
       // TODO refactor Values constructor to accept this
-      var argValues = new Values(
+      var values = new Values(
         _.map(expressions, (expression) => { return { expression: expression } }),
         this,
         stack
       );
 
       var propertyMacro;
-      if (propertyMacro = this.getPropertyMacro(name, argValues, stack)) {
+      if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
         stack.propertyMacro.push(propertyMacro);
-        _.extend(output, propertyMacro.evaluate(argValues, stack));
+        _.extend(output, propertyMacro.evaluate(values, stack));
         stack.propertyMacro.pop()
       } else {
-        if (argValues.length != 1 || argValues.positional.length != 1) {
-          throw new Error("Cannot apply " + argValues.length + " args to primitive property " + name)
+        if (values.length != 1 || values.positional.length != 1) {
+          throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
         }
 
-        output[name] = Value.evaluate(argValues.positional[0], stack);
+        output[name] = Value.evaluate(values.positional[0], stack);
       }
     }
 
@@ -288,10 +288,13 @@ class Scope {
 
     var layout = {};
     var paint = {};
+    var zIndex = 0;
 
-    _.each(properties, (value, name) => {
+    _.each(properties, (value:any, name:string) => {
 
-      if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+      if (name == 'z-index') {
+        zIndex = value
+      } else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
         paint[name] = value;
       } else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
         layout[name] = value;
@@ -301,7 +304,7 @@ class Scope {
 
     });
 
-    return {layout: layout, paint: paint};
+    return {layout: layout, paint: paint, 'z-index': zIndex};
   }
 
   // TODO merge this method with evaluatePaintProperties
@@ -389,6 +392,10 @@ class Scope {
     this.eachLoopScope(stack, (scope) => {
       layers = layers.concat(scope.evaluateLayers(stack));
     });
+
+    // We are relying on the behavior that the original ordering is preserved
+    // for layers with the same z-index
+    layers = _.sortBy(layers, 'z-index')
 
     return layers.length ? layers : undefined;
   }

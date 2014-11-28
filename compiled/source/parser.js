@@ -287,8 +287,8 @@ module.exports = (function() {
           return number;
         }).apply(__initializer);
         },
-        peg$c124 = /^[1-9]/,
-        peg$c125 = { type: "class", value: "[1-9]", description: "[1-9]" },
+        peg$c124 = /^[1-9\-]/,
+        peg$c125 = { type: "class", value: "[1-9\\-]", description: "[1-9\\-]" },
         peg$c126 = function(head, tail) {return (function() {
           return parseInt(head + tail.join(""));
         }).apply(__initializer);
