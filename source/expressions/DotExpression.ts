@@ -12,7 +12,7 @@ class DotExpression extends Expression {
 
   toValues(scope:Scope, stack:Stack):any[] {
     var base = this.baseExpression.toValues(scope, stack)[0];
-    assert(base[this.property]);
+    assert(base[this.property] !== undefined);
     return [base[this.property]];
   }
 

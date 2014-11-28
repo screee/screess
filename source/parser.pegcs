@@ -231,6 +231,7 @@ subscriptExpression =
 ////////////////////////////////////////////////////////////////////////////////
 
 value =
+  null /
   boolean /
   number /
   attributeReferenceValue /
@@ -239,6 +240,9 @@ value =
 boolean =
   "true" { true } /
   "false" { false }
+
+null =
+  "null" { null }
 
 number =
   before:integer? "." after:([0-9]+) { (before + parseFloat("." + after.join(""))) } /

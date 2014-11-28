@@ -44,8 +44,6 @@ class Scope {
     this.layerScopes = {};
     this.sources = {};
 
-    if (!this.name) { this.name = _.uniqueId('scope') }
-
     if (this.parent == null) {
       for (var macroName in Globals.valueMacros) {
         var fn = Globals.valueMacros[macroName];
@@ -338,7 +336,7 @@ class Scope {
     // TODO remove this _.objectCompact call -- some falsey values are important.
     var properties = _.objectCompact(_.extend(
       {
-        id: this.name,
+        id: this.name || _.uniqueId('scope'),
         filter: this.evaluateFilterProperty(stack),
         layers: layers
       },

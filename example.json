@@ -12,6 +12,86 @@
       }
     },
     {
+      "id": "hillshading",
+      "layers": [
+        {
+          "id": "scope5",
+          "filter": [
+            "==",
+            "class",
+            "full_highlight"
+          ],
+          "source": "1866861530",
+          "source-layer": "hillshade",
+          "type": "fill",
+          "layout": {},
+          "paint": {
+            "fill-color": "rgba(255, 255, 243, 1)",
+            "fill-antialias": false,
+            "fill-opacity": 0.6
+          }
+        },
+        {
+          "id": "scope6",
+          "filter": [
+            "==",
+            "class",
+            "medium_highlight"
+          ],
+          "source": "1866861530",
+          "source-layer": "hillshade",
+          "type": "fill",
+          "layout": {},
+          "paint": {
+            "fill-color": "rgba(255, 255, 221, 1)",
+            "fill-antialias": false,
+            "fill-opacity": 0.4
+          }
+        },
+        {
+          "id": "scope7",
+          "filter": [
+            "==",
+            "class",
+            "medium_shadow"
+          ],
+          "source": "1866861530",
+          "source-layer": "hillshade",
+          "type": "fill",
+          "layout": {},
+          "paint": {
+            "fill-color": "rgba(34, 0, 102, 1)",
+            "fill-antialias": false,
+            "fill-opacity": 0.07
+          }
+        },
+        {
+          "id": "scope8",
+          "filter": [
+            "==",
+            "class",
+            "full_shadow"
+          ],
+          "source": "1866861530",
+          "source-layer": "hillshade",
+          "type": "fill",
+          "layout": {},
+          "paint": {
+            "fill-color": "rgba(17, 0, 51, 1)",
+            "fill-antialias": false,
+            "fill-opacity": 0.09
+          }
+        }
+      ],
+      "source": "1866861530",
+      "type": "raster",
+      "layout": {
+        "raster-size": 512,
+        "raster-blur": 5
+      },
+      "paint": {}
+    },
+    {
       "id": "contour-lines",
       "type": "line",
       "source": "-336388137",
@@ -26,27 +106,6 @@
       }
     },
     {
-      "id": "contour-labels",
-      "type": "symbol",
-      "source": "-336388137",
-      "source-layer": "contours_ft",
-      "layout": {
-        "symbol-min-distance": 500,
-        "symbol-placement": "line",
-        "text-field": "{elevation_ft} ft",
-        "text-font": "Open Sans Regular, Arial Unicode MS Regular",
-        "text-max-angle": 28.65,
-        "text-max-size": 10
-      },
-      "paint": {
-        "text-color": "rgba(0, 0, 0, 1)",
-        "text-halo-color": "rgba(255, 255, 255, 1)",
-        "text-halo-width": 1.5,
-        "text-opacity": 0.5,
-        "text-size": 10
-      }
-    },
-    {
       "id": "water",
       "type": "fill",
       "source": "1866861530",
@@ -57,71 +116,168 @@
       }
     },
     {
-      "id": "mountains",
+      "id": "waterway-river",
       "filter": [
-        "all",
-        [
-          "==",
-          "natural",
-          "peak"
-        ],
-        [
-          "!in",
-          "ele",
-          "",
-          " "
-        ]
+        "in",
+        "type",
+        "river",
+        "canal"
       ],
-      "type": "symbol",
-      "source": "-28047008",
-      "source-layer": "osm_point",
+      "type": "line",
+      "source": "1866861530",
+      "source-layer": "waterway",
       "layout": {
-        "icon-image": "triangle-12",
-        "text-field": "{name} ({ele} m)",
-        "text-padding": 2,
-        "text-font": "Open Sans Semibold, Arial Unicode MS Bold",
-        "text-max-size": 12,
-        "text-max-width": 10,
-        "text-offset": [
-          0,
-          0.6
-        ],
-        "text-anchor": "top"
+        "line-join": "round"
       },
-      "paint": {}
+      "paint": {
+        "line-width": 5,
+        "line-color": "rgba(99, 193, 241, 1)",
+        "line-opacity": 1
+      }
     },
     {
-      "id": "mountains_woelevation",
+      "id": "waterway-stream",
       "filter": [
-        "all",
-        [
-          "==",
-          "natural",
-          "peak"
-        ],
-        [
-          "==",
-          "ele",
-          ""
-        ]
+        "in",
+        "type",
+        "stream",
+        "ditch"
+      ],
+      "type": "line",
+      "source": "1866861530",
+      "source-layer": "waterway",
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-width": 0.9,
+        "line-color": "rgba(99, 193, 241, 1)",
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "paths",
+      "type": "line",
+      "source": "1866861530",
+      "source-layer": "road",
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-width": 0.9,
+        "line-color": "rgba(0, 0, 0, 1)",
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "bridges",
+      "type": "line",
+      "source": "1866861530",
+      "source-layer": "bridge",
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-width": 6,
+        "line-color": "rgba(85, 85, 85, 1)",
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "water-labels",
+      "type": "symbol",
+      "source": "1866861530",
+      "source-layer": "water_label",
+      "layout": {
+        "text-field": "{name_en}",
+        "text-font": "Open Sans Bold, Arial Unicode MS Regular",
+        "text-max-angle": 28.65,
+        "text-max-size": 11.5,
+        "symbol-min-distance": 250,
+        "symbol-placement": "point"
+      },
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 1,
+        "text-halo-blur": 1,
+        "text-opacity": 1
+      }
+    },
+    {
+      "id": "waterway-river-labels",
+      "filter": [
+        "in",
+        "type",
+        "river",
+        "canal"
       ],
       "type": "symbol",
-      "source": "-28047008",
-      "source-layer": "osm_point",
+      "source": "1866861530",
+      "source-layer": "waterway_label",
       "layout": {
-        "icon-image": "triangle-12",
-        "text-field": "{name}",
-        "text-padding": 2,
-        "text-font": "Open Sans Semibold, Arial Unicode MS Bold",
-        "text-max-size": 12,
-        "text-max-width": 10,
-        "text-offset": [
-          0,
-          0.6
-        ],
-        "text-anchor": "top"
+        "text-field": "{name_en}",
+        "text-font": "Open Sans Bold, Arial Unicode MS Regular",
+        "text-max-angle": 28.65,
+        "text-max-size": 11,
+        "symbol-min-distance": 250,
+        "symbol-placement": "line"
       },
-      "paint": {}
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 1,
+        "text-halo-blur": 1,
+        "text-opacity": 1
+      }
+    },
+    {
+      "id": "waterway-stream-labels",
+      "filter": [
+        "in",
+        "type",
+        "stream",
+        "ditch"
+      ],
+      "type": "symbol",
+      "source": "1866861530",
+      "source-layer": "waterway_label",
+      "layout": {
+        "text-field": "{name_en}",
+        "text-font": "Open Sans Bold, Arial Unicode MS Regular",
+        "text-max-angle": 28.65,
+        "text-max-size": 8,
+        "symbol-min-distance": 250,
+        "symbol-placement": "line"
+      },
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 1,
+        "text-halo-blur": 1,
+        "text-opacity": 1
+      }
+    },
+    {
+      "id": "contour-labels",
+      "type": "symbol",
+      "source": "-336388137",
+      "source-layer": "contours_ft",
+      "layout": {
+        "text-field": "{elevation_ft} ft",
+        "text-font": "Open Sans Bold, Arial Unicode MS Regular",
+        "text-max-angle": 28.65,
+        "text-max-size": 8,
+        "symbol-min-distance": 250,
+        "symbol-placement": "line"
+      },
+      "paint": {
+        "text-color": "rgba(0, 0, 0, 1)",
+        "text-halo-color": "rgba(255, 255, 255, 1)",
+        "text-halo-width": 1,
+        "text-halo-blur": 1,
+        "text-opacity": 0.4
+      }
     }
   ],
   "sources": {
@@ -132,10 +288,6 @@
     "-336388137": {
       "type": "vector",
       "url": "mapbox://lucaswoj.715d65b2"
-    },
-    "-28047008": {
-      "type": "vector",
-      "url": "mapbox://lucaswoj.561773ec"
     }
   },
   "transition": {}

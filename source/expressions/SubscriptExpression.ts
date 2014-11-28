@@ -15,7 +15,7 @@ class SubscriptExpression extends Expression {
     var property = this.propertyExpression.toValue(scope, stack);
     assert(_.isString(property) || _.isNumber(property));
 
-    assert(base[property]);
+    assert(base[property] !== undefined);
     return [base[property]];
   }
 

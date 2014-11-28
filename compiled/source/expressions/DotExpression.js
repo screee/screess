@@ -16,7 +16,7 @@ var DotExpression = (function (_super) {
     }
     DotExpression.prototype.toValues = function (scope, stack) {
         var base = this.baseExpression.toValues(scope, stack)[0];
-        assert(base[this.property]);
+        assert(base[this.property] !== undefined);
         return [base[this.property]];
     };
     return DotExpression;

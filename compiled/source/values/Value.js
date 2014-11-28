@@ -2,7 +2,7 @@ var Value = (function () {
     function Value() {
     }
     Value.evaluate = function (value, stack) {
-        if (value.evaluate) {
+        if (value && value.evaluate) {
             return value.evaluate(stack);
         }
         else {

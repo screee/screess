@@ -5,20 +5,146 @@ source-scree-osm = source(type: vector, url: "mapbox://lucaswoj.561773ec")
 sprite: "https://www.mapbox.com/mapbox-gl-styles/sprites/outdoors"
 glyphs: "mapbox://fontstack/{fontstack}/{range}.pbf"
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                   Macros                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+scree-color-land = #d2f0be
+scree-color-water = #63c1f1
+
+scree-label(field, size, type, opacity = 1) = {
+  text-color: #000
+  text-field: field
+  text-font: "Open Sans Bold, Arial Unicode MS Regular"
+  text-halo-color: #fff
+  text-halo-width: 1
+  text-halo-blur: 1
+  text-max-angle: 28.65
+  text-max-size: size
+  text-opacity: opacity
+  symbol-min-distance: 250
+  symbol-placement: type
+}
+
+scree-line(width, color = #000, opacity = 1) = {
+  line-width: width
+  line-color: color
+  line-opacity: opacity
+  line-join: round
+}
+
+scree-polygon(color) = {
+  fill-color: color
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                   Styles                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #background {
   $type: background
-  background-color: #d2f0be
+  background-color: scree-color-land
+}
+
+#hillshading {
+  raster-size: 512
+  raster-blur: 5
+  $source: source-mapbox
+  $type: raster
+
+  hillshading = [
+    full_highlight: [color: #fffff3, opacity: 0.6]
+    medium_highlight: [color: #ffd, opacity: 0.4]
+    medium_shadow: [color: #206, opacity: 0.07]
+    full_shadow: [color: #103, opacity: 0.09]
+  ]
+
+  for class, p in hillshading {
+    # {
+      $source: source-mapbox
+      $source-layer: hillshade
+      $type: fill
+      $filter: @class == class
+      fill-color: p.color
+      fill-antialias: false
+      fill-opacity: p.opacity
+    }
+  }
+
 }
 
 #contour-lines {
   $type: line
   $source: source-scree-contours
   $source-layer: contours_ft
+  scree-line: 0.75 #000 0.2
+}
 
-  line-width: 0.75
-  line-color: #000
-  line-opacity: 0.2
-  line-join: round
+#water {
+  $type: fill
+  $source: source-mapbox
+  $source-layer: water
+  scree-polygon: scree-color-water
+}
+
+#waterway-river {
+  $type: line
+  $source: source-mapbox
+  $source-layer: waterway
+  $filter: @type in [river, canal]
+  scree-line: 5 scree-color-water
+}
+
+#waterway-stream {
+  $type: line
+  $source: source-mapbox
+  $source-layer: waterway
+  $filter: @type in [stream, ditch]
+  scree-line: 0.9 scree-color-water
+}
+
+#paths {
+  $type: line
+  $source: source-mapbox
+  $source-layer: road
+  scree-line: 0.9 #000
+}
+
+#bridges {
+  $type: line
+  $source: source-mapbox
+  $source-layer: bridge
+  scree-line: 6 #555
+}
+
+#water-labels {
+  $type: symbol
+  $source: source-mapbox
+  $source-layer: water_label
+
+  scree-label: @name_en 11.5 point
+}
+
+#waterway-river-labels {
+  $type: symbol
+  $source: source-mapbox
+  $source-layer: waterway_label
+
+  $filter: @type in [river, canal]
+  scree-label: @name_en 11 line
+}
+
+#waterway-stream-labels {
+  $type: symbol
+  $source: source-mapbox
+  $source-layer: waterway_label
+
+  $filter: @type in [stream, ditch]
+  scree-label: @name_en 8 line
 }
 
 #contour-labels {
@@ -26,55 +152,6 @@ glyphs: "mapbox://fontstack/{fontstack}/{range}.pbf"
   $source: source-scree-contours
   $source-layer: contours_ft
 
-  symbol-min-distance: 500
-  symbol-placement: line
-  text-color: #000
-  text-field: "#{@elevation_ft} ft"
-  text-font: "Open Sans Regular, Arial Unicode MS Regular"
-  text-halo-color: #fff
-  text-halo-width: 1.5
-  text-max-angle: 28.65
-  text-max-size: 10
-  text-opacity: 0.5
-  text-size: 10
+  scree-label: "@elevation_ft ft" 8 line 0.4
 }
 
-#water {
-  $type: fill
-  $source: source-mapbox
-  $source-layer: water
-
-  fill-color: #63c1f1
-}
-
-#mountains {
-  $type: symbol
-  $source: source-scree-osm
-  $source-layer: osm_point
-  $filter: @natural == "peak" && @ele !in ["", " "]
-
-  icon-image: "triangle-12"
-  text-field: "@name (@ele m)"
-  text-padding: 2
-  text-font: "Open Sans Semibold, Arial Unicode MS Bold"
-  text-max-size: 12
-  text-max-width: 10
-  text-offset: [0, 0.6]
-  text-anchor: top
-}
-
-#mountains_woelevation {
-  $type: symbol
-  $source: source-scree-osm
-  $source-layer: osm_point
-  $filter: @natural == "peak" && @ele == ""
-
-  icon-image: "triangle-12"
-  text-field: @name
-  text-padding: 2
-  text-font: "Open Sans Semibold, Arial Unicode MS Bold"
-  text-max-size: 12
-  text-max-width: 10
-  text-offset: [0, 0.6]
-  text-anchor: top
-}
