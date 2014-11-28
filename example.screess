@@ -51,10 +51,10 @@ glyphs: "mapbox://fontstack/{fontstack}/{range}.pbf"
   $type: symbol
   $source: source-scree-osm
   $source-layer: osm_point
-  $filter: @natural == "peak"
+  $filter: @natural == "peak" && @ele !in ["", " "]
 
   icon-image: "triangle-12"
-  text-field: "{name}"
+  text-field: "@name (@ele m)"
   text-padding: 2
   text-font: "Open Sans Semibold, Arial Unicode MS Bold"
   text-max-size: 12
@@ -63,41 +63,18 @@ glyphs: "mapbox://fontstack/{fontstack}/{range}.pbf"
   text-anchor: top
 }
 
-#road {
-  $type: line
-  $source: source-scree-osm
-  $source-layer: osm_line
-  $filter: @highway in [residential, tertiary, secondary, primary, highway]
-
-  line-width: 4
-  line-color: #ffaf24
-  line-opacity: 1
-  line-cap: round
-}
-
-#trail {
-  $type: line
-  $source: source-mapbox
-  $source-layer: road
-  $filter: @class in [path, footway, bikeway, horseway, track, service, piste]
-
-  line-width: 2.5
-  line-color: #ff7124
-  line-opacity: 1
-  line-cap: round
-}
-
-#way-lables {
+#mountains_woelevation {
   $type: symbol
   $source: source-scree-osm
-  $source-layer: osm_line_label
-  $filter: @highway in [residential, tertiary, secondary, primary, highway, path, footway, bikeway, horseway, track, service, piste]
+  $source-layer: osm_point
+  $filter: @natural == "peak" && @ele == ""
 
-  symbol-placement: line
-  text-color: #000
+  icon-image: "triangle-12"
   text-field: @name
+  text-padding: 2
   text-font: "Open Sans Semibold, Arial Unicode MS Bold"
-  text-max-angle: 40
   text-max-size: 12
   text-max-width: 10
+  text-offset: [0, 0.6]
+  text-anchor: top
 }

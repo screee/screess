@@ -104,7 +104,12 @@ describe "layers", ->
     stylesheet = parse '#test { $type: background; $filter: @name == "foo" }'
     assert stylesheet.layers[0].filter
 
+
 describe "sublayers", ->
+
+  it "should not have an empty layers array if no sublayers", ->
+    stylesheet = parse '#test { $type: background; }'
+    assert !stylesheet.layers[0].layers
 
   it "should allow sublayers", ->
     stylesheet = parse """

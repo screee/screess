@@ -5,15 +5,17 @@
   "layers": [
     {
       "id": "background",
+      "type": "background",
       "layout": {},
       "paint": {
         "background-color": "rgba(210, 240, 190, 1)"
-      },
-      "type": "background"
+      }
     },
     {
       "id": "contour-lines",
+      "type": "line",
       "source": "-336388137",
+      "source-layer": "contours_ft",
       "layout": {
         "line-join": "round"
       },
@@ -21,13 +23,13 @@
         "line-width": 0.75,
         "line-color": "rgba(0, 0, 0, 1)",
         "line-opacity": 0.2
-      },
-      "type": "line",
-      "source-layer": "contours_ft"
+      }
     },
     {
       "id": "contour-labels",
+      "type": "symbol",
       "source": "-336388137",
+      "source-layer": "contours_ft",
       "layout": {
         "symbol-min-distance": 500,
         "symbol-placement": "line",
@@ -42,28 +44,70 @@
         "text-halo-width": 1.5,
         "text-opacity": 0.5,
         "text-size": 10
-      },
-      "type": "symbol",
-      "source-layer": "contours_ft"
+      }
     },
     {
       "id": "water",
+      "type": "fill",
       "source": "1866861530",
+      "source-layer": "water",
       "layout": {},
       "paint": {
         "fill-color": "rgba(99, 193, 241, 1)"
-      },
-      "type": "fill",
-      "source-layer": "water"
+      }
     },
     {
       "id": "mountains",
-      "source": "-28047008",
       "filter": [
-        "==",
-        "natural",
-        "peak"
+        "all",
+        [
+          "==",
+          "natural",
+          "peak"
+        ],
+        [
+          "!in",
+          "ele",
+          "",
+          " "
+        ]
       ],
+      "type": "symbol",
+      "source": "-28047008",
+      "source-layer": "osm_point",
+      "layout": {
+        "icon-image": "triangle-12",
+        "text-field": "{name} ({ele} m)",
+        "text-padding": 2,
+        "text-font": "Open Sans Semibold, Arial Unicode MS Bold",
+        "text-max-size": 12,
+        "text-max-width": 10,
+        "text-offset": [
+          0,
+          0.6
+        ],
+        "text-anchor": "top"
+      },
+      "paint": {}
+    },
+    {
+      "id": "mountains_woelevation",
+      "filter": [
+        "all",
+        [
+          "==",
+          "natural",
+          "peak"
+        ],
+        [
+          "==",
+          "ele",
+          ""
+        ]
+      ],
+      "type": "symbol",
+      "source": "-28047008",
+      "source-layer": "osm_point",
       "layout": {
         "icon-image": "triangle-12",
         "text-field": "{name}",
@@ -77,90 +121,7 @@
         ],
         "text-anchor": "top"
       },
-      "paint": {},
-      "type": "symbol",
-      "source-layer": "osm_point"
-    },
-    {
-      "id": "road",
-      "source": "-28047008",
-      "filter": [
-        "in",
-        "highway",
-        "residential",
-        "tertiary",
-        "secondary",
-        "primary",
-        "highway"
-      ],
-      "layout": {
-        "line-cap": "round"
-      },
-      "paint": {
-        "line-width": 4,
-        "line-color": "rgba(255, 175, 36, 1)",
-        "line-opacity": 1
-      },
-      "type": "line",
-      "source-layer": "osm_line"
-    },
-    {
-      "id": "trail",
-      "source": "1866861530",
-      "filter": [
-        "in",
-        "class",
-        "path",
-        "footway",
-        "bikeway",
-        "horseway",
-        "track",
-        "service",
-        "piste"
-      ],
-      "layout": {
-        "line-cap": "round"
-      },
-      "paint": {
-        "line-width": 2.5,
-        "line-color": "rgba(255, 113, 36, 1)",
-        "line-opacity": 1
-      },
-      "type": "line",
-      "source-layer": "road"
-    },
-    {
-      "id": "way-lables",
-      "source": "-28047008",
-      "filter": [
-        "in",
-        "highway",
-        "residential",
-        "tertiary",
-        "secondary",
-        "primary",
-        "highway",
-        "path",
-        "footway",
-        "bikeway",
-        "horseway",
-        "track",
-        "service",
-        "piste"
-      ],
-      "layout": {
-        "symbol-placement": "line",
-        "text-field": "{name}",
-        "text-font": "Open Sans Semibold, Arial Unicode MS Bold",
-        "text-max-angle": 40,
-        "text-max-size": 12,
-        "text-max-width": 10
-      },
-      "paint": {
-        "text-color": "rgba(0, 0, 0, 1)"
-      },
-      "type": "symbol",
-      "source-layer": "osm_line_label"
+      "paint": {}
     }
   ],
   "sources": {

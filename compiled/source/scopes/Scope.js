@@ -247,10 +247,10 @@ var Scope = (function () {
         stack.scope.push(this);
         var layers = this.evaluateLayers(stack);
         var metaProperties = this.evaluateMetaProperties(stack);
-        if (layers.length && metaProperties['type']) {
-            assert.equal(metaProperties['type'], 'raster');
-        }
-        else if (layers.length) {
+        if (layers) {
+            if (metaProperties['type']) {
+                assert.equal(metaProperties['type'], 'raster');
+            }
             metaProperties['type'] = 'raster';
         }
         // TODO ensure layer has a source and type
@@ -302,7 +302,7 @@ var Scope = (function () {
         this.eachLoopScope(stack, function (scope) {
             layers = layers.concat(scope.evaluateLayers(stack));
         });
-        return layers;
+        return layers.length ? layers : undefined;
     };
     return Scope;
 })();
