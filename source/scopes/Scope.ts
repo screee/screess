@@ -396,6 +396,10 @@ class Scope {
     // We are relying on the behavior that the original ordering is preserved
     // for layers with the same z-index
     layers = _.sortBy(layers, 'z-index')
+    for (var i in layers) {
+      var layer = layers[i];
+      delete layer['z-index']
+    }
 
     return layers.length ? layers : undefined;
   }

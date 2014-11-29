@@ -27,7 +27,11 @@ class ColorValue extends Value {
   constructor(public red:number, public green:number, public blue:number, public alpha:number) { super(); }
 
   evaluate(stack:Stack):string {
-    return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
+    if (this.alpha != 1) {
+      return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
+    } else {
+      return _.rgb2hex(this.red, this.green, this.blue);
+    }
   }
 }
 

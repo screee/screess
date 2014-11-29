@@ -15,7 +15,7 @@ var FunctionValue = (function (_super) {
     }
     FunctionValue.prototype.evaluate = function (stack) {
         var stops = _.map(this.stops, function (stop) {
-            return [stop[0], Value.evaluate(stop[1], stack)];
+            return [parseInt(stop[0], 10), Value.evaluate(stop[1], stack)];
         });
         if (this.base) {
             return { base: Value.evaluate(this.base, stack), stops: stops };

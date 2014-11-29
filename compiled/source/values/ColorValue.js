@@ -31,7 +31,12 @@ var ColorValue = (function (_super) {
         return new ColorValue(red, green, blue, alpha);
     };
     ColorValue.prototype.evaluate = function (stack) {
-        return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
+        if (this.alpha != 1) {
+            return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
+        }
+        else {
+            return _.rgb2hex(this.red, this.green, this.blue);
+        }
     };
     return ColorValue;
 })(Value);

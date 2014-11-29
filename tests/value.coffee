@@ -114,7 +114,10 @@ describe "value", ->
   describe "color", ->
 
     it "should parse hex", ->
-      assert.equal parseValue('#fff'), "rgba(255, 255, 255, 1)"
+      assert.equal parseValue('#fff'), "#ffffff"
 
     it "should parse a color function", ->
-      assert.equal parseValue('rgba(4 3 2, 1)'), "rgba(4, 3, 2, 1)"
+      assert.equal parseValue('rgba(255 255 255 1)'), "#ffffff"
+
+    it "should parse a color function with alpha", ->
+      assert.equal parseValue('rgba(255 255 255 0.5)'), "rgba(255, 255, 255, 0.5)"
