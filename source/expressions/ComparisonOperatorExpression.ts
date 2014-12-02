@@ -8,7 +8,7 @@ class ComparisonOperatorExpression extends Expression {
 
   constructor(public left, public operator, public right) { super() }
 
-  evaluate(scope, stack):any[] {
+  toValues(scope, stack):any[] {
     var lvalue = this.left.toValue(scope, stack)
     var rvalue = this.right.toValue(scope, stack)
 
@@ -17,7 +17,7 @@ class ComparisonOperatorExpression extends Expression {
     assert(lvalue instanceof AttributeReferenceValue)
     assert(!(rvalue instanceof AttributeReferenceValue))
 
-    return [this.operator, lvalue.name, Value.evaluate(rvalue, stack)]
+    return [[this.operator, lvalue.name, Value.evaluate(rvalue, stack)]]
   }
 
 }

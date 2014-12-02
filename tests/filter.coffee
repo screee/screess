@@ -7,6 +7,10 @@ describe "filters", ->
     stylesheet = parse "#layer { $type: background; $filter: #{filter} }"
     stylesheet.layers[0].filter
 
+  describe "typecheck operator", ->
+    it "should parse the 'is' operator", ->
+        assert.deepEqual parseFilter("is LineString"), ["==", "$type", "LineString"]
+
   describe "comparison operator", ->
     for operator in ["==", ">=", "<=", "<", ">", "!="]
       it "should parse the '#{operator}' operator", ->

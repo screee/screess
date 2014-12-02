@@ -22,6 +22,10 @@ describe "value", ->
     it "should parse with space seperators", ->
       assert.deepEqual parseValue("[1 2 3]"), [1,2,3]
 
+    it "should allow filters to be members", ->
+      assert.deepEqual parseValue("[@class == footway]"), [["==", "class", "footway"]]
+
+
   describe "map", ->
 
     it "should parse with comma seperators", ->
@@ -41,6 +45,9 @@ describe "value", ->
 
     it "shoud allow recursive property accesses"
       # assert.deepEqual parseValue('[one:[two:[three: 3]]].one["two"].three'), 3
+
+    it "should allow filters to be members", ->
+      assert.deepEqual parseValue("[filter: @class == footway]"), {filter: ["==", "class", "footway"]}
 
   describe "number", ->
 

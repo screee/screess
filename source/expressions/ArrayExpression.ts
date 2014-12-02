@@ -12,11 +12,15 @@ class ArrayExpression extends Expression {
   }
 
   toValues(scope:Scope, stack:Stack):any[] {
-    var value = _.flatten(_.map(this.expressions, (expression) => {
-      return expression.toValues(scope, stack)
-    }));
+    var values = []
 
-    return [value];
+    for (var i in this.expressions) {
+      var expression = this.expressions[i]
+      var expressionValues = expression.toValues(scope, stack)
+      values = values.concat(expressionValues)
+    }
+
+    return [values];
   }
 
 }

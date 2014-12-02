@@ -16,7 +16,7 @@ class BooleanLogicExpression extends Expression {
     super();
   }
 
-  evaluate(scope:Scope, stack:Stack):any[] {
+  toValues(scope:Scope, stack:Stack):any[] {
     var filter = [BooleanLogicExpression.operators[this.operator]].concat(
       _.map(
         this.expressions,
@@ -24,7 +24,7 @@ class BooleanLogicExpression extends Expression {
       )
     )
 
-    return filter;
+    return [filter];
   }
 
 }

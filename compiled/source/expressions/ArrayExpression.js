@@ -5,7 +5,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var _ = require("../utilities");
 var ArrayExpression = (function (_super) {
     __extends(ArrayExpression, _super);
     function ArrayExpression(expressions) {
@@ -13,10 +12,13 @@ var ArrayExpression = (function (_super) {
         this.expressions = expressions;
     }
     ArrayExpression.prototype.toValues = function (scope, stack) {
-        var value = _.flatten(_.map(this.expressions, function (expression) {
-            return expression.toValues(scope, stack);
-        }));
-        return [value];
+        var values = [];
+        for (var i in this.expressions) {
+            var expression = this.expressions[i];
+            var expressionValues = expression.toValues(scope, stack);
+            values = values.concat(expressionValues);
+        }
+        return [values];
     };
     return ArrayExpression;
 })(Expression);

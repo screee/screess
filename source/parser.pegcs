@@ -55,11 +55,11 @@ expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { nul
 
 // TODO these should return a Values object
 expressionsUnnamedWeak =
-  head:valueExpression tail:(expressionsSeperatorWeak valueExpression)* { [head].concat(tail.map (e) -> e[1]) } /
+  head:expression tail:(expressionsSeperatorWeak expression)* { [head].concat(tail.map (e) -> e[1]) } /
   "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
 
 expressionsUnnamedStrong =
-  head:valueExpression tail:(expressionsSeperatorStrong valueExpression)* { [head].concat(tail.map (e) -> e[1]) }
+  head:expression tail:(expressionsSeperatorStrong expression)* { [head].concat(tail.map (e) -> e[1]) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -97,12 +97,12 @@ valueMacroDefinitionArguments =
   "" { @ValuesDefinition.ZERO }
 
 valueMacroDefinitionArgument =
-  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression: expression } /
+  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
   name:identifier { name: name }
 
 loop =
   ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
-  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
+  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
 
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope
@@ -118,7 +118,7 @@ propertyMacroDefinitionArguments =
   "" { @ValuesDefinition.ZERO }
 
 propertyMacroDefinitionArgument =
-  name:identifier whitespace* "=" whitespace* expression:valueExpression { name: name, expression:expression } /
+  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression:expression } /
   name:identifier { name: name }
 
 scope =
@@ -141,13 +141,13 @@ expression =
 filterExpression =
   notOperatorExpression /
   booleanLogicExpression /
-  filterOperatorExpression /
+  filterOperatorExpression
 
 booleanLogicExpression =
   whitespace* left:filterOperatorExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorExpression =
-  "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
+  whitespace* "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
 
 /////////////////////////////////////////////
 //       Filter Leaf Expression            //
@@ -163,7 +163,7 @@ groupExpression =
   whitespace* "(" expression:expression ")" { expression }
 
 typeCheckOperatorExpression =
-  whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) } /
+  whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) }
 
 comparisonOperatorExpression =
   whitespace* left:valueExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
@@ -215,7 +215,7 @@ mapExpressionItems =
   head:mapExpressionItem tail:(expressionsSeperatorStrong mapExpressionItem)* { [head].concat(tail.map (e) -> e[1]) }
 
 mapExpressionItem =
-  name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression }
+  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }
 
 dotExpression =
   base:baseValueExpression "." property:identifier { new @DotExpression(base, property) }

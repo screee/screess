@@ -16,13 +16,13 @@ var SetOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    SetOperatorExpression.prototype.evaluate = function (scope, stack) {
+    SetOperatorExpression.prototype.toValues = function (scope, stack) {
         var lvalue = this.left.toValue(scope, stack);
         // TODO allow for multiple rvalues
         var rvalue = this.right.toValue(scope, stack);
         assert(lvalue instanceof AttributeReferenceValue);
         assert(rvalue instanceof Array);
-        return [this.operator, lvalue.name].concat(Value.evaluate(rvalue, stack));
+        return [[this.operator, lvalue.name].concat(Value.evaluate(rvalue, stack))];
     };
     return SetOperatorExpression;
 })(Expression);
