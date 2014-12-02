@@ -164,6 +164,7 @@ var Scope = (function () {
             }
             else {
                 if (values.length != 1 || values.positional.length != 1) {
+                    console.log(values);
                     throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
                 }
                 output[name] = Value.evaluate(values.positional[0], stack);

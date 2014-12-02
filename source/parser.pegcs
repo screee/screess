@@ -24,6 +24,7 @@
   @MapExpression = require('./expressions/MapExpression')
   @DotExpression = require('./expressions/DotExpression')
   @SubscriptExpression = require('./expressions/SubscriptExpression')
+  @ArithmeticOperatorExpression = require('./expressions/ArithmeticOperatorExpression')
 
   @globalScope = @scope = new @Scope(null)
   @pushScope = (scope) =>
@@ -127,7 +128,7 @@ scope =
 
 expression =
   filterExpression /
-  valueExpression
+  arithmeticOperatorExpression
 
 /////////////////////////////////////////////
 //           Filter Expression             //
@@ -136,19 +137,19 @@ expression =
 filterExpression =
   notOperatorExpression /
   booleanLogicExpression /
-  filterOperatorExpression
+  logicOperatorExpression
 
 booleanLogicExpression =
-  whitespace* left:filterOperatorExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
+  whitespace* left:logicOperatorExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorExpression =
   whitespace* "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
 
 /////////////////////////////////////////////
-//       Filter Leaf Expression            //
+//       Logic Operator Expression         //
 /////////////////////////////////////////////
 
-filterOperatorExpression =
+logicOperatorExpression =
   groupExpression /
   setOperatorExpression /
   comparisonOperatorExpression /
@@ -158,13 +159,21 @@ groupExpression =
   whitespace* "(" expression:expression ")" { expression }
 
 typeCheckOperatorExpression =
-  whitespace* "is" whitespace* type:valueExpression { new @TypeCheckOperatorExpression(type) }
+  whitespace* "is" whitespace* type:arithmeticOperatorExpression { new @TypeCheckOperatorExpression(type) }
 
 comparisonOperatorExpression =
-  whitespace* left:valueExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:valueExpression { new @ComparisonOperatorExpression(left, operator, right) }
+  whitespace* left:arithmeticOperatorExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticOperatorExpression { new @ComparisonOperatorExpression(left, operator, right) }
 
 setOperatorExpression =
-  whitespace* left:valueExpression whitespace* operator:("in" / "!in") whitespace* right:valueExpression { new @SetOperatorExpression(left, operator, right) }
+  whitespace* left:arithmeticOperatorExpression whitespace* operator:("in" / "!in") whitespace* right:arithmeticOperatorExpression { new @SetOperatorExpression(left, operator, right) }
+
+/////////////////////////////////////////////
+//     Arithmetic Operator Expression      //
+/////////////////////////////////////////////
+
+arithmeticOperatorExpression =
+  left:valueExpression whitespaceWeak* operator:("+" / "-" / "/" / "*" / "^") whitespaceWeak* right:valueExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  valueExpression
 
 /////////////////////////////////////////////
 //           Value Expression              //

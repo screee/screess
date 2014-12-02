@@ -146,6 +146,15 @@ describe "layers", ->
     stylesheet = parse '#test { $type: background; $filter: @name == "foo" }'
     assert stylesheet.layers[0].filter
 
+describe "operators", ->
+
+  it "should apply", ->
+    stylesheet = parse """
+      #test {
+        $value: 1 + 1;
+      }
+    """
+    assert.equal stylesheet.layers[0]['value'], 2
 
 describe "sublayers", ->
 
