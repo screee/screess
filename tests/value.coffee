@@ -173,7 +173,7 @@ describe "arithmetic operators", ->
       stops: [[1, 2], [2, 3]]
     }
 
-  it "should apply multiple", ->
+  it "should support chaining", ->
     stylesheet = parse """
       #test { $value: 1 + 1 + 1 + 1; }
     """
