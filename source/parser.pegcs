@@ -172,7 +172,12 @@ setOperatorExpression =
 /////////////////////////////////////////////
 
 arithmeticOperatorExpression =
-  left:valueExpression whitespaceWeak* operator:("+" / "-" / "/" / "*" / "^") whitespaceWeak* right:valueExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  left:arithmeticOperatorStrongExpression whitespaceWeak* operator:("+" / "-") whitespaceWeak* right:arithmeticOperatorExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  arithmeticOperatorStrongExpression
+
+arithmeticOperatorStrongExpression =
+  left:valueExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticOperatorStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  "(" whitespace* expression:arithmeticOperatorExpression whitespace* ")" { expression } /
   valueExpression
 
 /////////////////////////////////////////////
