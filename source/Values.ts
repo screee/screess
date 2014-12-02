@@ -16,7 +16,6 @@ class Values {
   public positional:Value[];
   public named:{[s:string]:Value};
 
-  // TODO add types to arguments
   constructor(args:Value[], scope:Scope, stack:Stack) {
     this.positional = [];
     this.named = {};

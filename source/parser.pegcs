@@ -73,17 +73,12 @@ statements = whitespace* (statement (statementSeperator statement)* statementSep
 
 statement =
   comment /
-  filterProperty /
   valueMacroDefinition /
   layer /
   class /
   propertyMacroDefinition /
   loop /
   property
-
-// TODO deprecate
-filterProperty =
- "$filter:" whitespace* expression:expression { @scope.setFilter(expression) }
 
 property =
   name:identifier ":" whitespace* expressions:expressionsUnnamedWeak { @scope.addProperty(name, expressions) } /

@@ -1,7 +1,6 @@
 var assert = require('assert');
 var _ = require('./utilities');
 var Values = (function () {
-    // TODO add types to arguments
     function Values(args, scope, stack) {
         this.positional = [];
         this.named = {};
