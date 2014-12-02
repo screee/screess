@@ -7,6 +7,7 @@ import ChildProcess = require('child_process')
 import assert = require('assert');
 var Parser = require('../source/parser');
 var Package = require('../../package.json');
+var Linter = require('mapbox-gl-style-lint')
 
 var ENCODING = "utf8";
 
@@ -42,7 +43,6 @@ function preview(style:string):void {
 }
 
 function compile() {
-  try {
     console.log("\n\nStarting compilation");
     var inputStream = CLI.args[0] ? Fs.createReadStream(CLI.args[0]) : process.stdin;
     var outputStream = CLI.args[1] ? Fs.createWriteStream(CLI.args[1]) : process.stdout;
@@ -56,19 +56,21 @@ function compile() {
     inputStream.on("data", (chunk) => {input += chunk})
 
     inputStream.on("end", () => {
-      var output = JSON.stringify(Parser.parse(input), null, 2) + "\n";
+      try {
+        var output = JSON.stringify(Parser.parse(input), null, 2) + "\n";
+        Linter(output);
 
-      if (outputStream == process.stdout) {
-        outputStream.write(output, ENCODING);
-      } else {
-        outputStream.end(output, ENCODING);
+        if (outputStream == process.stdout) {
+          outputStream.write(output, ENCODING);
+        } else {
+          outputStream.end(output, ENCODING);
+        }
+
+        assert(CLI.args[1]);
+        if (CLI['preview']) preview(CLI.args[1]);
+        console.log("Done compilation");
+      } catch (e) {
+        console.log(e.toString())
       }
-
-      assert(CLI.args[1]);
-      if (CLI['preview']) preview(CLI.args[1]);
-      console.log("Done compilation");
     });
-  } catch (e) {
-    console.log(e);
-  }
 }

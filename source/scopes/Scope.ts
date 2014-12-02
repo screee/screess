@@ -29,7 +29,7 @@ class Scope {
   public propertyMacros:PropertyMacro[];
   public loops:Loop[]
 
-  public layerScopes:{[name:string]: Scope}
+  public layerScopes:Scope[]
   public classScopes:{[name:string]: Scope}
 
   // TODO deprecate
@@ -41,7 +41,7 @@ class Scope {
     this.propertyMacros = [];
     this.loops = [];
     this.classScopes = {};
-    this.layerScopes = {};
+    this.layerScopes = [];
     this.sources = {};
 
     if (this.parent == null) {
@@ -99,10 +99,12 @@ class Scope {
   }
 
   addLayerScope(name?:string):Scope {
-    if (this.layerScopes[name]) {
+    if (name != null && this.layerScopes[name]) {
       throw new Error("Duplicate entries for layer scope " + name)
     }
-    return this.layerScopes[name] = new Scope(this, name);
+    var scope = new Scope(this, name);
+    this.layerScopes.push(scope);
+    return scope;
   }
 
   addLiteralValueMacros(values:{[name:string]:any}):void {

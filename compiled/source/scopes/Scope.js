@@ -17,7 +17,7 @@ var Scope = (function () {
         this.propertyMacros = [];
         this.loops = [];
         this.classScopes = {};
-        this.layerScopes = {};
+        this.layerScopes = [];
         this.sources = {};
         if (this.parent == null) {
             for (var macroName in Globals.valueMacros) {
@@ -65,10 +65,12 @@ var Scope = (function () {
         return this.classScopes[name];
     };
     Scope.prototype.addLayerScope = function (name) {
-        if (this.layerScopes[name]) {
+        if (name != null && this.layerScopes[name]) {
             throw new Error("Duplicate entries for layer scope " + name);
         }
-        return this.layerScopes[name] = new Scope(this, name);
+        var scope = new Scope(this, name);
+        this.layerScopes.push(scope);
+        return scope;
     };
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (var identifier in values) {

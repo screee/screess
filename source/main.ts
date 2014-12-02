@@ -3,7 +3,7 @@
 var Parser = require('./parser');
 
 if (module.exports) {
-  module.exports = require("./parser");
+  module.exports = Parser;
 } else if (window) {
-  window['ScreeSS'] = require("./parser");
+  window['ScreeSS'] = Parser;
 }
