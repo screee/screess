@@ -28,7 +28,7 @@ module.exports =
       stops = []
       for key, value of args
         if key == "base" then continue
-        if (stop = parseInt(key)) != NaN then stops.push([key, value])
+        if (stop = parseInt(key)) != NaN then stops.push([stop, value])
         else assert false
       assert stops.length > 0
       [new FunctionValue(args.base, stops)]

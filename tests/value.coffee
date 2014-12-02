@@ -133,56 +133,60 @@ describe "arithmetic operators", ->
 
   it "should apply '+'", ->
     stylesheet = parse """
-      #test {
-        $value: 1 + 1;
-      }
+      #test { $value: 1 + 1; }
     """
     assert.equal stylesheet.layers[0]['value'], 2
 
   it "should apply '-'", ->
     stylesheet = parse """
-      #test {
-        $value: 3 - 1;
-      }
+      #test { $value: 3 - 1; }
     """
     assert.equal stylesheet.layers[0]['value'], 2
 
   it "should apply '*'", ->
     stylesheet = parse """
-      #test {
-        $value: 2 * 2;
-      }
+      #test { $value: 2 * 2; }
     """
     assert.equal stylesheet.layers[0]['value'], 4
 
   it "should apply '/'", ->
     stylesheet = parse """
-      #test {
-        $value: 4 / 2;
-      }
+      #test { $value: 4 / 2; }
     """
     assert.equal stylesheet.layers[0]['value'], 2
 
+  it "should apply to function values as rvalues", ->
+    stylesheet = parse """
+      #test { $value: 1 + function(base:0.5 1:1 2:2) }
+    """
+    assert.deepEqual stylesheet.layers[0]['value'], {
+      base: 0.5,
+      stops: [[1, 2], [2, 3]]
+    }
+
+  it "should apply to function values as lvalues", ->
+    stylesheet = parse """
+      #test { $value: function(base:0.5 1:1 2:2) + 1 }
+    """
+    assert.deepEqual stylesheet.layers[0]['value'], {
+      base: 0.5,
+      stops: [[1, 2], [2, 3]]
+    }
+
   it "should apply multiple", ->
     stylesheet = parse """
-      #test {
-        $value: 1 + 1 + 1 + 1;
-      }
+      #test { $value: 1 + 1 + 1 + 1; }
     """
     assert.equal stylesheet.layers[0]['value'], 4
 
   it "should support order of operations", ->
     stylesheet = parse """
-      #test {
-        $value: 2 * 2 + 2 * 2;
-      }
+      #test { $value: 2 * 2 + 2 * 2; }
     """
     assert.equal stylesheet.layers[0]['value'], 8
 
   it "should support parenthesis", ->
     stylesheet = parse """
-      #test {
-        $value: 2 * (2 + 2);
-      }
+      #test { $value: 2 * (2 + 2); }
     """
     assert.equal stylesheet.layers[0]['value'], 8

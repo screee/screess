@@ -51,7 +51,7 @@
             continue;
           }
           if ((stop = parseInt(key)) !== NaN) {
-            stops.push([key, value]);
+            stops.push([stop, value]);
           } else {
             assert(false);
           }

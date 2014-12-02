@@ -1,8 +1,8 @@
-import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
 import Expression = require("./Expression");
 import Scope = require("../scopes/Scope");
 import Stack = require("../Stack");
+import FunctionValue = require("../values/FunctionValue")
 import _ = require("../utilities");
 
 class ArithmeticOperatorExpression extends Expression {
@@ -15,23 +15,34 @@ class ArithmeticOperatorExpression extends Expression {
     var left = this.left.toValue(scope, stack);
     var right = this.right.toValue(scope, stack);
 
-    assert(_.isNumber(left))
-    assert(_.isNumber(right))
-
-    var output:Number;
-    if (this.operator == '+') {
-      output = left + right
-    } else if (this.operator == '-') {
-      output = left - right
-    } else if (this.operator == '*') {
-      output = left * right
-    } else if (this.operator == '/') {
-      output = left / right
-    } else if (this.operator == '^') {
-      output = Math.pow(left, right)
+    function apply(left:number, operator:string, right:number):number {
+      if (operator == '+') { return left + right }
+      else if (operator == '-') { return left - right }
+      else if (operator == '*') { return left * right }
+      else if (operator == '/') { return left / right }
     }
 
-    return [output];
+    if (_.isNumber(left) && _.isNumber(right)) {
+      return [apply(left, this.operator, right)];
+
+    } else if (_.isNumber(left) && right instanceof FunctionValue) {
+      var base = right.base
+      var stops = <[number, number][]> _.map(right.stops, (value) => {
+        return [value[0], apply(left, this.operator, value[1])]
+      })
+      return [ new FunctionValue(base, stops) ]
+
+    } else if (left instanceof FunctionValue && _.isNumber(right)) {
+      var base = left.base
+      var stops = <[number, number][]> _.map(left.stops, (value) => {
+        return [value[0], apply(value[1], this.operator, right)]
+      })
+      return [ new FunctionValue(base, stops) ]
+
+    } else {
+      assert(false);
+    }
+
   }
 
 }

@@ -6,6 +6,7 @@ var __extends = this.__extends || function (d, b) {
 };
 var assert = require("assert");
 var Expression = require("./Expression");
+var FunctionValue = require("../values/FunctionValue");
 var _ = require("../utilities");
 var ArithmeticOperatorExpression = (function (_super) {
     __extends(ArithmeticOperatorExpression, _super);
@@ -16,27 +17,43 @@ var ArithmeticOperatorExpression = (function (_super) {
         this.right = right;
     }
     ArithmeticOperatorExpression.prototype.toValues = function (scope, stack) {
+        var _this = this;
         var left = this.left.toValue(scope, stack);
         var right = this.right.toValue(scope, stack);
-        assert(_.isNumber(left));
-        assert(_.isNumber(right));
-        var output;
-        if (this.operator == '+') {
-            output = left + right;
+        function apply(left, operator, right) {
+            if (operator == '+') {
+                return left + right;
+            }
+            else if (operator == '-') {
+                return left - right;
+            }
+            else if (operator == '*') {
+                return left * right;
+            }
+            else if (operator == '/') {
+                return left / right;
+            }
         }
-        else if (this.operator == '-') {
-            output = left - right;
+        if (_.isNumber(left) && _.isNumber(right)) {
+            return [apply(left, this.operator, right)];
         }
-        else if (this.operator == '*') {
-            output = left * right;
+        else if (_.isNumber(left) && right instanceof FunctionValue) {
+            var base = right.base;
+            var stops = _.map(right.stops, function (value) {
+                return [value[0], apply(left, _this.operator, value[1])];
+            });
+            return [new FunctionValue(base, stops)];
         }
-        else if (this.operator == '/') {
-            output = left / right;
+        else if (left instanceof FunctionValue && _.isNumber(right)) {
+            var base = left.base;
+            var stops = _.map(left.stops, function (value) {
+                return [value[0], apply(value[1], _this.operator, right)];
+            });
+            return [new FunctionValue(base, stops)];
         }
-        else if (this.operator == '^') {
-            output = Math.pow(left, right);
+        else {
+            assert(false);
         }
-        return [output];
     };
     return ArithmeticOperatorExpression;
 })(Expression);
