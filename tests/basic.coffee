@@ -101,15 +101,19 @@ describe "loops", ->
 
   it "should place sublayers in the right order", ->
     stylesheet = parse """
-      # { $value: 0 }
+      # { $value: 1 }
       for value in [1] {
-        # { $value: value }
+        # { $value: 0; z-index: -1 }
+        # { $value: 2 }
+        # { $value: 4; z-index: 1 }
       }
-      # { $value: 2 }
+      # { $value: 3 }
     """
     assert.equal stylesheet.layers[0].value, 0
     assert.equal stylesheet.layers[1].value, 1
     assert.equal stylesheet.layers[2].value, 2
+    assert.equal stylesheet.layers[3].value, 3
+    assert.equal stylesheet.layers[4].value, 4
 
 describe "layers", ->
 
