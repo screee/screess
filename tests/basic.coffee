@@ -51,7 +51,6 @@ describe "z-index", ->
     assert.deepEqual  stylesheet.layers[0].layers[1].id, "second"
     assert.deepEqual  stylesheet.layers[0].layers[2].id, "third"
 
-
 describe "loops", ->
 
   it "should iterate over an array's values to create layers", ->
@@ -99,6 +98,18 @@ describe "loops", ->
     assert.equal stylesheet.layers[1].key, 1
     assert.equal stylesheet.layers[2].value, 6
     assert.equal stylesheet.layers[2].key, 2
+
+  it "should place sublayers in the right order", ->
+    stylesheet = parse """
+      # { $value: 0 }
+      for value in [1] {
+        # { $value: value }
+      }
+      # { $value: 2 }
+    """
+    assert.equal stylesheet.layers[0].value, 0
+    assert.equal stylesheet.layers[1].value, 1
+    assert.equal stylesheet.layers[2].value, 2
 
 describe "layers", ->
 

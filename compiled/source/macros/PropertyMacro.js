@@ -7,8 +7,8 @@ var PropertyMacro = (function () {
         this.name = name;
         this.argDefinition = argDefinition;
         this.body = body;
-        var ClassScope = require("../scopes/ClassScope");
-        this.scope = new ClassScope(this.parentScope);
+        var _Scope = require("../scopes/Scope");
+        this.scope = new _Scope(this.parentScope);
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
             return !argDefinition.expression;
         });
@@ -19,7 +19,7 @@ var PropertyMacro = (function () {
         var scope = new Scope(this.scope);
         scope.addLiteralValueMacros(args);
         stack.scope.push(scope);
-        var values = _.extend(scope.evaluateProperties(stack, this.scope.properties), this.body ? this.body.apply({}, argValues) : null);
+        var values = _.extend(scope.evaluateProperties(stack, this.scope.statements), this.body ? this.body.apply({}, argValues) : null);
         stack.scope.pop();
         return values;
     };

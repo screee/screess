@@ -13,8 +13,8 @@ class PropertyMacro {
   public argLengthMax:number;
 
   constructor(public parentScope:Scope, public name:string, public argDefinition:ValuesDefinition, public body:Function = null) {
-    var ClassScope = require("../scopes/ClassScope")
-    this.scope = new ClassScope(this.parentScope)
+    var _Scope = require("../scopes/Scope")
+    this.scope = new _Scope(this.parentScope)
 
     this.argLengthMin = _.count(
       this.argDefinition.definitions,
@@ -31,7 +31,7 @@ class PropertyMacro {
 
     stack.scope.push(scope)
     var values = _.extend(
-      scope.evaluateProperties(stack, this.scope.properties),
+      scope.evaluateProperties(stack, this.scope.statements),
       this.body ? this.body.apply({}, argValues) : null
     )
     stack.scope.pop()

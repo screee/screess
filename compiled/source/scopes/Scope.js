@@ -8,17 +8,22 @@ var _ = require("../utilities");
 var ScopeType = require('./ScopeType');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var Globals = require('../globals');
+var StatementType;
+(function (StatementType) {
+    StatementType[StatementType["LOOP"] = 0] = "LOOP";
+    StatementType[StatementType["LAYER"] = 1] = "LAYER";
+    StatementType[StatementType["CLASS"] = 2] = "CLASS";
+    StatementType[StatementType["PROPERTY"] = 3] = "PROPERTY";
+})(StatementType || (StatementType = {}));
 var Scope = (function () {
     function Scope(parent, name) {
+        if (name === void 0) { name = null; }
         this.parent = parent;
         this.name = name;
-        this.properties = {};
         this.valueMacros = [];
         this.propertyMacros = [];
-        this.loops = [];
-        this.classScopes = {};
-        this.layerScopes = [];
         this.sources = {};
+        this.statements = [];
         if (this.parent == null) {
             for (var macroName in Globals.valueMacros) {
                 var fn = Globals.valueMacros[macroName];
@@ -30,9 +35,6 @@ var Scope = (function () {
             }
         }
     }
-    Scope.prototype.getProperties = function () {
-        return this.properties;
-    };
     Scope.prototype.isGlobal = function () {
         return !this.parent;
     };
@@ -53,24 +55,44 @@ var Scope = (function () {
         return this.isGlobal() ? this.getSource(name) : this.parent.getSource(name);
     };
     Scope.prototype.addProperty = function (name, expressions) {
-        if (this.properties[name]) {
-            throw new Error("Duplicate entries for property " + name);
-        }
-        return this.properties[name] = expressions;
+        // TODO check for duplicate properties
+        assert(name != null);
+        this.statements.push({
+            type: 3 /* PROPERTY */,
+            name: name,
+            expressions: expressions
+        });
     };
     Scope.prototype.addClassScope = function (name) {
-        if (!this.classScopes[name]) {
-            this.classScopes[name] = new Scope(this, name);
-        }
-        return this.classScopes[name];
+        // TODO ensure class scopes are merged properly
+        var scope = new Scope(this, name);
+        this.statements.push({
+            type: 2 /* CLASS */,
+            scope: scope
+        });
+        return scope;
     };
     Scope.prototype.addLayerScope = function (name) {
-        if (name != null && this.layerScopes[name]) {
-            throw new Error("Duplicate entries for layer scope " + name);
-        }
+        // TODO check for duplicate layer scopes
         var scope = new Scope(this, name);
-        this.layerScopes.push(scope);
+        this.statements.push({
+            type: 1 /* LAYER */,
+            scope: scope
+        });
         return scope;
+    };
+    Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
+        var loop = {
+            valueIdentifier: valueIdentifier,
+            keyIdentifier: keyIdentifier,
+            collectionExpression: collectionExpression,
+            scope: new Scope(this)
+        };
+        this.statements.push({
+            type: 0 /* LOOP */,
+            loop: loop
+        });
+        return loop.scope;
     };
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (var identifier in values) {
@@ -82,16 +104,7 @@ var Scope = (function () {
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         var ValueMacro_ = require("../macros/ValueMacro");
-        var macro;
-        if (_.isArray(body)) {
-            macro = new ValueMacro_(name, argDefinition, this, body);
-        }
-        else if (_.isFunction(body)) {
-            macro = new ValueMacro_(name, argDefinition, this, body);
-        }
-        else {
-            assert(false);
-        }
+        var macro = new ValueMacro_(name, argDefinition, this, body);
         return this.valueMacros.unshift(macro);
     };
     Scope.prototype.addPropertyMacro = function (name, argDefinition, body) {
@@ -99,16 +112,6 @@ var Scope = (function () {
         var macro = new PropertyMacro(this, name, argDefinition, body);
         this.propertyMacros.unshift(macro);
         return macro.scope;
-    };
-    Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
-        var loop = {
-            valueIdentifier: valueIdentifier,
-            keyIdentifier: keyIdentifier,
-            collectionExpression: collectionExpression,
-            scope: new Scope(this)
-        };
-        this.loops.push(loop);
-        return loop.scope;
     };
     Scope.prototype.getValueMacro = function (name, values, stack) {
         for (var i in this.valueMacros) {
@@ -139,11 +142,16 @@ var Scope = (function () {
         // avoid this.
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
-    Scope.prototype.evaluateProperties = function (stack, properties) {
-        if (properties === void 0) { properties = this.properties; }
+    Scope.prototype.evaluateProperties = function (stack, statements) {
+        if (statements === void 0) { statements = this.statements; }
         var output = {};
-        for (var name in properties) {
-            var expressions = properties[name];
+        var propertyStatements = _.filter(statements, function (statement) {
+            return statement.type == 3 /* PROPERTY */;
+        });
+        for (var i in propertyStatements) {
+            var statement = propertyStatements[i];
+            var name = statement.name;
+            var expressions = statement.expressions;
             // TODO refactor Values constructor to accept this
             var values = new Values(_.map(expressions, function (expression) {
                 return { expression: expression };
@@ -193,63 +201,44 @@ var Scope = (function () {
         this.evaluateProperties(stack);
         stack.scope.pop();
     };
-    // TODO deprecate
-    Scope.prototype.setFilter = function (filterExpression) {
-        if (this.filterExpression) {
-            throw new Error("Duplicate filters");
-        }
-        this.filterExpression = filterExpression;
-    };
-    Scope.prototype.evaluateFilterProperty = function (stack) {
-        if (this.filterExpression) {
-            return this.filterExpression.evaluate(this, stack);
-            ;
-        }
-        else {
-            return null;
-        }
-    };
     Scope.prototype.evaluateClassPaintProperties = function (type, stack) {
         // TODO ensure all properties are paint properties, not layout properties
-        return _.objectMap(this.classScopes, function (scope, name) {
-            return ["paint." + name, scope.evaluateClassScope(stack)];
+        var classStatements = _.filter(this.statements, function (statement) {
+            return statement.type == 2 /* CLASS */;
         });
-    };
-    Scope.prototype.evaluatePaintProperties = function (type, stack) {
-        var properties = this.evaluateProperties(stack, _.objectFilter(this.properties, function (property, name) {
-            return !_.startsWith(name, "$");
-        }));
-        var layout = {};
-        var paint = {};
-        var zIndex = 0;
-        _.each(properties, function (value, name) {
-            if (name == 'z-index') {
-                zIndex = value;
-            }
-            else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
-                paint[name] = value;
-            }
-            else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
-                layout[name] = value;
-            }
-            else {
-                throw new Error("Unknown property name " + name + " for layer type " + type);
-            }
+        return _.objectMap(classStatements, function (statement, name) {
+            return [
+                "paint." + name,
+                statement.scope.evaluateClassScope(stack)
+            ];
         });
-        return { layout: layout, paint: paint, 'z-index': zIndex };
-    };
-    // TODO merge this method with evaluatePaintProperties
-    Scope.prototype.evaluateMetaProperties = function (stack) {
-        return this.evaluateProperties(stack, _.objectMapKeys(_.objectFilter(this.properties, function (property, name) {
-            return _.startsWith(name, "$");
-        }), function (property, name) {
-            return name.slice(1);
-        }));
     };
     Scope.prototype.evaluateLayerScope = function (stack) {
         stack.scope.push(this);
+        var properties = this.evaluateProperties(stack);
+        var metaProperties = {};
+        var paintProperties = {};
+        var layoutProperties = {};
         var layers = this.evaluateLayers(stack);
-        var metaProperties = this.evaluateMetaProperties(stack);
+        var type = properties['$type'] || 'raster';
+        for (var name in properties) {
+            var value = properties[name];
+            if (_.startsWith(name, '$')) {
+                metaProperties[name.slice(1)] = value;
+            }
+            else if (name == 'z-index') {
+                metaProperties['z-index'] = value;
+            }
+            else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+                paintProperties[name] = value;
+            }
+            else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+                layoutProperties[name] = value;
+            }
+            else {
+                assert(false);
+            }
+        }
         if (layers) {
             if (metaProperties['type']) {
                 assert.equal(metaProperties['type'], 'raster');
@@ -258,13 +247,14 @@ var Scope = (function () {
         }
         // TODO ensure layer has a source and type
         // TODO remove this _.objectCompact call -- some falsey values are important.
-        var properties = _.objectCompact(_.extend({
+        var output = _.objectCompact(_.extend({
             id: this.name || _.uniqueId('scope'),
-            filter: this.evaluateFilterProperty(stack),
-            layers: layers
-        }, metaProperties, this.evaluatePaintProperties(metaProperties['type'], stack), this.evaluateClassPaintProperties(metaProperties['type'], stack)));
+            layers: layers,
+            paint: paintProperties,
+            layout: layoutProperties
+        }, metaProperties, this.evaluateClassPaintProperties(type, stack)));
         stack.scope.pop();
-        return properties;
+        return output;
     };
     Scope.prototype.evaluate = function (type, stack) {
         if (type == 0 /* GLOBAL */) {
@@ -280,31 +270,35 @@ var Scope = (function () {
             assert(false);
         }
     };
-    Scope.prototype.eachLoopScope = function (stack, callback) {
-        for (var i in this.loops) {
-            var scope = this.loops[i].scope;
-            var collectionExpression = this.loops[i].collectionExpression;
-            var valueIdentifier = this.loops[i].valueIdentifier;
-            var keyIdentifier = this.loops[i].keyIdentifier;
-            var collection = collectionExpression.toValue(this, stack);
-            assert(_.isArray(collection) || _.isObject(collection));
-            for (var key in collection) {
-                var value = collection[key];
-                scope.addLiteralValueMacro(valueIdentifier, value);
-                if (keyIdentifier) {
-                    scope.addLiteralValueMacro(keyIdentifier, key);
-                }
-                callback(scope);
+    Scope.prototype.eachLoopScope = function (loop, stack, callback) {
+        var scope = loop.scope;
+        var collectionExpression = loop.collectionExpression;
+        var valueIdentifier = loop.valueIdentifier;
+        var keyIdentifier = loop.keyIdentifier;
+        var collection = collectionExpression.toValue(this, stack);
+        assert(_.isArray(collection) || _.isObject(collection));
+        for (var key in collection) {
+            var value = collection[key];
+            scope.addLiteralValueMacro(valueIdentifier, value);
+            if (keyIdentifier) {
+                scope.addLiteralValueMacro(keyIdentifier, key);
             }
+            callback(scope);
         }
     };
     Scope.prototype.evaluateLayers = function (stack) {
-        var layers = _.map(this.layerScopes, function (layer) {
-            return layer.evaluateLayerScope(stack);
-        });
-        this.eachLoopScope(stack, function (scope) {
-            layers = layers.concat(scope.evaluateLayers(stack));
-        });
+        var layers = [];
+        for (var i in this.statements) {
+            var statement = this.statements[i];
+            if (statement.type == 1 /* LAYER */) {
+                layers.push(statement.scope.evaluateLayerScope(stack));
+            }
+            else if (statement.type == 0 /* LOOP */) {
+                this.eachLoopScope(statement.loop, stack, function (scope) {
+                    layers = layers.concat(scope.evaluateLayers(stack));
+                });
+            }
+        }
         // We are relying on the behavior that the original ordering is preserved
         // for layers with the same z-index
         layers = _.sortBy(layers, 'z-index');

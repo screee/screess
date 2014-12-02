@@ -58,6 +58,7 @@ function compile() {
     inputStream.on("end", () => {
       try {
         var output = JSON.stringify(Parser.parse(input), null, 2) + "\n";
+        // TODO run the linter within ScreeSS library
         Linter(output);
 
         if (outputStream == process.stdout) {

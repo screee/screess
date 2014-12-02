@@ -80,9 +80,9 @@ describe "whitespace", ->
 
   it "should allow for a property's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
-      type-second(one, two) = { type: two }
+      type-second(one, two) = { $type: two }
       #layer {
-        $type-second: (
+        type-second: (
           foo
           background
         )
