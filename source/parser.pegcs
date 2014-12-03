@@ -151,37 +151,34 @@ notOperatorExpression =
 
 filterWeakExpression =
   groupExpression /
-  filterWeakInfixOperatorExpression /
+  setOperatorExpression /
+  comparisonOperatorExpression /
   typeCheckOperatorExpression
 
 groupExpression =
-  "(" expression:expression ")"
-  { expression }
+  whitespace* "(" expression:expression ")" { expression }
 
 typeCheckOperatorExpression =
-  "is" whitespace* type:expression
-  { new @TypeCheckOperatorExpression(type) }
+  whitespace* "is" whitespace* type:arithmeticExpression { new @TypeCheckOperatorExpression(type) }
 
-filterWeakInfixOperatorExpression =
-  left:valueExpression whitespace*
-  operator:("==" / ">=" / "<=" / "<" / ">" / "!=" / "in" / "!in") whitespace*
-  right:arithmeticExpression
-  {
-    if operator in ["in", "!in"] then new @SetOperatorExpression(left, operator, right)
-    else new @ComparisonOperatorExpression(left, operator, right)
-  }
+comparisonOperatorExpression =
+  whitespace* left:arithmeticExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticExpression { new @ComparisonOperatorExpression(left, operator, right) }
+
+setOperatorExpression =
+  whitespace* left:arithmeticExpression whitespace* operator:("in" / "!in") whitespace* right:arithmeticExpression { new @SetOperatorExpression(left, operator, right) }
 
 /////////////////////////////////////////////
 //     Arithmetic Operator Expression      //
 /////////////////////////////////////////////
 
 arithmeticExpression =
+  left:arithmeticStrongExpression whitespaceWeak* operator:("+" / "-") whitespaceWeak* right:arithmeticExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  arithmeticStrongExpression
+
+arithmeticStrongExpression =
+  left:valueExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
   "(" whitespace* expression:arithmeticExpression whitespace* ")" { expression } /
-  left:valueExpression rest:(whitespace* operator:("+" / "-" / "/" / "*") whitespace* right:arithmeticExpression)?
-  {
-    if rest then new @ArithmeticOperatorExpression(left, rest[1], rest[3])
-    else left
-  }
+  valueExpression
 
 /////////////////////////////////////////////
 //         Strong Value Expression         //

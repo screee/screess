@@ -6,6 +6,7 @@ var __extends = this.__extends || function (d, b) {
 };
 var Expression = require("./Expression");
 var assert = require('assert');
+// TODO merge this class with SubscriptExpression
 var DotExpression = (function (_super) {
     __extends(DotExpression, _super);
     function DotExpression(baseExpression, property) {
