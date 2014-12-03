@@ -1,6 +1,5 @@
 var assert = require('assert');
 var ValuesDefinition = (function () {
-    // TODO create type for definitions
     function ValuesDefinition(definitions, scope) {
         this.definitions = definitions;
         this.scope = scope;

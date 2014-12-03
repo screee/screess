@@ -13,11 +13,9 @@ class ValuesDefinition {
 
   static ZERO:ValuesDefinition = new ValuesDefinition([], null);
 
-  // TODO create type for named
-  public named;
+  public named:{[name:string]: Definition};
   public length:number;
 
-  // TODO create type for definitions
   constructor(public definitions:Definition[], public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);

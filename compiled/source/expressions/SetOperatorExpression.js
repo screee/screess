@@ -18,7 +18,6 @@ var SetOperatorExpression = (function (_super) {
     }
     SetOperatorExpression.prototype.toValues = function (scope, stack) {
         var lvalue = this.left.toValue(scope, stack);
-        // TODO allow for multiple rvalues
         var rvalue = this.right.toValue(scope, stack);
         assert(lvalue instanceof AttributeReferenceValue);
         assert(rvalue instanceof Array);

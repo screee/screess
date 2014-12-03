@@ -9,7 +9,6 @@ var Expression = (function () {
         }
         return values[0];
     };
-    // TODO use union types on return type
     Expression.prototype.toValues = function (scope, stack) {
         throw new Error("Abstract method");
     };

@@ -146,7 +146,7 @@ notOperatorExpression =
   "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
 
 /////////////////////////////////////////////
-//       Logic Operator Expression         //
+//         Filter Weak Expression          //
 /////////////////////////////////////////////
 
 filterWeakExpression =
@@ -181,7 +181,7 @@ arithmeticStrongExpression =
   valueExpression
 
 /////////////////////////////////////////////
-//         Strong Value Expression         //
+//            Value Expression             //
 /////////////////////////////////////////////
 
 valueExpression =

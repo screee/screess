@@ -12,7 +12,6 @@ class Expression {
     return values[0];
   }
 
-  // TODO use union types on return type
   toValues(scope, stack):any[] {
     throw new Error("Abstract method");
   }

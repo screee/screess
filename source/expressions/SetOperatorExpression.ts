@@ -12,7 +12,6 @@ class SetOperatorExpression extends Expression {
 
   toValues(scope:Scope, stack:Stack):any[] {
     var lvalue = this.left.toValue(scope, stack);
-    // TODO allow for multiple rvalues
     var rvalue = this.right.toValue(scope, stack);
 
     assert(lvalue instanceof AttributeReferenceValue);

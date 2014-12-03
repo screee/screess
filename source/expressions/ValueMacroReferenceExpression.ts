@@ -5,10 +5,15 @@ import Values = require('../Values');
 import Stack = require("../Stack");
 import _ = require("../utilities");
 
+interface ArgumentExpression {
+  name?: string;
+  expression: Expression;
+}
+
 class ValueMacroReferenceExpression extends Expression {
 
   // TODO add type to argumentExpressions
-  constructor(public name:string, public argumentExpressions) {
+  constructor(public name:string, public argumentExpressions:ArgumentExpression[]) {
     super()
   }
 
