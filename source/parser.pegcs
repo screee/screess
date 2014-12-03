@@ -137,65 +137,70 @@ expression =
 filterExpression =
   notOperatorExpression /
   booleanLogicExpression /
-  logicOperatorExpression
+  filterWeakExpression
 
 booleanLogicExpression =
-  whitespace* left:logicOperatorExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
+  left:filterWeakExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorExpression =
-  whitespace* "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
+  "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
 
 /////////////////////////////////////////////
 //       Logic Operator Expression         //
 /////////////////////////////////////////////
 
-logicOperatorExpression =
+filterWeakExpression =
   groupExpression /
-  setOperatorExpression /
-  comparisonOperatorExpression /
+  filterWeakInfixOperatorExpression /
   typeCheckOperatorExpression
 
 groupExpression =
-  whitespace* "(" expression:expression ")" { expression }
+  "(" expression:expression ")"
+  { expression }
 
 typeCheckOperatorExpression =
-  whitespace* "is" whitespace* type:arithmeticOperatorExpression { new @TypeCheckOperatorExpression(type) }
+  "is" whitespace* type:expression
+  { new @TypeCheckOperatorExpression(type) }
 
-comparisonOperatorExpression =
-  whitespace* left:arithmeticOperatorExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticOperatorExpression { new @ComparisonOperatorExpression(left, operator, right) }
-
-setOperatorExpression =
-  whitespace* left:arithmeticOperatorExpression whitespace* operator:("in" / "!in") whitespace* right:arithmeticOperatorExpression { new @SetOperatorExpression(left, operator, right) }
+filterWeakInfixOperatorExpression =
+  left:valueExpression whitespace*
+  operator:("==" / ">=" / "<=" / "<" / ">" / "!=" / "in" / "!in") whitespace*
+  right:arithmeticOperatorExpression
+  {
+    if operator in ["in", "!in"] then new @SetOperatorExpression(left, operator, right)
+    else new @ComparisonOperatorExpression(left, operator, right)
+  }
 
 /////////////////////////////////////////////
 //     Arithmetic Operator Expression      //
 /////////////////////////////////////////////
 
 arithmeticOperatorExpression =
-  left:arithmeticOperatorStrongExpression whitespaceWeak* operator:("+" / "-") whitespaceWeak* right:arithmeticOperatorExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
-  arithmeticOperatorStrongExpression
-
-arithmeticOperatorStrongExpression =
-  left:valueExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticOperatorStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
   "(" whitespace* expression:arithmeticOperatorExpression whitespace* ")" { expression } /
-  valueExpression
+  left:valueExpression rest:(whitespace* operator:("+" / "-" / "/" / "*") whitespace* right:arithmeticOperatorExpression)?
+  {
+    if rest then new @ArithmeticOperatorExpression(left, rest[1], rest[3])
+    else left
+  }
 
 /////////////////////////////////////////////
-//           Value Expression              //
+//         Weak Value Expression           //
 /////////////////////////////////////////////
 
-// TODO use more realer parser generator so that I don't have to do this stuff
 valueExpression =
   dotExpression /
   subscriptExpression /
-  baseValueExpression
-
-baseValueExpression =
   literalExpression /
   valueMacroReferenceExpression /
   stringExpression /
   mapExpression /
   arrayExpression
+
+dotExpression =
+  base:(arrayExpression / mapExpression / valueMacroReferenceExpression) "." property:(integer / identifier) { new @DotExpression(base, property) }
+
+subscriptExpression =
+  base:(arrayExpression / mapExpression / valueMacroReferenceExpression) "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
 
 literalExpression =
   value:value { new @LiteralExpression(value) }
@@ -225,13 +230,6 @@ mapExpressionItems =
 
 mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }
-
-dotExpression =
-  base:baseValueExpression "." property:identifier { new @DotExpression(base, property) }
-
-subscriptExpression =
-  base:baseValueExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
