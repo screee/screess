@@ -184,23 +184,30 @@ arithmeticOperatorExpression =
   }
 
 /////////////////////////////////////////////
-//         Weak Value Expression           //
+//         Strong Value Expression         //
 /////////////////////////////////////////////
 
 valueExpression =
   dotExpression /
   subscriptExpression /
+  valueWeakExpression
+
+dotExpression =
+  base:valueWeakExpression "." property:(integer / identifier) { new @DotExpression(base, property) }
+
+subscriptExpression =
+  base:valueWeakExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
+
+/////////////////////////////////////////////
+//         Weak Value Expression           //
+/////////////////////////////////////////////
+
+valueWeakExpression =
   literalExpression /
   valueMacroReferenceExpression /
   stringExpression /
   mapExpression /
   arrayExpression
-
-dotExpression =
-  base:(arrayExpression / mapExpression / valueMacroReferenceExpression) "." property:(integer / identifier) { new @DotExpression(base, property) }
-
-subscriptExpression =
-  base:(arrayExpression / mapExpression / valueMacroReferenceExpression) "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
 
 literalExpression =
   value:value { new @LiteralExpression(value) }
