@@ -24,7 +24,27 @@ class ColorValue extends Value {
     return new ColorValue(red, green, blue, alpha)
   }
 
-  constructor(public red:number, public green:number, public blue:number, public alpha:number) { super(); }
+  public lightness:number;
+  public value:number;
+  public hue:number;
+  public saturation:number;
+
+  constructor(
+      public red:number,
+      public green:number,
+      public blue:number,
+      public alpha:number
+  ) {
+    super();
+
+    var hsv = _.rgb2hsv(red, green, blue);
+    var hsl = _.rgb2hsv(red, green, blue);
+
+    this.hue = hsv[0];
+    this.saturation = hsv[1];
+    this.value = hsv[2];
+    this.lightness =  hsl[2];
+  }
 
   evaluate(stack:Stack):string {
     if (this.alpha != 1) {

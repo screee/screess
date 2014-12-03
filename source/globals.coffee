@@ -12,7 +12,6 @@ module.exports =
       if source["tile-size"]
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
-
       return [stack.getGlobalScope().addSource(source)]
 
     identity: (args) -> _.values args
@@ -32,3 +31,5 @@ module.exports =
         else assert false
       assert stops.length > 0
       [new FunctionValue(args.base, stops)]
+
+

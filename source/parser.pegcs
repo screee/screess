@@ -97,7 +97,7 @@ valueMacroDefinitionArgument =
   name:identifier { name: name }
 
 loop =
-  ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:valueExpression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
+  ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
   ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
 
 layer =
@@ -187,7 +187,7 @@ arithmeticStrongExpression =
 valueExpression =
   head:valueWeakExpression accesses:(
     "." (integer / identifier) /
-    "[" valueExpression "]"
+    "[" expression "]"
   )* {
     output = head
 
@@ -222,8 +222,8 @@ valueMacroReferenceExpressionArguments =
   "" { [] }
 
 valueMacroReferenceExpressionArgument =
-  name:(identifier / integer) whitespace* ":" whitespace* expression:valueExpression { name: name, expression: expression } /
-  expression:valueExpression { { expression: expression } }
+  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
+  expression:expression { { expression: expression } }
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) }

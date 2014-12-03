@@ -14,6 +14,12 @@ var ColorValue = (function (_super) {
         this.green = green;
         this.blue = blue;
         this.alpha = alpha;
+        var hsv = _.rgb2hsv(red, green, blue);
+        var hsl = _.rgb2hsv(red, green, blue);
+        this.hue = hsv[0];
+        this.saturation = hsv[1];
+        this.value = hsv[2];
+        this.lightness = hsl[2];
     }
     ColorValue.hex = function (hex) {
         var rgb = _.hex2rgb(hex);
