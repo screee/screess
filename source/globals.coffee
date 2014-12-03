@@ -32,4 +32,9 @@ module.exports =
       assert stops.length > 0
       [new FunctionValue(args.base, stops)]
 
+    range: (args) ->
+      [start, stop, step] = args
+      [_.range(start, stop, step)]
+
+
 

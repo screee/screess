@@ -58,6 +58,11 @@
         }
         assert(stops.length > 0);
         return [new FunctionValue(args.base, stops)];
+      },
+      range: function(args) {
+        var start, step, stop;
+        start = args[0], stop = args[1], step = args[2];
+        return [_.range(start, stop, step)];
       }
     }
   };
