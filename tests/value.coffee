@@ -181,6 +181,12 @@ describe "arithmetic operators", ->
     """
     assert.equal stylesheet.layers[0]['value'], 4
 
+  it "should support order of operations", ->
+    stylesheet = parse """
+      #test { $value: 2 * 2 + 2 * 2; }
+    """
+    assert.equal stylesheet.layers[0]['value'], 8
+
   it "should support parenthesis", ->
     stylesheet = parse """
       #test { $value: 2 * (2 + 2); }
