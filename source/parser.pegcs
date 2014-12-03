@@ -128,7 +128,7 @@ scope =
 
 expression =
   filterExpression /
-  arithmeticOperatorExpression
+  arithmeticExpression
 
 /////////////////////////////////////////////
 //           Filter Expression             //
@@ -165,7 +165,7 @@ typeCheckOperatorExpression =
 filterWeakInfixOperatorExpression =
   left:valueExpression whitespace*
   operator:("==" / ">=" / "<=" / "<" / ">" / "!=" / "in" / "!in") whitespace*
-  right:arithmeticOperatorExpression
+  right:arithmeticExpression
   {
     if operator in ["in", "!in"] then new @SetOperatorExpression(left, operator, right)
     else new @ComparisonOperatorExpression(left, operator, right)
@@ -175,9 +175,9 @@ filterWeakInfixOperatorExpression =
 //     Arithmetic Operator Expression      //
 /////////////////////////////////////////////
 
-arithmeticOperatorExpression =
-  "(" whitespace* expression:arithmeticOperatorExpression whitespace* ")" { expression } /
-  left:valueExpression rest:(whitespace* operator:("+" / "-" / "/" / "*") whitespace* right:arithmeticOperatorExpression)?
+arithmeticExpression =
+  "(" whitespace* expression:arithmeticExpression whitespace* ")" { expression } /
+  left:valueExpression rest:(whitespace* operator:("+" / "-" / "/" / "*") whitespace* right:arithmeticExpression)?
   {
     if rest then new @ArithmeticOperatorExpression(left, rest[1], rest[3])
     else left
@@ -188,15 +188,20 @@ arithmeticOperatorExpression =
 /////////////////////////////////////////////
 
 valueExpression =
-  dotExpression /
-  subscriptExpression /
-  valueWeakExpression
+  head:valueWeakExpression accesses:(
+    "." (integer / identifier) /
+    "[" valueExpression "]"
+  )* {
+    output = head
 
-dotExpression =
-  base:valueWeakExpression "." property:(integer / identifier) { new @DotExpression(base, property) }
+    for access in accesses
+      if access[0] == "."
+        output = new @DotExpression(output, access[1])
+      else if access[0] == "["
+        output = new @SubscriptExpression(output, access[1])
 
-subscriptExpression =
-  base:valueWeakExpression "[" property:valueExpression "]" { new @SubscriptExpression(base, property) }
+    return output
+  }
 
 /////////////////////////////////////////////
 //         Weak Value Expression           //

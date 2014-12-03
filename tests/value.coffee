@@ -28,7 +28,6 @@ describe "value", ->
     it "should allow nested arrays", ->
       assert.deepEqual parseValue("[[[[ 1 ]]]]"), [[[[1]]]]
 
-
   describe "map", ->
 
     it "should parse with comma seperators", ->
@@ -46,8 +45,8 @@ describe "value", ->
     it "should allow maps inside maps", ->
       assert.deepEqual parseValue("[one:[two:[three: [four: 4]]]]"), {one: {two: {three: {four: 4}}}}
 
-    it "shoud allow recursive property accesses"
-      # assert.deepEqual parseValue('[one:[two:[three: 3]]].one["two"].three'), 3
+    it "shoud allow recursive property accesses", ->
+      assert.deepEqual parseValue('[one:[two:[three: 3]]].one["two"].three'), 3
 
     it "should allow filters to be members", ->
       assert.deepEqual parseValue("[filter: @class == footway]"), {filter: ["==", "class", "footway"]}
