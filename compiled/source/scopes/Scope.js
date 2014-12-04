@@ -14,6 +14,9 @@ var StatementType;
     StatementType[StatementType["LAYER"] = 1] = "LAYER";
     StatementType[StatementType["CLASS"] = 2] = "CLASS";
     StatementType[StatementType["PROPERTY"] = 3] = "PROPERTY";
+    StatementType[StatementType["IF"] = 4] = "IF";
+    StatementType[StatementType["ELSE"] = 5] = "ELSE";
+    StatementType[StatementType["ELSE_IF"] = 6] = "ELSE_IF";
 })(StatementType || (StatementType = {}));
 var Scope = (function () {
     function Scope(parent, name) {
@@ -94,6 +97,32 @@ var Scope = (function () {
         });
         return loop.scope;
     };
+    Scope.prototype.addIf = function (expression) {
+        var scope = new Scope(this);
+        this.statements.push({
+            type: 4 /* IF */,
+            expressions: [expression],
+            scope: scope
+        });
+        return scope;
+    };
+    Scope.prototype.addElseIf = function (expression) {
+        var scope = new Scope(this);
+        this.statements.push({
+            type: 6 /* ELSE_IF */,
+            expressions: [expression],
+            scope: scope
+        });
+        return scope;
+    };
+    Scope.prototype.addElse = function () {
+        var scope = new Scope(this);
+        this.statements.push({
+            type: 5 /* ELSE */,
+            scope: scope
+        });
+        return scope;
+    };
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (var identifier in values) {
             this.addLiteralValueMacro(identifier, values[identifier]);
@@ -145,29 +174,41 @@ var Scope = (function () {
     Scope.prototype.evaluateProperties = function (stack, statements) {
         if (statements === void 0) { statements = this.statements; }
         var output = {};
-        var propertyStatements = _.filter(statements, function (statement) {
-            return statement.type == 3 /* PROPERTY */;
-        });
-        for (var i in propertyStatements) {
-            var statement = propertyStatements[i];
-            var name = statement.name;
-            var expressions = statement.expressions;
-            // TODO refactor Values constructor to accept this
-            var values = new Values(_.map(expressions, function (expression) {
-                return { expression: expression };
-            }), this, stack);
-            var propertyMacro;
-            if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
-                stack.propertyMacro.push(propertyMacro);
-                _.extend(output, propertyMacro.evaluate(values, stack));
-                stack.propertyMacro.pop();
-            }
-            else {
-                if (values.length != 1 || values.positional.length != 1) {
-                    console.log(values);
-                    throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
+        for (var i = 0; i < statements.length; i++) {
+            var statement = statements[i];
+            if (statement.type == 3 /* PROPERTY */) {
+                var name = statement.name;
+                var expressions = statement.expressions;
+                // TODO refactor Values constructor to accept this
+                var values = new Values(_.map(expressions, function (expression) {
+                    return { expression: expression };
+                }), this, stack);
+                var propertyMacro;
+                if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
+                    stack.propertyMacro.push(propertyMacro);
+                    _.extend(output, propertyMacro.evaluate(values, stack));
+                    stack.propertyMacro.pop();
                 }
-                output[name] = Value.evaluate(values.positional[0], stack);
+                else {
+                    if (values.length != 1 || values.positional.length != 1) {
+                        console.log(values);
+                        throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
+                    }
+                    output[name] = Value.evaluate(values.positional[0], stack);
+                }
+            }
+            else if (statement.type == 4 /* IF */) {
+                if (statement.expressions[0].toValue(this, stack)) {
+                    _.extend(output, statement.scope.evaluateProperties(stack));
+                }
+                else if (statements[i + 1] && statements[i + 1].type == 6 /* ELSE_IF */ && statements[i + 1].expressions[0].toValue(this, stack)) {
+                    var statement = statements[++i];
+                    _.extend(output, statement.scope.evaluateProperties(stack));
+                }
+                else if (statements[i + 1] && statements[i + 1].type == 5 /* ELSE */) {
+                    var statement = statements[++i];
+                    _.extend(output, statement.scope.evaluateProperties(stack));
+                }
             }
         }
         return output;

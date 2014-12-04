@@ -79,6 +79,7 @@ statement =
   class /
   propertyMacroDefinition /
   loop /
+  conditional /
   property
 
 property =
@@ -99,6 +100,12 @@ valueMacroDefinitionArgument =
 loop =
   ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
   ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
+
+conditional =
+  ("if" whitespace+ expression:expression whitespace* { @pushScope(@scope.addIf(expression)) }) scope
+  ((whitespace* "else if" whitespace+ expression:expression whitespace* { @pushScope(@scope.addElseIf(expression)) }) scope)*
+  ((whitespace* ("else") whitespace* {@pushScope(@scope.addElse())}) scope)?
+
 
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope

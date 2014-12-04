@@ -182,3 +182,61 @@ describe "sublayers", ->
           }
         }
       """
+
+describe "conditionals", ->
+
+  it "should parse true if expressions", ->
+
+    stylesheet = parse """
+      #test {
+        if true {
+          $type: background
+        }
+      }
+    """
+
+    assert.equal stylesheet.layers[0].type, 'background'
+
+  it "should not parse false if expressions", ->
+
+    stylesheet = parse """
+      #test {
+        $type: background
+        if false {
+          $type: fill
+        }
+      }
+    """
+
+    assert.equal stylesheet.layers[0].type, 'background'
+
+  it "should parse else expressions", ->
+
+    stylesheet = parse """
+      #test {
+        if false {
+          $type: fill
+        } else {
+          $type: background
+        }
+      }
+    """
+
+    assert.equal stylesheet.layers[0].type, 'background'
+
+  it "should parse else if expressions", ->
+
+    stylesheet = parse """
+      #test {
+        if false {
+          $type: fill
+        } else if true {
+          $type: background
+        } else {
+          $type: line
+        }
+      }
+    """
+
+    assert.equal stylesheet.layers[0].type, 'background'
+

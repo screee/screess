@@ -23,7 +23,10 @@ enum StatementType {
   LOOP,
   LAYER,
   CLASS,
-  PROPERTY
+  PROPERTY,
+  IF,
+  ELSE,
+  ELSE_IF
 }
 
 interface Statement {
@@ -137,6 +140,41 @@ class Scope {
     return loop.scope;
   }
 
+  addIf(expression:Expression):Scope {
+    var scope = new Scope(this);
+
+    this.statements.push({
+      type: StatementType.IF,
+      expressions: [expression],
+      scope: scope
+    })
+
+    return scope;
+  }
+
+  addElseIf(expression:Expression):Scope {
+    var scope = new Scope(this);
+
+    this.statements.push({
+      type: StatementType.ELSE_IF,
+      expressions: [expression],
+      scope: scope
+    })
+
+    return scope;
+  }
+
+  addElse():Scope {
+    var scope = new Scope(this);
+
+    this.statements.push({
+      type: StatementType.ELSE,
+      scope: scope
+    })
+
+    return scope;
+  }
+
   addLiteralValueMacros(values:{[name:string]:any}):void {
     for (var identifier in values) {
       this.addLiteralValueMacro(identifier, values[identifier]);
@@ -198,35 +236,48 @@ class Scope {
   evaluateProperties(stack:Stack, statements:Statement[] = this.statements):any {
     var output = {}
 
-    var propertyStatements = _.filter(statements, (statement) => {
-      return statement.type == StatementType.PROPERTY
-    });
+    for (var i = 0; i < statements.length; i++) {
+      var statement = statements[i];
 
-    for (var i in propertyStatements) {
-      var statement = propertyStatements[i];
+      if (statement.type == StatementType.PROPERTY) {
+        var name = statement.name;
+        var expressions = statement.expressions;
 
-      var name = statement.name;
-      var expressions = statement.expressions;
+        // TODO refactor Values constructor to accept this
+        var values = new Values(
+          _.map(expressions, (expression) => { return { expression: expression } }),
+          this,
+          stack
+        );
 
-      // TODO refactor Values constructor to accept this
-      var values = new Values(
-        _.map(expressions, (expression) => { return { expression: expression } }),
-        this,
-        stack
-      );
+        var propertyMacro;
+        if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
+          stack.propertyMacro.push(propertyMacro);
+          _.extend(output, propertyMacro.evaluate(values, stack));
+          stack.propertyMacro.pop()
+        } else {
+          if (values.length != 1 || values.positional.length != 1) {
+            console.log(values)
+            throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
+          }
 
-      var propertyMacro;
-      if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
-        stack.propertyMacro.push(propertyMacro);
-        _.extend(output, propertyMacro.evaluate(values, stack));
-        stack.propertyMacro.pop()
-      } else {
-        if (values.length != 1 || values.positional.length != 1) {
-          console.log(values)
-          throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
+          output[name] = Value.evaluate(values.positional[0], stack);
         }
 
-        output[name] = Value.evaluate(values.positional[0], stack);
+      } else if (statement.type == StatementType.IF) {
+
+        if (statement.expressions[0].toValue(this, stack)) {
+          _.extend(output, statement.scope.evaluateProperties(stack));
+
+        } else if (statements[i+1] && statements[i+1].type == StatementType.ELSE_IF && statements[i+1].expressions[0].toValue(this, stack)) {
+          var statement = statements[++i];
+          _.extend(output, statement.scope.evaluateProperties(stack));
+
+        } else if (statements[i + 1] && statements[i + 1].type == StatementType.ELSE) {
+          var statement = statements[++i];
+          _.extend(output, statement.scope.evaluateProperties(stack));
+        }
+
       }
     }
 
