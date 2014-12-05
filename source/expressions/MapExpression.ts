@@ -16,9 +16,9 @@ class MapExpression extends Expression {
     super();
   }
 
-  toValues(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
     var value = _.objectMap(this.entries, (entry) => {
-      return [entry.name, entry.expression.toValue(scope, stack)]
+      return [entry.name, entry.expression.evaluateToIntermediate(scope, stack)]
     });
 
     return [value];

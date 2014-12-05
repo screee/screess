@@ -11,12 +11,12 @@ class ArrayExpression extends Expression {
     super()
   }
 
-  toValues(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
     var values = []
 
     for (var i in this.expressions) {
       var expression = this.expressions[i]
-      var expressionValues = expression.toValues(scope, stack)
+      var expressionValues = expression.evaluateToIntermediates(scope, stack)
       values = values.concat(expressionValues)
     }
 

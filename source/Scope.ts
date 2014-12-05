@@ -192,7 +192,7 @@ class Scope {
         var valueIdentifier = loopStatement.valueIdentifier;
         var keyIdentifier = loopStatement.keyIdentifier;
 
-        var collection = collectionExpression.toValue(this, stack);
+        var collection = collectionExpression.evaluateToIntermediate(this, stack);
         assert(_.isArray(collection) || _.isObject(collection))
 
         for (var key in collection) {
@@ -205,7 +205,7 @@ class Scope {
       } else if (statement instanceof Statement.IfStatement) {
         var ifStatement = <Statement.IfStatement> statement;
 
-        if (ifStatement.expression.toValue(this, stack)) {
+        if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
           ifStatement.scope.eachPrimitiveStatement(stack, callback);
           continue;
         }
@@ -214,7 +214,7 @@ class Scope {
         while (statements[i + 1] instanceof Statement.ElseIfStatement) {
           var elseIfStatement = <Statement.ElseIfStatement> statements[++i];
 
-          if (elseIfStatement.expression.toValue(this, stack)) {
+          if (elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
             elseIfStatement.scope.eachPrimitiveStatement(stack, callback)
             flag = true
             break

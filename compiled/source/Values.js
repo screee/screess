@@ -12,7 +12,7 @@ var Values = (function () {
         this.named = {};
         for (var i in args) {
             var arg = args[i];
-            var argValues = arg.expression.toValues(scope, stack);
+            var argValues = arg.expression.evaluateToIntermediates(scope, stack);
             if (arg.name) {
                 assert(argValues.length == 1);
                 this.named[arg.name] = argValues[0];
@@ -77,7 +77,7 @@ var Values = (function () {
                         args[definition.name] = this.positional[positionalIndex++];
                     }
                     else {
-                        args[definition.name] = definition.expression.toValue(argDefinition.scope, stack);
+                        args[definition.name] = definition.expression.evaluateToIntermediate(argDefinition.scope, stack);
                     }
                 }
             }

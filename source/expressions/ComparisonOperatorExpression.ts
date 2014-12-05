@@ -8,9 +8,9 @@ class ComparisonOperatorExpression extends Expression {
 
   constructor(public left, public operator, public right) { super() }
 
-  toValues(scope, stack):any[] {
-    var lvalue = this.left.toValue(scope, stack)
-    var rvalue = this.right.toValue(scope, stack)
+  evaluateToIntermediates(scope, stack):any[] {
+    var lvalue = this.left.evaluateToIntermediate(scope, stack)
+    var rvalue = this.right.evaluateToIntermediate(scope, stack)
 
     // Only one of the values can be an AttributeReferenceValue and it must be
     // the lvalue

@@ -2,8 +2,8 @@ import Value = require('../values/Value')
 
 class Expression {
 
-  toValue(scope, stack):any {
-    var values = this.toValues(scope, stack);
+  evaluateToIntermediate(scope, stack):any {
+    var values = this.evaluateToIntermediates(scope, stack);
 
     if (values.length > 1) {
       throw new Error("Expected 1 value but found " + values.length + " values");
@@ -12,12 +12,12 @@ class Expression {
     return values[0];
   }
 
-  toValues(scope, stack):any[] {
+  evaluateToIntermediates(scope, stack):any[] {
     throw new Error("Abstract method");
   }
 
   evaluate(scope, stack):any[] {
-    return Value.evaluate(this.toValue(scope, stack), stack);
+    return Value.evaluate(this.evaluateToIntermediate(scope, stack), stack);
   }
 
 }

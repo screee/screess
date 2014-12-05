@@ -11,7 +11,7 @@ class LiteralExpression extends Expression {
     super()
   }
 
-  toValues():any[] {
+  evaluateToIntermediates():any[] {
     return [this.value];
   }
 

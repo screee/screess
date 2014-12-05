@@ -11,9 +11,9 @@ class ArithmeticOperatorExpression extends Expression {
     super();
   }
 
-  toValues(scope:Scope, stack:Stack):any[] {
-    var left = this.left.toValue(scope, stack);
-    var right = this.right.toValue(scope, stack);
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+    var left = this.left.evaluateToIntermediate(scope, stack);
+    var right = this.right.evaluateToIntermediate(scope, stack);
 
     function apply(left:number, operator:string, right:number):number {
       if (operator == '+') { return left + right }

@@ -16,10 +16,10 @@ var ArithmeticOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ArithmeticOperatorExpression.prototype.toValues = function (scope, stack) {
+    ArithmeticOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
         var _this = this;
-        var left = this.left.toValue(scope, stack);
-        var right = this.right.toValue(scope, stack);
+        var left = this.left.evaluateToIntermediate(scope, stack);
+        var right = this.right.evaluateToIntermediate(scope, stack);
         function apply(left, operator, right) {
             if (operator == '+') {
                 return left + right;

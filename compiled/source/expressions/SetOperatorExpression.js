@@ -16,9 +16,9 @@ var SetOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    SetOperatorExpression.prototype.toValues = function (scope, stack) {
-        var lvalue = this.left.toValue(scope, stack);
-        var rvalue = this.right.toValue(scope, stack);
+    SetOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+        var lvalue = this.left.evaluateToIntermediate(scope, stack);
+        var rvalue = this.right.evaluateToIntermediate(scope, stack);
         assert(lvalue instanceof AttributeReferenceValue);
         assert(rvalue instanceof Array);
         return [[this.operator, lvalue.name].concat(Value.evaluate(rvalue, stack))];

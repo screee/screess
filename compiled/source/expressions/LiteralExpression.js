@@ -15,7 +15,7 @@ var LiteralExpression = (function (_super) {
     LiteralExpression.literalExpression = function (value) {
         return new LiteralExpression(value);
     };
-    LiteralExpression.prototype.toValues = function () {
+    LiteralExpression.prototype.evaluateToIntermediates = function () {
         return [this.value];
     };
     return LiteralExpression;

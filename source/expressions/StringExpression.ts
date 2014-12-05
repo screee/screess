@@ -7,7 +7,7 @@ class StringExpression extends Expression {
 
   constructor(public body:string) { super() }
 
-  toValues(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
     var output = this.body;
     var match;
 

@@ -11,11 +11,11 @@ var ArrayExpression = (function (_super) {
         _super.call(this);
         this.expressions = expressions;
     }
-    ArrayExpression.prototype.toValues = function (scope, stack) {
+    ArrayExpression.prototype.evaluateToIntermediates = function (scope, stack) {
         var values = [];
         for (var i in this.expressions) {
             var expression = this.expressions[i];
-            var expressionValues = expression.toValues(scope, stack);
+            var expressionValues = expression.evaluateToIntermediates(scope, stack);
             values = values.concat(expressionValues);
         }
         return [values];

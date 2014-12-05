@@ -11,9 +11,9 @@ class SubscriptExpression extends Expression {
     super()
   }
 
-  toValues(scope:Scope, stack:Stack):any[] {
-    var base = this.baseExpression.toValue(scope, stack);
-    var property = this.propertyExpression.toValue(scope, stack);
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+    var base = this.baseExpression.evaluateToIntermediate(scope, stack);
+    var property = this.propertyExpression.evaluateToIntermediate(scope, stack);
     assert(_.isString(property) || _.isNumber(property));
 
     assert(base[property] !== undefined);

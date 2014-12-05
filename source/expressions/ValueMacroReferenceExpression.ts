@@ -17,7 +17,7 @@ class ValueMacroReferenceExpression extends Expression {
     super()
   }
 
-  toValues(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
     var argValues = new Values(this.argumentExpressions, scope, stack);
 
     var macro = scope.getValueMacro(this.name, argValues, stack);
@@ -25,7 +25,7 @@ class ValueMacroReferenceExpression extends Expression {
       throw new Error("Could not find value macro " + this.name);
     }
 
-    return macro.toValues(argValues, stack);
+    return macro.evaluateToIntermediates(argValues, stack);
   }
 }
 

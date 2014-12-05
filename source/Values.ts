@@ -31,7 +31,7 @@ class Values {
 
     for (var i in args) {
       var arg = args[i];
-      var argValues = arg.expression.toValues(scope, stack)
+      var argValues = arg.expression.evaluateToIntermediates(scope, stack)
 
       if (arg.name) {
         assert(argValues.length == 1);
@@ -106,7 +106,7 @@ class Values {
           if (positionalIndex < this.positional.length) {
             args[definition.name] = this.positional[positionalIndex++]
           } else {
-            args[definition.name] = definition.expression.toValue(argDefinition.scope, stack)
+            args[definition.name] = definition.expression.evaluateToIntermediate(argDefinition.scope, stack)
           }
         }
       }

@@ -12,7 +12,7 @@ var StringExpression = (function (_super) {
         _super.call(this);
         this.body = body;
     }
-    StringExpression.prototype.toValues = function (scope, stack) {
+    StringExpression.prototype.evaluateToIntermediates = function (scope, stack) {
         var output = this.body;
         var match;
         while (match = (/#\{(.*)\}/).exec(output)) {

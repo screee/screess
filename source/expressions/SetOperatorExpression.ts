@@ -10,9 +10,9 @@ class SetOperatorExpression extends Expression {
 
   constructor(public left:Expression, public operator:string, public right:Expression) { super() }
 
-  toValues(scope:Scope, stack:Stack):any[] {
-    var lvalue = this.left.toValue(scope, stack);
-    var rvalue = this.right.toValue(scope, stack);
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+    var lvalue = this.left.evaluateToIntermediate(scope, stack);
+    var rvalue = this.right.evaluateToIntermediate(scope, stack);
 
     assert(lvalue instanceof AttributeReferenceValue);
     assert(rvalue instanceof Array);

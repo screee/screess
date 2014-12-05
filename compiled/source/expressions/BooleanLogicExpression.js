@@ -13,7 +13,7 @@ var BooleanLogicExpression = (function (_super) {
         this.operator = operator;
         this.expressions = expressions;
     }
-    BooleanLogicExpression.prototype.toValues = function (scope, stack) {
+    BooleanLogicExpression.prototype.evaluateToIntermediates = function (scope, stack) {
         var filter = [BooleanLogicExpression.operators[this.operator]].concat(_.map(this.expressions, function (expression) {
             return expression.evaluate(scope, stack);
         }));

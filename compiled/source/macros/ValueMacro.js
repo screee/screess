@@ -12,7 +12,7 @@ var ValueMacro = (function () {
                 scope.addLiteralValueMacros(args);
                 stack.scope.push(scope);
                 var values = _.map(body, function (expression) {
-                    return expression.toValue(scope, stack);
+                    return expression.evaluateToIntermediate(scope, stack);
                 });
                 stack.scope.pop();
                 return values;
@@ -28,7 +28,7 @@ var ValueMacro = (function () {
     ValueMacro.prototype.matches = function (name, argValues) {
         return name == this.name && argValues.matches(this.argDefinition);
     };
-    ValueMacro.prototype.toValues = function (argValues, stack) {
+    ValueMacro.prototype.evaluateToIntermediates = function (argValues, stack) {
         var args = argValues.evaluate(this.argDefinition, stack);
         var values = this.body(args, stack);
         return values;

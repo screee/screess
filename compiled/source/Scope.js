@@ -200,7 +200,7 @@ var Scope = (function () {
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
     // Properties, layers, classes
-    Scope.prototype.eachStatement = function (stack, callback) {
+    Scope.prototype.eachPrimitiveStatement = function (stack, callback) {
         var statements = this.statements;
         for (var i = 0; i < statements.length; i++) {
             var statement = statements[i];
@@ -210,7 +210,7 @@ var Scope = (function () {
                 var collectionExpression = loopStatement.collectionExpression;
                 var valueIdentifier = loopStatement.valueIdentifier;
                 var keyIdentifier = loopStatement.keyIdentifier;
-                var collection = collectionExpression.toValue(this, stack);
+                var collection = collectionExpression.evaluateToIntermediate(this, stack);
                 assert(_.isArray(collection) || _.isObject(collection));
                 for (var key in collection) {
                     var value = collection[key];
@@ -218,27 +218,27 @@ var Scope = (function () {
                     if (keyIdentifier) {
                         scope.addLiteralValueMacro(keyIdentifier, key);
                     }
-                    scope.eachStatement(stack, callback);
+                    scope.eachPrimitiveStatement(stack, callback);
                 }
             }
             else if (statement instanceof Statement.IfStatement) {
                 var ifStatement = statement;
-                if (ifStatement.expression.toValue(this, stack)) {
-                    ifStatement.scope.eachStatement(stack, callback);
+                if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
+                    ifStatement.scope.eachPrimitiveStatement(stack, callback);
                     continue;
                 }
                 var flag = false;
                 while (statements[i + 1] instanceof Statement.ElseIfStatement) {
                     var elseIfStatement = statements[++i];
-                    if (elseIfStatement.expression.toValue(this, stack)) {
-                        elseIfStatement.scope.eachStatement(stack, callback);
+                    if (elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
+                        elseIfStatement.scope.eachPrimitiveStatement(stack, callback);
                         flag = true;
                         break;
                     }
                 }
                 if (!flag && statements[i + 1] instanceof Statement.ElseStatement) {
                     var elseStatement = statements[++i];
-                    elseStatement.scope.eachStatement(stack, callback);
+                    elseStatement.scope.eachPrimitiveStatement(stack, callback);
                 }
             }
             else if (statement instanceof Statement.PropertyStatement) {
@@ -247,7 +247,7 @@ var Scope = (function () {
                 var macro;
                 if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
                     stack.propertyMacro.push(macro);
-                    macro.getScope(values, stack).eachStatement(stack, callback);
+                    macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
                     stack.propertyMacro.pop();
                 }
                 else {
@@ -266,7 +266,7 @@ var Scope = (function () {
         var layers = [];
         var classes = [];
         var properties = {};
-        this.eachStatement(stack, function (scope, statement) {
+        this.eachPrimitiveStatement(stack, function (scope, statement) {
             if (statement instanceof Statement.LayerStatement) {
                 var layerStatement = statement;
                 layers.push(layerStatement.scope.evaluate(1 /* LAYER */, stack));

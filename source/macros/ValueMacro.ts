@@ -21,7 +21,7 @@ class ValueMacro {
 
         stack.scope.push(scope);
         var values = _.map(body, (expression:Expression) => {
-          return expression.toValue(scope, stack)
+          return expression.evaluateToIntermediate(scope, stack)
         })
         stack.scope.pop();
         return values;
@@ -37,7 +37,7 @@ class ValueMacro {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  toValues(argValues:Values, stack:Stack) {
+  evaluateToIntermediates(argValues:Values, stack:Stack) {
     var args = argValues.evaluate(this.argDefinition, stack);
     var values = this.body(args, stack);
     return values;

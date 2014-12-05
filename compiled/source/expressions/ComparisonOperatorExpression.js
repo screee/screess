@@ -16,9 +16,9 @@ var ComparisonOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ComparisonOperatorExpression.prototype.toValues = function (scope, stack) {
-        var lvalue = this.left.toValue(scope, stack);
-        var rvalue = this.right.toValue(scope, stack);
+    ComparisonOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+        var lvalue = this.left.evaluateToIntermediate(scope, stack);
+        var rvalue = this.right.evaluateToIntermediate(scope, stack);
         // Only one of the values can be an AttributeReferenceValue and it must be
         // the lvalue
         assert(lvalue instanceof AttributeReferenceValue);
