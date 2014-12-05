@@ -45,7 +45,11 @@ class Scope {
   public propertyMacros:PropertyMacro[];
 
   // TODO remove "name"
-  constructor(public stylesheet:Stylesheet, public parent:Scope, public name:string = null, public statements:Statement[] = []) {
+  constructor(
+      public stylesheet:Stylesheet,
+      public parent:Scope,
+      public statements:Statement[] = []
+  ) {
     this.valueMacros = [];
     this.propertyMacros = [];
 
