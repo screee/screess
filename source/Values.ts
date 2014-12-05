@@ -1,6 +1,6 @@
 import assert = require('assert');
 import ValuesDefinition = require('./ValuesDefinition');
-import Scope = require("./scopes/Scope");
+import Scope = require("./Scope");
 import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');

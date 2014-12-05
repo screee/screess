@@ -1,4 +1,4 @@
-var Scope = require('../scopes/Scope');
+var Scope = require('../Scope');
 var _ = require("../utilities");
 var PropertyMacro = (function () {
     function PropertyMacro(parentScope, name, argDefinition, body) {
@@ -7,7 +7,7 @@ var PropertyMacro = (function () {
         this.name = name;
         this.argDefinition = argDefinition;
         this.body = body;
-        var _Scope = require("../scopes/Scope");
+        var _Scope = require("../Scope");
         this.scope = new _Scope(this.parentScope);
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
             return !argDefinition.expression;

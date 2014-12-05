@@ -1,5 +1,5 @@
 import LiteralExpression = require("../expressions/LiteralExpression")
-import Scope  = require('../scopes/Scope');
+import Scope  = require('../Scope');
 import assert = require("assert");
 import Values = require("../Values");
 import ValuesDefinition = require("../ValuesDefinition");
@@ -13,7 +13,7 @@ class PropertyMacro {
   public argLengthMax:number;
 
   constructor(public parentScope:Scope, public name:string, public argDefinition:ValuesDefinition, public body:Function = null) {
-    var _Scope = require("../scopes/Scope")
+    var _Scope = require("../Scope")
     this.scope = new _Scope(this.parentScope)
 
     this.argLengthMin = _.count(

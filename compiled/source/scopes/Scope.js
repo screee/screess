@@ -5,7 +5,6 @@ var assert = require("assert");
 var LiteralExpression = require('../expressions/LiteralExpression');
 var Stack = require('../Stack');
 var _ = require("../utilities");
-var ScopeType = require('./ScopeType');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
 var Statement = require('../Statement');
 var Globals = require('../globals');
@@ -323,5 +322,14 @@ var Scope = (function () {
     };
     return Scope;
 })();
+var Scope;
+(function (Scope) {
+    (function (Type) {
+        Type[Type["GLOBAL"] = 0] = "GLOBAL";
+        Type[Type["LAYER"] = 1] = "LAYER";
+        Type[Type["CLASS"] = 2] = "CLASS";
+    })(Scope.Type || (Scope.Type = {}));
+    var Type = Scope.Type;
+})(Scope || (Scope = {}));
 module.exports = Scope;
 //# sourceMappingURL=Scope.js.map

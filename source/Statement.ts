@@ -1,4 +1,4 @@
-import Scope = require("./scopes/Scope")
+import Scope = require("./Scope")
 import Expression = require("./expressions/Expression")
 
 class Statement {  }

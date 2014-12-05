@@ -1,5 +1,5 @@
 import assert = require('assert')
-import Scope = require('./scopes/Scope')
+import Scope = require('./Scope')
 import _ = require('./utilities')
 import Expression = require('./expressions/Expression');
 

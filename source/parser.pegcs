@@ -4,8 +4,7 @@
   assert = require 'assert'
 
   @Stylesheet = require('./Stylesheet')
-  @Scope = require('./scopes/Scope')
-  @ScopeType = require('./scopes/ScopeType')
+  @Scope = require('./Scope')
 
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')

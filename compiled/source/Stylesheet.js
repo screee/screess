@@ -1,4 +1,4 @@
-var Scope = require('./scopes/Scope');
+var Scope = require('./Scope');
 var _ = require('./utilities');
 var Stylesheet = (function () {
     function Stylesheet() {

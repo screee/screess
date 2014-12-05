@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import AttributeReferenceValue = require("../values/AttributeReferenceValue");
 import assert = require("assert");
-import Scope = require("../scopes/Scope");
+import Scope = require("../Scope");
 import Stack = require("../Stack");
 import _ = require("../utilities");
 

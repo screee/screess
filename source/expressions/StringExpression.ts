@@ -1,5 +1,5 @@
 import Expression = require("./Expression");
-import Scope = require("../scopes/Scope");
+import Scope = require("../Scope");
 import Stack = require("../Stack");
 var parse = require("../parser").parse;
 

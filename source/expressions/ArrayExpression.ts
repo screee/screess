@@ -1,6 +1,6 @@
 import Expression = require("./Expression");
 import LiteralExpression = require("./LiteralExpression");
-import Scope = require("../scopes/Scope");
+import Scope = require("../Scope");
 import Stack = require("../Stack");
 
 import _ = require("../utilities");

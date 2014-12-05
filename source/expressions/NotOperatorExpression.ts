@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import assert = require("assert");
 import _ = require("../utilities");
-import Scope = require("../scopes/Scope");
+import Scope = require("../Scope");
 import Stack = require("../Stack");
 
 class SetOperatorExpression extends Expression {

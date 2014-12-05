@@ -1,4 +1,4 @@
-var Scope = require('../scopes/Scope');
+var Scope = require('../Scope');
 var assert = require('assert');
 var _ = require("../utilities");
 var ValueMacro = (function () {

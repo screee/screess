@@ -1,6 +1,6 @@
 import Expression = require("./Expression");
 import util = require('util');
-import Scope = require("../scopes/Scope");
+import Scope = require("../Scope");
 import Values = require('../Values');
 import Stack = require("../Stack");
 import _ = require("../utilities");
