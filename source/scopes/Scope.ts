@@ -61,7 +61,7 @@ class Scope {
       this.parent = parent;
       this.stylesheet = parent.stylesheet;
 
-    } else { // parent instanceof stylesheet
+    } else { // parent instanceof Stylesheet
       this.parent = null;
       this.stylesheet = parent;
 
@@ -238,47 +238,6 @@ class Scope {
     return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
   }
 
-  evaluateProperties(stack:Stack, statements:Statement[] = this.statements):any {
-    var output = {}
-
-    this.eachStatement(stack, (scope, statement) => {
-      if (statement.type == StatementType.PROPERTY) {
-        // TODO refactor Values to accept this as a constructor
-        var values = new Values(
-          _.map(statement.expressions, (expression) => {
-            return { expression: expression }
-          }),
-          scope,
-          stack
-        );
-
-        if (values.length != 1 || values.positional.length != 1) {
-          throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
-        }
-        output[statement.name] = Value.evaluate(values.positional[0], stack);
-      }
-    });
-
-    return output
-  }
-
-  eachLoopSubscope(loop:Loop, stack:Stack, callback:(Scope) => void):void {
-    var scope = loop.scope;
-    var collectionExpression = loop.collectionExpression;
-    var valueIdentifier = loop.valueIdentifier;
-    var keyIdentifier = loop.keyIdentifier;
-
-    var collection = collectionExpression.toValue(this, stack);
-    assert(_.isArray(collection) || _.isObject(collection))
-
-    for (var key in collection) {
-      var value = collection[key];
-      scope.addLiteralValueMacro(valueIdentifier, value);
-      if (keyIdentifier) { scope.addLiteralValueMacro(keyIdentifier, key); }
-      callback(scope);
-    }
-  }
-
   // Properties, layers, classes
   eachStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void): void {
     var statements = this.statements;
@@ -287,9 +246,22 @@ class Scope {
       var statement = statements[i];
 
       if (statement.type == StatementType.LOOP) {
-        this.eachLoopSubscope(statement.loop, stack, (scope) => {
+
+        var loop = statement.loop;
+        var scope = loop.scope;
+        var collectionExpression = loop.collectionExpression;
+        var valueIdentifier = loop.valueIdentifier;
+        var keyIdentifier = loop.keyIdentifier;
+
+        var collection = collectionExpression.toValue(this, stack);
+        assert(_.isArray(collection) || _.isObject(collection))
+
+        for (var key in collection) {
+          var value = collection[key];
+          scope.addLiteralValueMacro(valueIdentifier, value);
+          if (keyIdentifier) { scope.addLiteralValueMacro(keyIdentifier, key); }
           scope.eachStatement(stack, callback)
-        })
+        }
 
       } else if (statement.type == StatementType.IF) {
 
@@ -338,18 +310,41 @@ class Scope {
     }
   }
 
-  evaluateLayers(stack:Stack):{}[] {
+  // TODO rename
+  private evaluate_(stack:Stack):{layers:Scope[]; classes:Scope[]; properties:{}} {
     var layers = [];
+    var classes = [];
+    var properties = {};
 
     this.eachStatement(stack, (scope, statement) => {
       if (statement.type == StatementType.LAYER) {
         layers.push(statement.scope.evaluateLayerScope(stack));
+
+      } else if (statement.type == StatementType.CLASS) {
+        classes.push(statement.scope.evaluateClassScope(stack))
+
+      } else if (statement.type == StatementType.PROPERTY) {
+        // TODO refactor Values to accept this as a constructor
+        var values = new Values(
+          _.map(statement.expressions, (expression) => {
+            return { expression: expression }
+          }),
+          scope,
+          stack
+        );
+
+        if (values.length != 1 || values.positional.length != 1) {
+          throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
+        }
+
+        properties[statement.name] = Value.evaluate(values.positional[0], stack);
       }
     });
 
     layers = _.sortBy(layers, 'z-index');
+    if (layers.length == 0) { layers = undefined }
 
-    return layers.length ? layers : undefined;
+    return {layers: layers, classes: classes, properties: properties};
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -369,16 +364,21 @@ class Scope {
 
   evaluateClassScope(stack:Stack):any {
     // TODO assert there are no child layers or classes
+    // TODO ensure all properties are paint properties, not layout properties
     stack.scope.push(this);
-    this.evaluateProperties(stack);
+    var evaluated = this.evaluate_(stack);
     stack.scope.pop();
+
+    return evaluated.properties;
   }
 
   evaluateGlobalScope(stack:Stack = new Stack()):any {
     stack.scope.push(this)
 
-    var layers = this.evaluateLayers(stack);
-    var properties = this.evaluateProperties(stack)
+    var evaluated = this.evaluate_(stack);
+
+    var layers = evaluated.layers;
+    var properties = evaluated.properties;
 
     var sources = _.objectMapValues(this.stylesheet.sources, (source, name) => {
       return _.objectMapValues(source, (value, key) => {
@@ -407,31 +407,17 @@ class Scope {
   }
 
   evaluateLayerScope(stack:Stack):any {
-
-    var evaluateClassPaintProperties = (type:string, stack:Stack):{} => {
-      // TODO ensure all properties are paint properties, not layout properties
-      var classStatements = _.filter(this.statements, (statement) => {
-        return statement.type == StatementType.CLASS;
-      });
-
-      return _.objectMap(classStatements, (statement, name) => {
-        return [
-          "paint." + name,
-          statement.scope.evaluateClassScope(stack)
-        ]
-      })
-    }
-
     // TODO should this be in this method?
     stack.scope.push(this);
 
-    var properties = this.evaluateProperties(stack);
+    var evaluated = this.evaluate_(stack);
 
+    var properties = evaluated.properties;
     var metaProperties = { 'z-index': 0 };
     var paintProperties = {};
     var layoutProperties = {};
 
-    var layers = this.evaluateLayers(stack);
+    var layers = evaluated.layers;
     var type = properties['$type'] || 'raster';
 
     for (var name in properties) {
@@ -457,6 +443,10 @@ class Scope {
       metaProperties['type'] = 'raster'
     }
 
+    var classes = _.objectMap(evaluated.classes, (scope) => {
+      return ["paint." + scope.name, scope]
+    });
+
     // TODO ensure layer has a source and type
 
     // TODO remove this _.objectCompact call -- some falsey values are important.
@@ -468,7 +458,7 @@ class Scope {
         layout: layoutProperties
       },
       metaProperties,
-      evaluateClassPaintProperties(type, stack)
+      classes
     ));
 
     stack.scope.pop();

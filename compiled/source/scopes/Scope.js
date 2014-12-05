@@ -169,48 +169,27 @@ var Scope = (function () {
         }
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
-    Scope.prototype.evaluateProperties = function (stack, statements) {
-        if (statements === void 0) { statements = this.statements; }
-        var output = {};
-        this.eachStatement(stack, function (scope, statement) {
-            if (statement.type == 3 /* PROPERTY */) {
-                // TODO refactor Values to accept this as a constructor
-                var values = new Values(_.map(statement.expressions, function (expression) {
-                    return { expression: expression };
-                }), scope, stack);
-                if (values.length != 1 || values.positional.length != 1) {
-                    throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
-                }
-                output[statement.name] = Value.evaluate(values.positional[0], stack);
-            }
-        });
-        return output;
-    };
-    Scope.prototype.eachLoopSubscope = function (loop, stack, callback) {
-        var scope = loop.scope;
-        var collectionExpression = loop.collectionExpression;
-        var valueIdentifier = loop.valueIdentifier;
-        var keyIdentifier = loop.keyIdentifier;
-        var collection = collectionExpression.toValue(this, stack);
-        assert(_.isArray(collection) || _.isObject(collection));
-        for (var key in collection) {
-            var value = collection[key];
-            scope.addLiteralValueMacro(valueIdentifier, value);
-            if (keyIdentifier) {
-                scope.addLiteralValueMacro(keyIdentifier, key);
-            }
-            callback(scope);
-        }
-    };
     // Properties, layers, classes
     Scope.prototype.eachStatement = function (stack, callback) {
         var statements = this.statements;
         for (var i = 0; i < statements.length; i++) {
             var statement = statements[i];
             if (statement.type == 0 /* LOOP */) {
-                this.eachLoopSubscope(statement.loop, stack, function (scope) {
+                var loop = statement.loop;
+                var scope = loop.scope;
+                var collectionExpression = loop.collectionExpression;
+                var valueIdentifier = loop.valueIdentifier;
+                var keyIdentifier = loop.keyIdentifier;
+                var collection = collectionExpression.toValue(this, stack);
+                assert(_.isArray(collection) || _.isObject(collection));
+                for (var key in collection) {
+                    var value = collection[key];
+                    scope.addLiteralValueMacro(valueIdentifier, value);
+                    if (keyIdentifier) {
+                        scope.addLiteralValueMacro(keyIdentifier, key);
+                    }
                     scope.eachStatement(stack, callback);
-                });
+                }
             }
             else if (statement.type == 4 /* IF */) {
                 if (statement.expressions[0].toValue(this, stack)) {
@@ -250,15 +229,34 @@ var Scope = (function () {
             }
         }
     };
-    Scope.prototype.evaluateLayers = function (stack) {
+    // TODO rename
+    Scope.prototype.evaluate_ = function (stack) {
         var layers = [];
+        var classes = [];
+        var properties = {};
         this.eachStatement(stack, function (scope, statement) {
             if (statement.type == 1 /* LAYER */) {
                 layers.push(statement.scope.evaluateLayerScope(stack));
             }
+            else if (statement.type == 2 /* CLASS */) {
+                classes.push(statement.scope.evaluateClassScope(stack));
+            }
+            else if (statement.type == 3 /* PROPERTY */) {
+                // TODO refactor Values to accept this as a constructor
+                var values = new Values(_.map(statement.expressions, function (expression) {
+                    return { expression: expression };
+                }), scope, stack);
+                if (values.length != 1 || values.positional.length != 1) {
+                    throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
+                }
+                properties[statement.name] = Value.evaluate(values.positional[0], stack);
+            }
         });
         layers = _.sortBy(layers, 'z-index');
-        return layers.length ? layers : undefined;
+        if (layers.length == 0) {
+            layers = undefined;
+        }
+        return { layers: layers, classes: classes, properties: properties };
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
@@ -278,15 +276,18 @@ var Scope = (function () {
     };
     Scope.prototype.evaluateClassScope = function (stack) {
         // TODO assert there are no child layers or classes
+        // TODO ensure all properties are paint properties, not layout properties
         stack.scope.push(this);
-        this.evaluateProperties(stack);
+        var evaluated = this.evaluate_(stack);
         stack.scope.pop();
+        return evaluated.properties;
     };
     Scope.prototype.evaluateGlobalScope = function (stack) {
         if (stack === void 0) { stack = new Stack(); }
         stack.scope.push(this);
-        var layers = this.evaluateLayers(stack);
-        var properties = this.evaluateProperties(stack);
+        var evaluated = this.evaluate_(stack);
+        var layers = evaluated.layers;
+        var properties = evaluated.properties;
         var sources = _.objectMapValues(this.stylesheet.sources, function (source, name) {
             return _.objectMapValues(source, function (value, key) {
                 return Value.evaluate(value, stack);
@@ -307,26 +308,14 @@ var Scope = (function () {
         });
     };
     Scope.prototype.evaluateLayerScope = function (stack) {
-        var _this = this;
-        var evaluateClassPaintProperties = function (type, stack) {
-            // TODO ensure all properties are paint properties, not layout properties
-            var classStatements = _.filter(_this.statements, function (statement) {
-                return statement.type == 2 /* CLASS */;
-            });
-            return _.objectMap(classStatements, function (statement, name) {
-                return [
-                    "paint." + name,
-                    statement.scope.evaluateClassScope(stack)
-                ];
-            });
-        };
         // TODO should this be in this method?
         stack.scope.push(this);
-        var properties = this.evaluateProperties(stack);
+        var evaluated = this.evaluate_(stack);
+        var properties = evaluated.properties;
         var metaProperties = { 'z-index': 0 };
         var paintProperties = {};
         var layoutProperties = {};
-        var layers = this.evaluateLayers(stack);
+        var layers = evaluated.layers;
         var type = properties['$type'] || 'raster';
         for (var name in properties) {
             var value = properties[name];
@@ -352,6 +341,9 @@ var Scope = (function () {
             }
             metaProperties['type'] = 'raster';
         }
+        var classes = _.objectMap(evaluated.classes, function (scope) {
+            return ["paint." + scope.name, scope];
+        });
         // TODO ensure layer has a source and type
         // TODO remove this _.objectCompact call -- some falsey values are important.
         var output = _.objectCompact(_.extend({
@@ -359,7 +351,7 @@ var Scope = (function () {
             layers: layers,
             paint: paintProperties,
             layout: layoutProperties
-        }, metaProperties, evaluateClassPaintProperties(type, stack)));
+        }, metaProperties, classes));
         stack.scope.pop();
         return output;
     };
