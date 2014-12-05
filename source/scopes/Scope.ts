@@ -10,6 +10,7 @@ import PropertyMacro = require('../macros/PropertyMacro');
 import _ = require("../utilities")
 import ScopeType = require('./ScopeType')
 import MapboxGLStyleSpec = require('../MapboxGLStyleSpec')
+import Stylesheet = require('../Stylesheet');
 var Globals = require('../globals');
 
 interface Loop {
@@ -29,27 +30,24 @@ enum StatementType {
   ELSE_IF
 }
 
+// TODO just make this more freeform
 interface Statement {
   type:StatementType;
   loop?:Loop;
-  scope?:Scope;
   name?:string;
+  scope?:Scope;
   expressions?:Expression[];
 }
 
 class Scope {
 
-  // TODO move to a global class
-  public sources:{[name:string]: any};
-
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
   // TODO remove "name"
-  constructor(public parent:Scope, public name:string = null, private statements:Statement[] = []) {
+  constructor(public stylesheet:Stylesheet, public parent:Scope, public name:string = null, public statements:Statement[] = []) {
     this.valueMacros = [];
     this.propertyMacros = [];
-    this.sources = {};
 
     if (this.parent == null) {
       for (var macroName in Globals.valueMacros) {
@@ -68,22 +66,16 @@ class Scope {
     return !this.parent
   }
 
-  addSource(source:{}):string {
-    if (this.isGlobal()) {
-      var hash = _.hash(JSON.stringify(source)).toString();
-      this.sources[hash] = source;
-      return hash;
-    } else {
-      return this.parent.addSource(source);
-    }
-  }
-
   getGlobalScope():Scope {
     return this.isGlobal() ? this : this.parent.getGlobalScope();
   }
 
-  getSource(name:string):any {
-    return this.isGlobal() ? this.getSource(name) : this.parent.getSource(name);
+  //////////////////////////////////////////////////////////////////////////////
+  // Construction
+
+  // TODO make Source class
+  addSource(source:{}):string {
+    return this.stylesheet.addSource(source);
   }
 
   addProperty(name:string, expressions:Expression[]):void {
@@ -98,7 +90,7 @@ class Scope {
 
   addClassScope(name:string):Scope {
     // TODO ensure class scopes are merged properly
-    var scope = new Scope(this, name)
+    var scope = new Scope(this.stylesheet, this, name)
 
     this.statements.push({
       type: StatementType.CLASS,
@@ -110,7 +102,7 @@ class Scope {
 
   addLayerScope(name?:string):Scope {
     // TODO check for duplicate layer scopes
-    var scope = new Scope(this, name)
+    var scope = new Scope(this.stylesheet, this, name)
 
     this.statements.push({
       type: StatementType.LAYER,
@@ -126,7 +118,7 @@ class Scope {
       valueIdentifier: valueIdentifier,
       keyIdentifier: keyIdentifier,
       collectionExpression: collectionExpression,
-      scope: new Scope(this)
+      scope: new Scope(this.stylesheet, this)
     }
 
     this.statements.push({
@@ -138,7 +130,7 @@ class Scope {
   }
 
   addIf(expression:Expression):Scope {
-    var scope = new Scope(this);
+    var scope = new Scope(this.stylesheet, this);
 
     this.statements.push({
       type: StatementType.IF,
@@ -150,7 +142,7 @@ class Scope {
   }
 
   addElseIf(expression:Expression):Scope {
-    var scope = new Scope(this);
+    var scope = new Scope(this.stylesheet, this);
 
     this.statements.push({
       type: StatementType.ELSE_IF,
@@ -162,7 +154,7 @@ class Scope {
   }
 
   addElse():Scope {
-    var scope = new Scope(this);
+    var scope = new Scope(this.stylesheet, this);
 
     this.statements.push({
       type: StatementType.ELSE,
@@ -199,6 +191,9 @@ class Scope {
     return macro.scope
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Evaluation Helpers
+
   getValueMacro(name:string, values:Values, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
@@ -225,8 +220,6 @@ class Scope {
       }
     }
 
-    // TODO create super parent class that returns null for everything to
-    // avoid this.
     return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
   }
 
@@ -252,125 +245,6 @@ class Scope {
     });
 
     return output
-  }
-
-  evaluateGlobalScope(stack:Stack = new Stack()):any {
-    stack.scope.push(this)
-
-    var layers = this.evaluateLayers(stack);
-    var properties = this.evaluateProperties(stack)
-
-    var sources = _.objectMapValues(this.sources, (source, name) => {
-      return _.objectMapValues(source, (value, key) => {
-        return Value.evaluate(value, stack);
-      });
-    });
-
-    var transition = {
-      duration: properties["transition-delay"],
-      delay: properties["transition-duration"]
-    }
-    delete properties["transition-delay"];
-    delete properties["transition-duration"];
-
-    stack.scope.pop();
-
-    return _.extend(
-      properties,
-      {
-        version: 6,
-        layers: layers,
-        sources: sources,
-        transition: transition
-      }
-    )
-  }
-
-  evaluateClassScope(stack:Stack):any {
-    // TODO assert there are no child layers or classes
-    stack.scope.push(this);
-    this.evaluateProperties(stack);
-    stack.scope.pop();
-  }
-
-  evaluateClassPaintProperties(type:string, stack:Stack):{} {
-    // TODO ensure all properties are paint properties, not layout properties
-    var classStatements = _.filter(this.statements, (statement) => {
-      return statement.type == StatementType.CLASS;
-    });
-
-    return _.objectMap(classStatements, (statement, name) => {
-      return [
-        "paint." + name,
-        statement.scope.evaluateClassScope(stack)
-      ]
-    })
-  }
-
-  evaluateLayerScope(stack:Stack):any {
-    stack.scope.push(this);
-
-    var properties = this.evaluateProperties(stack);
-
-    var metaProperties = { 'z-index': 0 };
-    var paintProperties = {};
-    var layoutProperties = {};
-
-    var layers = this.evaluateLayers(stack);
-    var type = properties['$type'] || 'raster';
-
-    for (var name in properties) {
-      var value = properties[name];
-
-      if (_.startsWith(name, '$')) {
-        metaProperties[name.slice(1)] = value;
-      } else if (name == 'z-index') {
-        metaProperties['z-index'] = value;
-      } else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
-        paintProperties[name] = value;
-      } else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
-        layoutProperties[name] = value;
-      } else {
-        assert(false);
-      }
-    }
-
-    if (layers) {
-      if (metaProperties['type']) {
-        assert.equal(metaProperties['type'], 'raster');
-      }
-      metaProperties['type'] = 'raster'
-    }
-
-    // TODO ensure layer has a source and type
-
-    // TODO remove this _.objectCompact call -- some falsey values are important.
-    var output = _.objectCompact(_.extend(
-      {
-        id: this.name || _.uniqueId('scope'),
-        layers: layers,
-        paint: paintProperties,
-        layout: layoutProperties
-      },
-      metaProperties,
-      this.evaluateClassPaintProperties(type, stack)
-    ));
-
-    stack.scope.pop();
-
-    return output;
-  }
-
-  evaluate(type:ScopeType, stack:Stack):{} {
-    if (type == ScopeType.GLOBAL) {
-      return this.evaluateGlobalScope(stack)
-    } else if (type == ScopeType.LAYER) {
-      return this.evaluateLayerScope(stack)
-    } else if (type == ScopeType.CLASS) {
-      return this.evaluateClassScope(stack)
-    } else {
-      assert(false);
-    }
   }
 
   eachLoopSubscope(loop:Loop, stack:Stack, callback:(Scope) => void):void {
@@ -461,6 +335,130 @@ class Scope {
     layers = _.sortBy(layers, 'z-index');
 
     return layers.length ? layers : undefined;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Evaluation
+
+  evaluate(type:ScopeType, stack:Stack):{} {
+    if (type == ScopeType.GLOBAL) {
+      return this.evaluateGlobalScope(stack)
+    } else if (type == ScopeType.LAYER) {
+      return this.evaluateLayerScope(stack)
+    } else if (type == ScopeType.CLASS) {
+      return this.evaluateClassScope(stack)
+    } else {
+      assert(false);
+    }
+  }
+
+  evaluateClassScope(stack:Stack):any {
+    // TODO assert there are no child layers or classes
+    stack.scope.push(this);
+    this.evaluateProperties(stack);
+    stack.scope.pop();
+  }
+
+  evaluateGlobalScope(stack:Stack = new Stack()):any {
+    stack.scope.push(this)
+
+    var layers = this.evaluateLayers(stack);
+    var properties = this.evaluateProperties(stack)
+
+    var sources = _.objectMapValues(this.stylesheet.sources, (source, name) => {
+      return _.objectMapValues(source, (value, key) => {
+        return Value.evaluate(value, stack);
+      });
+    });
+
+    var transition = {
+      duration: properties["transition-delay"],
+      delay: properties["transition-duration"]
+    }
+    delete properties["transition-delay"];
+    delete properties["transition-duration"];
+
+    stack.scope.pop();
+
+    return _.extend(
+      properties,
+      {
+        version: 6,
+        layers: layers,
+        sources: sources,
+        transition: transition
+      }
+    )
+  }
+
+  evaluateLayerScope(stack:Stack):any {
+
+    var evaluateClassPaintProperties = (type:string, stack:Stack):{} => {
+      // TODO ensure all properties are paint properties, not layout properties
+      var classStatements = _.filter(this.statements, (statement) => {
+        return statement.type == StatementType.CLASS;
+      });
+
+      return _.objectMap(classStatements, (statement, name) => {
+        return [
+          "paint." + name,
+          statement.scope.evaluateClassScope(stack)
+        ]
+      })
+    }
+
+    // TODO should this be in this method?
+    stack.scope.push(this);
+
+    var properties = this.evaluateProperties(stack);
+
+    var metaProperties = { 'z-index': 0 };
+    var paintProperties = {};
+    var layoutProperties = {};
+
+    var layers = this.evaluateLayers(stack);
+    var type = properties['$type'] || 'raster';
+
+    for (var name in properties) {
+      var value = properties[name];
+
+      if (_.startsWith(name, '$')) {
+        metaProperties[name.slice(1)] = value;
+      } else if (name == 'z-index') {
+        metaProperties['z-index'] = value;
+      } else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+        paintProperties[name] = value;
+      } else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+        layoutProperties[name] = value;
+      } else {
+        assert(false);
+      }
+    }
+
+    if (layers) {
+      if (metaProperties['type']) {
+        assert.equal(metaProperties['type'], 'raster');
+      }
+      metaProperties['type'] = 'raster'
+    }
+
+    // TODO ensure layer has a source and type
+
+    // TODO remove this _.objectCompact call -- some falsey values are important.
+    var output = _.objectCompact(_.extend(
+      {
+        id: this.name || _.uniqueId('scope'),
+        layers: layers,
+        paint: paintProperties,
+        layout: layoutProperties
+      },
+      metaProperties,
+      evaluateClassPaintProperties(type, stack)
+    ));
+
+    stack.scope.pop();
+
+    return output;
   }
 
 }

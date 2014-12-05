@@ -20,15 +20,15 @@ var StatementType;
 })(StatementType || (StatementType = {}));
 var Scope = (function () {
     // TODO remove "name"
-    function Scope(parent, name, statements) {
+    function Scope(stylesheet, parent, name, statements) {
         if (name === void 0) { name = null; }
         if (statements === void 0) { statements = []; }
+        this.stylesheet = stylesheet;
         this.parent = parent;
         this.name = name;
         this.statements = statements;
         this.valueMacros = [];
         this.propertyMacros = [];
-        this.sources = {};
         if (this.parent == null) {
             for (var macroName in Globals.valueMacros) {
                 var fn = Globals.valueMacros[macroName];
@@ -43,21 +43,14 @@ var Scope = (function () {
     Scope.prototype.isGlobal = function () {
         return !this.parent;
     };
-    Scope.prototype.addSource = function (source) {
-        if (this.isGlobal()) {
-            var hash = _.hash(JSON.stringify(source)).toString();
-            this.sources[hash] = source;
-            return hash;
-        }
-        else {
-            return this.parent.addSource(source);
-        }
-    };
     Scope.prototype.getGlobalScope = function () {
         return this.isGlobal() ? this : this.parent.getGlobalScope();
     };
-    Scope.prototype.getSource = function (name) {
-        return this.isGlobal() ? this.getSource(name) : this.parent.getSource(name);
+    //////////////////////////////////////////////////////////////////////////////
+    // Construction
+    // TODO make Source class
+    Scope.prototype.addSource = function (source) {
+        return this.stylesheet.addSource(source);
     };
     Scope.prototype.addProperty = function (name, expressions) {
         // TODO check for duplicate properties
@@ -70,7 +63,7 @@ var Scope = (function () {
     };
     Scope.prototype.addClassScope = function (name) {
         // TODO ensure class scopes are merged properly
-        var scope = new Scope(this, name);
+        var scope = new Scope(this.stylesheet, this, name);
         this.statements.push({
             type: 2 /* CLASS */,
             scope: scope
@@ -79,7 +72,7 @@ var Scope = (function () {
     };
     Scope.prototype.addLayerScope = function (name) {
         // TODO check for duplicate layer scopes
-        var scope = new Scope(this, name);
+        var scope = new Scope(this.stylesheet, this, name);
         this.statements.push({
             type: 1 /* LAYER */,
             scope: scope
@@ -91,7 +84,7 @@ var Scope = (function () {
             valueIdentifier: valueIdentifier,
             keyIdentifier: keyIdentifier,
             collectionExpression: collectionExpression,
-            scope: new Scope(this)
+            scope: new Scope(this.stylesheet, this)
         };
         this.statements.push({
             type: 0 /* LOOP */,
@@ -100,7 +93,7 @@ var Scope = (function () {
         return loop.scope;
     };
     Scope.prototype.addIf = function (expression) {
-        var scope = new Scope(this);
+        var scope = new Scope(this.stylesheet, this);
         this.statements.push({
             type: 4 /* IF */,
             expressions: [expression],
@@ -109,7 +102,7 @@ var Scope = (function () {
         return scope;
     };
     Scope.prototype.addElseIf = function (expression) {
-        var scope = new Scope(this);
+        var scope = new Scope(this.stylesheet, this);
         this.statements.push({
             type: 6 /* ELSE_IF */,
             expressions: [expression],
@@ -118,7 +111,7 @@ var Scope = (function () {
         return scope;
     };
     Scope.prototype.addElse = function () {
-        var scope = new Scope(this);
+        var scope = new Scope(this.stylesheet, this);
         this.statements.push({
             type: 5 /* ELSE */,
             scope: scope
@@ -144,6 +137,8 @@ var Scope = (function () {
         this.propertyMacros.unshift(macro);
         return macro.scope;
     };
+    //////////////////////////////////////////////////////////////////////////////
+    // Evaluation Helpers
     Scope.prototype.getValueMacro = function (name, values, stack) {
         for (var i in this.valueMacros) {
             var macro = this.valueMacros[i];
@@ -169,8 +164,6 @@ var Scope = (function () {
                 return macro;
             }
         }
-        // TODO create super parent class that returns null for everything to
-        // avoid this.
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
     Scope.prototype.evaluateProperties = function (stack, statements) {
@@ -189,105 +182,6 @@ var Scope = (function () {
             }
         });
         return output;
-    };
-    Scope.prototype.evaluateGlobalScope = function (stack) {
-        if (stack === void 0) { stack = new Stack(); }
-        stack.scope.push(this);
-        var layers = this.evaluateLayers(stack);
-        var properties = this.evaluateProperties(stack);
-        var sources = _.objectMapValues(this.sources, function (source, name) {
-            return _.objectMapValues(source, function (value, key) {
-                return Value.evaluate(value, stack);
-            });
-        });
-        var transition = {
-            duration: properties["transition-delay"],
-            delay: properties["transition-duration"]
-        };
-        delete properties["transition-delay"];
-        delete properties["transition-duration"];
-        stack.scope.pop();
-        return _.extend(properties, {
-            version: 6,
-            layers: layers,
-            sources: sources,
-            transition: transition
-        });
-    };
-    Scope.prototype.evaluateClassScope = function (stack) {
-        // TODO assert there are no child layers or classes
-        stack.scope.push(this);
-        this.evaluateProperties(stack);
-        stack.scope.pop();
-    };
-    Scope.prototype.evaluateClassPaintProperties = function (type, stack) {
-        // TODO ensure all properties are paint properties, not layout properties
-        var classStatements = _.filter(this.statements, function (statement) {
-            return statement.type == 2 /* CLASS */;
-        });
-        return _.objectMap(classStatements, function (statement, name) {
-            return [
-                "paint." + name,
-                statement.scope.evaluateClassScope(stack)
-            ];
-        });
-    };
-    Scope.prototype.evaluateLayerScope = function (stack) {
-        stack.scope.push(this);
-        var properties = this.evaluateProperties(stack);
-        var metaProperties = { 'z-index': 0 };
-        var paintProperties = {};
-        var layoutProperties = {};
-        var layers = this.evaluateLayers(stack);
-        var type = properties['$type'] || 'raster';
-        for (var name in properties) {
-            var value = properties[name];
-            if (_.startsWith(name, '$')) {
-                metaProperties[name.slice(1)] = value;
-            }
-            else if (name == 'z-index') {
-                metaProperties['z-index'] = value;
-            }
-            else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
-                paintProperties[name] = value;
-            }
-            else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
-                layoutProperties[name] = value;
-            }
-            else {
-                assert(false);
-            }
-        }
-        if (layers) {
-            if (metaProperties['type']) {
-                assert.equal(metaProperties['type'], 'raster');
-            }
-            metaProperties['type'] = 'raster';
-        }
-        // TODO ensure layer has a source and type
-        // TODO remove this _.objectCompact call -- some falsey values are important.
-        var output = _.objectCompact(_.extend({
-            id: this.name || _.uniqueId('scope'),
-            layers: layers,
-            paint: paintProperties,
-            layout: layoutProperties
-        }, metaProperties, this.evaluateClassPaintProperties(type, stack)));
-        stack.scope.pop();
-        return output;
-    };
-    Scope.prototype.evaluate = function (type, stack) {
-        if (type == 0 /* GLOBAL */) {
-            return this.evaluateGlobalScope(stack);
-        }
-        else if (type == 1 /* LAYER */) {
-            return this.evaluateLayerScope(stack);
-        }
-        else if (type == 2 /* CLASS */) {
-            return this.evaluateClassScope(stack);
-        }
-        else {
-            assert(false);
-        }
     };
     Scope.prototype.eachLoopSubscope = function (loop, stack, callback) {
         var scope = loop.scope;
@@ -362,6 +256,109 @@ var Scope = (function () {
         });
         layers = _.sortBy(layers, 'z-index');
         return layers.length ? layers : undefined;
+    };
+    //////////////////////////////////////////////////////////////////////////////
+    // Evaluation
+    Scope.prototype.evaluate = function (type, stack) {
+        if (type == 0 /* GLOBAL */) {
+            return this.evaluateGlobalScope(stack);
+        }
+        else if (type == 1 /* LAYER */) {
+            return this.evaluateLayerScope(stack);
+        }
+        else if (type == 2 /* CLASS */) {
+            return this.evaluateClassScope(stack);
+        }
+        else {
+            assert(false);
+        }
+    };
+    Scope.prototype.evaluateClassScope = function (stack) {
+        // TODO assert there are no child layers or classes
+        stack.scope.push(this);
+        this.evaluateProperties(stack);
+        stack.scope.pop();
+    };
+    Scope.prototype.evaluateGlobalScope = function (stack) {
+        if (stack === void 0) { stack = new Stack(); }
+        stack.scope.push(this);
+        var layers = this.evaluateLayers(stack);
+        var properties = this.evaluateProperties(stack);
+        var sources = _.objectMapValues(this.stylesheet.sources, function (source, name) {
+            return _.objectMapValues(source, function (value, key) {
+                return Value.evaluate(value, stack);
+            });
+        });
+        var transition = {
+            duration: properties["transition-delay"],
+            delay: properties["transition-duration"]
+        };
+        delete properties["transition-delay"];
+        delete properties["transition-duration"];
+        stack.scope.pop();
+        return _.extend(properties, {
+            version: 6,
+            layers: layers,
+            sources: sources,
+            transition: transition
+        });
+    };
+    Scope.prototype.evaluateLayerScope = function (stack) {
+        var _this = this;
+        var evaluateClassPaintProperties = function (type, stack) {
+            // TODO ensure all properties are paint properties, not layout properties
+            var classStatements = _.filter(_this.statements, function (statement) {
+                return statement.type == 2 /* CLASS */;
+            });
+            return _.objectMap(classStatements, function (statement, name) {
+                return [
+                    "paint." + name,
+                    statement.scope.evaluateClassScope(stack)
+                ];
+            });
+        };
+        // TODO should this be in this method?
+        stack.scope.push(this);
+        var properties = this.evaluateProperties(stack);
+        var metaProperties = { 'z-index': 0 };
+        var paintProperties = {};
+        var layoutProperties = {};
+        var layers = this.evaluateLayers(stack);
+        var type = properties['$type'] || 'raster';
+        for (var name in properties) {
+            var value = properties[name];
+            if (_.startsWith(name, '$')) {
+                metaProperties[name.slice(1)] = value;
+            }
+            else if (name == 'z-index') {
+                metaProperties['z-index'] = value;
+            }
+            else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+                paintProperties[name] = value;
+            }
+            else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+                layoutProperties[name] = value;
+            }
+            else {
+                assert(false);
+            }
+        }
+        if (layers) {
+            if (metaProperties['type']) {
+                assert.equal(metaProperties['type'], 'raster');
+            }
+            metaProperties['type'] = 'raster';
+        }
+        // TODO ensure layer has a source and type
+        // TODO remove this _.objectCompact call -- some falsey values are important.
+        var output = _.objectCompact(_.extend({
+            id: this.name || _.uniqueId('scope'),
+            layers: layers,
+            paint: paintProperties,
+            layout: layoutProperties
+        }, metaProperties, evaluateClassPaintProperties(type, stack)));
+        stack.scope.pop();
+        return output;
     };
     return Scope;
 })();

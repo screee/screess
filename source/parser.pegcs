@@ -3,6 +3,7 @@
   @_ = require './utilities'
   assert = require 'assert'
 
+  @Stylesheet = require('./Stylesheet')
   @Scope = require('./scopes/Scope')
   @ScopeType = require('./scopes/ScopeType')
 
@@ -26,16 +27,18 @@
   @SubscriptExpression = require('./expressions/SubscriptExpression')
   @ArithmeticOperatorExpression = require('./expressions/ArithmeticOperatorExpression')
 
-  @globalScope = @scope = new @Scope(null)
+  @stylesheet = new @Stylesheet()
+  @globalScope = @scope = @stylesheet.scope
+
   @pushScope = (scope) =>
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
-    assert(scope.parent == @scope, "Child scope must be parent of current scope")
+    assert(scope.parent == @scope, "Next scope must be child of current scope")
     @scope = scope
   @popScope = =>
     @scope = @scope.parent
 }
 
-global = statements { @globalScope.evaluateGlobalScope() }
+global = statements { @stylesheet.scope.evaluateGlobalScope() }
 
 identifier = a:[A-Za-z$]b:[a-zA-Z0-9-_]* { a + b.join("") }
 

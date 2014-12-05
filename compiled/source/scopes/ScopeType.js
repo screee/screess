@@ -1,3 +1,4 @@
+// TODO make a static member of the Scope class
 var ScopeType;
 (function (ScopeType) {
     ScopeType[ScopeType["GLOBAL"] = 0] = "GLOBAL";

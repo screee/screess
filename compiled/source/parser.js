@@ -33,7 +33,7 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
-          return this.globalScope.evaluateGlobalScope();
+          return this.stylesheet.scope.evaluateGlobalScope();
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,
@@ -4562,6 +4562,7 @@ module.exports = (function() {
       require('coffee-script');
       this._ = require('./utilities');
       assert = require('assert');
+      this.Stylesheet = require('./Stylesheet');
       this.Scope = require('./scopes/Scope');
       this.ScopeType = require('./scopes/ScopeType');
       this.ColorValue = require('./values/ColorValue');
@@ -4581,10 +4582,11 @@ module.exports = (function() {
       this.DotExpression = require('./expressions/DotExpression');
       this.SubscriptExpression = require('./expressions/SubscriptExpression');
       this.ArithmeticOperatorExpression = require('./expressions/ArithmeticOperatorExpression');
-      this.globalScope = this.scope = new this.Scope(null);
+      this.stylesheet = new this.Stylesheet();
+      this.globalScope = this.scope = this.stylesheet.scope;
       this.pushScope = function(scope) {
         assert(scope instanceof _this.Scope, "Malformed arguments to pushScope");
-        assert(scope.parent === _this.scope, "Child scope must be parent of current scope");
+        assert(scope.parent === _this.scope, "Next scope must be child of current scope");
         return _this.scope = scope;
       };
       this.popScope = function() {

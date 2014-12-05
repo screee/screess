@@ -7,6 +7,7 @@ class Stack {
   public propertyMacro;
   public scope;
 
+  // TODO create as immutable linked list
   constructor() {
     this.valueMacro = []
     this.propertyMacro = []

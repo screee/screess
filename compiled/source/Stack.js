@@ -1,4 +1,5 @@
 var Stack = (function () {
+    // TODO create as immutable linked list
     function Stack() {
         this.valueMacro = [];
         this.propertyMacro = [];

@@ -8,7 +8,7 @@ var ValueMacro = (function () {
         this.parentScope = parentScope;
         if (_.isArray(body)) {
             this.body = function (args, stack) {
-                var scope = new Scope(parentScope);
+                var scope = new Scope(parentScope.stylesheet, parentScope);
                 scope.addLiteralValueMacros(args);
                 stack.scope.push(scope);
                 var values = _.map(body, function (expression) {
