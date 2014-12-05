@@ -23,19 +23,27 @@ class PropertyMacro {
     this.argLengthMax = this.argDefinition.length;
   }
 
-  evaluate(argValues:Values, stack:Stack) {
-    var args = argValues.evaluate(this.argDefinition, stack)
+  // TODO deprecate in favor of getScope
+  // evaluate(argValues:Values, stack:Stack) {
+  //   var args = argValues.evaluate(this.argDefinition, stack)
 
-    var scope = new Scope(this.scope)
+  //   var scope = new Scope(this.scope)
+  //   scope.addLiteralValueMacros(args)
+
+  //   stack.scope.push(scope)
+  //   var values = _.extend(
+  //     scope.evaluateProperties(stack, this.scope.statements),
+  //     this.body ? this.body.apply({}, argValues) : null
+  //   )
+  //   stack.scope.pop()
+  //   return values
+  // }
+
+  getScope(values:Values, stack:Stack):Scope {
+    var scope = new Scope(this.scope, null, this.scope.statements)
+    var args = values.evaluate(this.argDefinition, stack);
     scope.addLiteralValueMacros(args)
-
-    stack.scope.push(scope)
-    var values = _.extend(
-      scope.evaluateProperties(stack, this.scope.statements),
-      this.body ? this.body.apply({}, argValues) : null
-    )
-    stack.scope.pop()
-    return values
+    return scope
   }
 
   matches(name:string, argValues:Values):boolean {

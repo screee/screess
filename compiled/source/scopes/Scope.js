@@ -19,14 +19,16 @@ var StatementType;
     StatementType[StatementType["ELSE_IF"] = 6] = "ELSE_IF";
 })(StatementType || (StatementType = {}));
 var Scope = (function () {
-    function Scope(parent, name) {
+    // TODO remove "name"
+    function Scope(parent, name, statements) {
         if (name === void 0) { name = null; }
+        if (statements === void 0) { statements = []; }
         this.parent = parent;
         this.name = name;
+        this.statements = statements;
         this.valueMacros = [];
         this.propertyMacros = [];
         this.sources = {};
-        this.statements = [];
         if (this.parent == null) {
             for (var macroName in Globals.valueMacros) {
                 var fn = Globals.valueMacros[macroName];
@@ -174,43 +176,18 @@ var Scope = (function () {
     Scope.prototype.evaluateProperties = function (stack, statements) {
         if (statements === void 0) { statements = this.statements; }
         var output = {};
-        for (var i = 0; i < statements.length; i++) {
-            var statement = statements[i];
+        this.eachStatement(stack, function (scope, statement) {
             if (statement.type == 3 /* PROPERTY */) {
-                var name = statement.name;
-                var expressions = statement.expressions;
-                // TODO refactor Values constructor to accept this
-                var values = new Values(_.map(expressions, function (expression) {
+                // TODO refactor Values to accept this as a constructor
+                var values = new Values(_.map(statement.expressions, function (expression) {
                     return { expression: expression };
-                }), this, stack);
-                var propertyMacro;
-                if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
-                    stack.propertyMacro.push(propertyMacro);
-                    _.extend(output, propertyMacro.evaluate(values, stack));
-                    stack.propertyMacro.pop();
+                }), scope, stack);
+                if (values.length != 1 || values.positional.length != 1) {
+                    throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
                 }
-                else {
-                    if (values.length != 1 || values.positional.length != 1) {
-                        console.log(values);
-                        throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
-                    }
-                    output[name] = Value.evaluate(values.positional[0], stack);
-                }
+                output[statement.name] = Value.evaluate(values.positional[0], stack);
             }
-            else if (statement.type == 4 /* IF */) {
-                if (statement.expressions[0].toValue(this, stack)) {
-                    _.extend(output, statement.scope.evaluateProperties(stack));
-                }
-                else if (statements[i + 1] && statements[i + 1].type == 6 /* ELSE_IF */ && statements[i + 1].expressions[0].toValue(this, stack)) {
-                    var statement = statements[++i];
-                    _.extend(output, statement.scope.evaluateProperties(stack));
-                }
-                else if (statements[i + 1] && statements[i + 1].type == 5 /* ELSE */) {
-                    var statement = statements[++i];
-                    _.extend(output, statement.scope.evaluateProperties(stack));
-                }
-            }
-        }
+        });
         return output;
     };
     Scope.prototype.evaluateGlobalScope = function (stack) {
@@ -312,7 +289,7 @@ var Scope = (function () {
             assert(false);
         }
     };
-    Scope.prototype.eachLoopScope = function (loop, stack, callback) {
+    Scope.prototype.eachLoopSubscope = function (loop, stack, callback) {
         var scope = loop.scope;
         var collectionExpression = loop.collectionExpression;
         var valueIdentifier = loop.valueIdentifier;
@@ -328,26 +305,62 @@ var Scope = (function () {
             callback(scope);
         }
     };
+    // Properties, layers, classes
+    Scope.prototype.eachStatement = function (stack, callback) {
+        var statements = this.statements;
+        for (var i = 0; i < statements.length; i++) {
+            var statement = statements[i];
+            if (statement.type == 0 /* LOOP */) {
+                this.eachLoopSubscope(statement.loop, stack, function (scope) {
+                    scope.eachStatement(stack, callback);
+                });
+            }
+            else if (statement.type == 4 /* IF */) {
+                if (statement.expressions[0].toValue(this, stack)) {
+                    statement.scope.eachStatement(stack, callback);
+                    continue;
+                }
+                var flag = false;
+                while (statements[i + 1] && statements[i + 1].type == 6 /* ELSE_IF */) {
+                    if (statements[++i].expressions[0].toValue(this, stack)) {
+                        statements[i].scope.eachStatement(stack, callback);
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag && statements[i + 1] && statements[i + 1].type == 5 /* ELSE */) {
+                    statement = statements[++i];
+                    statement.scope.eachStatement(stack, callback);
+                }
+            }
+            else if (statement.type == 3 /* PROPERTY */) {
+                // TODO refactor Values to accept this as a constructor
+                var values = new Values(_.map(statement.expressions, function (expression) {
+                    return { expression: expression };
+                }), this, stack);
+                var macro;
+                if (macro = this.getPropertyMacro(statement.name, values, stack)) {
+                    stack.propertyMacro.push(macro);
+                    macro.getScope(values, stack).eachStatement(stack, callback);
+                    stack.propertyMacro.pop();
+                }
+                else {
+                    callback(this, statement);
+                }
+            }
+            else {
+                callback(this, statement);
+            }
+        }
+    };
     Scope.prototype.evaluateLayers = function (stack) {
         var layers = [];
-        for (var i in this.statements) {
-            var statement = this.statements[i];
+        this.eachStatement(stack, function (scope, statement) {
             if (statement.type == 1 /* LAYER */) {
                 layers.push(statement.scope.evaluateLayerScope(stack));
             }
-            else if (statement.type == 0 /* LOOP */) {
-                this.eachLoopScope(statement.loop, stack, function (scope) {
-                    layers = layers.concat(scope.evaluateLayers(stack));
-                });
-            }
-        }
-        // We are relying on the behavior that the original ordering is preserved
-        // for layers with the same z-index
+        });
         layers = _.sortBy(layers, 'z-index');
-        // for (var i in layers) {
-        //   var layer = layers[i];
-        //   delete layer['z-index']
-        // }
         return layers.length ? layers : undefined;
     };
     return Scope;

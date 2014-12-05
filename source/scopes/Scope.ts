@@ -45,14 +45,11 @@ class Scope {
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
-  private statements:Statement[];
-
-  constructor(public parent:Scope, public name:string = null) {
+  // TODO remove "name"
+  constructor(public parent:Scope, public name:string = null, private statements:Statement[] = []) {
     this.valueMacros = [];
     this.propertyMacros = [];
     this.sources = {};
-
-    this.statements = [];
 
     if (this.parent == null) {
       for (var macroName in Globals.valueMacros) {
@@ -236,50 +233,23 @@ class Scope {
   evaluateProperties(stack:Stack, statements:Statement[] = this.statements):any {
     var output = {}
 
-    for (var i = 0; i < statements.length; i++) {
-      var statement = statements[i];
-
+    this.eachStatement(stack, (scope, statement) => {
       if (statement.type == StatementType.PROPERTY) {
-        var name = statement.name;
-        var expressions = statement.expressions;
-
-        // TODO refactor Values constructor to accept this
+        // TODO refactor Values to accept this as a constructor
         var values = new Values(
-          _.map(expressions, (expression) => { return { expression: expression } }),
-          this,
+          _.map(statement.expressions, (expression) => {
+            return { expression: expression }
+          }),
+          scope,
           stack
         );
 
-        var propertyMacro;
-        if (propertyMacro = this.getPropertyMacro(name, values, stack)) {
-          stack.propertyMacro.push(propertyMacro);
-          _.extend(output, propertyMacro.evaluate(values, stack));
-          stack.propertyMacro.pop()
-        } else {
-          if (values.length != 1 || values.positional.length != 1) {
-            console.log(values)
-            throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
-          }
-
-          output[name] = Value.evaluate(values.positional[0], stack);
+        if (values.length != 1 || values.positional.length != 1) {
+          throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
         }
-
-      } else if (statement.type == StatementType.IF) {
-
-        if (statement.expressions[0].toValue(this, stack)) {
-          _.extend(output, statement.scope.evaluateProperties(stack));
-
-        } else if (statements[i+1] && statements[i+1].type == StatementType.ELSE_IF && statements[i+1].expressions[0].toValue(this, stack)) {
-          var statement = statements[++i];
-          _.extend(output, statement.scope.evaluateProperties(stack));
-
-        } else if (statements[i + 1] && statements[i + 1].type == StatementType.ELSE) {
-          var statement = statements[++i];
-          _.extend(output, statement.scope.evaluateProperties(stack));
-        }
-
+        output[statement.name] = Value.evaluate(values.positional[0], stack);
       }
-    }
+    });
 
     return output
   }
@@ -403,7 +373,7 @@ class Scope {
     }
   }
 
-  eachLoopScope(loop:Loop, stack:Stack, callback:(Scope) => void):void {
+  eachLoopSubscope(loop:Loop, stack:Stack, callback:(Scope) => void):void {
     var scope = loop.scope;
     var collectionExpression = loop.collectionExpression;
     var valueIdentifier = loop.valueIdentifier;
@@ -420,29 +390,75 @@ class Scope {
     }
   }
 
+  // Properties, layers, classes
+  eachStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void): void {
+    var statements = this.statements;
+
+    for (var i=0; i < statements.length; i++) {
+      var statement = statements[i];
+
+      if (statement.type == StatementType.LOOP) {
+        this.eachLoopSubscope(statement.loop, stack, (scope) => {
+          scope.eachStatement(stack, callback)
+        })
+
+      } else if (statement.type == StatementType.IF) {
+
+        if (statement.expressions[0].toValue(this, stack)) {
+          statement.scope.eachStatement(stack, callback);
+          continue;
+        }
+
+        var flag = false;
+        while (statements[i + 1] && statements[i + 1].type == StatementType.ELSE_IF) {
+          if (statements[++i].expressions[0].toValue(this, stack)) {
+            statements[i].scope.eachStatement(stack, callback)
+            flag = true
+            break
+          }
+        }
+
+        if (!flag && statements[i + 1] && statements[i + 1].type == StatementType.ELSE) {
+          statement = statements[++i];
+          statement.scope.eachStatement(stack, callback)
+        }
+
+      } else if (statement.type == StatementType.PROPERTY) {
+
+        // TODO refactor Values to accept this as a constructor
+        var values = new Values(
+          _.map(statement.expressions, (expression) => {
+            return { expression: expression }
+          }),
+          this,
+          stack
+        );
+
+        var macro;
+        if (macro = this.getPropertyMacro(statement.name, values, stack)) {
+          stack.propertyMacro.push(macro);
+          macro.getScope(values, stack).eachStatement(stack, callback);
+          stack.propertyMacro.pop()
+        } else {
+          callback(this, statement);
+        }
+
+      } else {
+        callback(this, statement);
+      }
+    }
+  }
+
   evaluateLayers(stack:Stack):{}[] {
     var layers = [];
 
-    for (var i in this.statements) {
-      var statement = this.statements[i];
-
+    this.eachStatement(stack, (scope, statement) => {
       if (statement.type == StatementType.LAYER) {
         layers.push(statement.scope.evaluateLayerScope(stack));
-
-      } else if (statement.type == StatementType.LOOP) {
-        this.eachLoopScope(statement.loop, stack, (scope) => {
-          layers = layers.concat(scope.evaluateLayers(stack));
-        })
       }
-    }
+    });
 
-    // We are relying on the behavior that the original ordering is preserved
-    // for layers with the same z-index
-    layers = _.sortBy(layers, 'z-index')
-    // for (var i in layers) {
-    //   var layer = layers[i];
-    //   delete layer['z-index']
-    // }
+    layers = _.sortBy(layers, 'z-index');
 
     return layers.length ? layers : undefined;
   }

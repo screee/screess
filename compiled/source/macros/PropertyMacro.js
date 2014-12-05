@@ -14,14 +14,24 @@ var PropertyMacro = (function () {
         });
         this.argLengthMax = this.argDefinition.length;
     }
-    PropertyMacro.prototype.evaluate = function (argValues, stack) {
-        var args = argValues.evaluate(this.argDefinition, stack);
-        var scope = new Scope(this.scope);
+    // TODO deprecate in favor of getScope
+    // evaluate(argValues:Values, stack:Stack) {
+    //   var args = argValues.evaluate(this.argDefinition, stack)
+    //   var scope = new Scope(this.scope)
+    //   scope.addLiteralValueMacros(args)
+    //   stack.scope.push(scope)
+    //   var values = _.extend(
+    //     scope.evaluateProperties(stack, this.scope.statements),
+    //     this.body ? this.body.apply({}, argValues) : null
+    //   )
+    //   stack.scope.pop()
+    //   return values
+    // }
+    PropertyMacro.prototype.getScope = function (values, stack) {
+        var scope = new Scope(this.scope, null, this.scope.statements);
+        var args = values.evaluate(this.argDefinition, stack);
         scope.addLiteralValueMacros(args);
-        stack.scope.push(scope);
-        var values = _.extend(scope.evaluateProperties(stack, this.scope.statements), this.body ? this.body.apply({}, argValues) : null);
-        stack.scope.pop();
-        return values;
+        return scope;
     };
     PropertyMacro.prototype.matches = function (name, argValues) {
         return name == this.name && argValues.matches(this.argDefinition);
