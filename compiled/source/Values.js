@@ -1,7 +1,13 @@
 var assert = require('assert');
 var _ = require('./utilities');
+var Expression = require('./expressions/Expression');
 var Values = (function () {
     function Values(args, scope, stack) {
+        if (_.isArrayOf(args, Expression)) {
+            args = _.map(args, function (expression) {
+                return { expression: expression };
+            });
+        }
         this.positional = [];
         this.named = {};
         for (var i in args) {

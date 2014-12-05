@@ -11,33 +11,8 @@ import _ = require("../utilities")
 import ScopeType = require('./ScopeType')
 import MapboxGLStyleSpec = require('../MapboxGLStyleSpec')
 import Stylesheet = require('../Stylesheet');
+import Statement = require('../Statement');
 var Globals = require('../globals');
-
-interface Loop {
-  scope:Scope;
-  valueIdentifier:string;
-  keyIdentifier:string;
-  collectionExpression:Expression;
-}
-
-enum StatementType {
-  LOOP,
-  LAYER,
-  CLASS,
-  PROPERTY,
-  IF,
-  ELSE,
-  ELSE_IF
-}
-
-// TODO just make this more freeform
-interface Statement {
-  type:StatementType;
-  loop?:Loop;
-  name?:string;
-  scope?:Scope;
-  expressions?:Expression[];
-}
 
 class Scope {
 
@@ -96,88 +71,56 @@ class Scope {
   addProperty(name:string, expressions:Expression[]):void {
     // TODO check for duplicate properties
     assert(name != null);
-    this.statements.push({
-      type: StatementType.PROPERTY,
-      name: name,
-      expressions: expressions
-    })
+    this.statements.push(new Statement.PropertyStatement(name, expressions));
   }
 
+  // TODO rename to addClass
   addClassScope(name:string):Scope {
     // TODO ensure class scopes are merged properly
     var scope = new Scope(this, name)
-
-    this.statements.push({
-      type: StatementType.CLASS,
-      scope: scope
-    })
-
+    this.statements.push(new Statement.ClassStatement(name, scope));
     return scope;
   }
 
+  // TODO rename to addLayer
   addLayerScope(name?:string):Scope {
     // TODO check for duplicate layer scopes
     var scope = new Scope(this, name)
-
-    this.statements.push({
-      type: StatementType.LAYER,
-      scope: scope
-    })
-
+    this.statements.push(new Statement.LayerStatement(name, scope));
     return scope;
   }
 
-
   addLoop(valueIdentifier:string, keyIdentifier:string, collectionExpression:Expression):Scope {
-    var loop = {
-      valueIdentifier: valueIdentifier,
-      keyIdentifier: keyIdentifier,
-      collectionExpression: collectionExpression,
-      scope: new Scope(this)
-    }
-
-    this.statements.push({
-      type: StatementType.LOOP,
-      loop: loop
-    })
-
-    return loop.scope;
+    var scope = new Scope(this);
+    this.statements.push(new Statement.LoopStatement(
+      scope,
+      valueIdentifier,
+      keyIdentifier,
+      collectionExpression
+    ))
+    return scope;
   }
 
   addIf(expression:Expression):Scope {
     var scope = new Scope(this);
-
-    this.statements.push({
-      type: StatementType.IF,
-      expressions: [expression],
-      scope: scope
-    })
-
+    this.statements.push(new Statement.IfStatement(expression, scope));
     return scope;
   }
 
   addElseIf(expression:Expression):Scope {
     var scope = new Scope(this);
-
-    this.statements.push({
-      type: StatementType.ELSE_IF,
-      expressions: [expression],
-      scope: scope
-    })
-
+    this.statements.push(new Statement.ElseIfStatement(expression, scope));
     return scope;
   }
 
   addElse():Scope {
     var scope = new Scope(this);
-
-    this.statements.push({
-      type: StatementType.ELSE,
-      scope: scope
-    })
-
+    this.statements.push(new Statement.ElseStatement(scope));
     return scope;
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Macro Construction
 
   addLiteralValueMacros(values:{[name:string]:any}):void {
     for (var identifier in values) {
@@ -245,13 +188,13 @@ class Scope {
     for (var i=0; i < statements.length; i++) {
       var statement = statements[i];
 
-      if (statement.type == StatementType.LOOP) {
+      if (statement instanceof Statement.LoopStatement) {
+        var loopStatement = <Statement.LoopStatement> statement;
 
-        var loop = statement.loop;
-        var scope = loop.scope;
-        var collectionExpression = loop.collectionExpression;
-        var valueIdentifier = loop.valueIdentifier;
-        var keyIdentifier = loop.keyIdentifier;
+        var scope = loopStatement.scope;
+        var collectionExpression = loopStatement.collectionExpression;
+        var valueIdentifier = loopStatement.valueIdentifier;
+        var keyIdentifier = loopStatement.keyIdentifier;
 
         var collection = collectionExpression.toValue(this, stack);
         assert(_.isArray(collection) || _.isObject(collection))
@@ -263,40 +206,36 @@ class Scope {
           scope.eachStatement(stack, callback)
         }
 
-      } else if (statement.type == StatementType.IF) {
+      } else if (statement instanceof Statement.IfStatement) {
+        var ifStatement = <Statement.IfStatement> statement;
 
-        if (statement.expressions[0].toValue(this, stack)) {
-          statement.scope.eachStatement(stack, callback);
+        if (ifStatement.expression.toValue(this, stack)) {
+          ifStatement.scope.eachStatement(stack, callback);
           continue;
         }
 
         var flag = false;
-        while (statements[i + 1] && statements[i + 1].type == StatementType.ELSE_IF) {
-          if (statements[++i].expressions[0].toValue(this, stack)) {
-            statements[i].scope.eachStatement(stack, callback)
+        while (statements[i + 1] instanceof Statement.ElseIfStatement) {
+          var elseIfStatement = <Statement.ElseIfStatement> statements[++i];
+
+          if (elseIfStatement.expression.toValue(this, stack)) {
+            elseIfStatement.scope.eachStatement(stack, callback)
             flag = true
             break
           }
         }
 
-        if (!flag && statements[i + 1] && statements[i + 1].type == StatementType.ELSE) {
-          statement = statements[++i];
-          statement.scope.eachStatement(stack, callback)
+        if (!flag && statements[i + 1] instanceof Statement.ElseStatement) {
+          var elseStatement = <Statement.ElseStatement> statements[++i];
+          elseStatement.scope.eachStatement(stack, callback)
         }
 
-      } else if (statement.type == StatementType.PROPERTY) {
-
-        // TODO refactor Values to accept this as a constructor
-        var values = new Values(
-          _.map(statement.expressions, (expression) => {
-            return { expression: expression }
-          }),
-          this,
-          stack
-        );
+      } else if (statement instanceof Statement.PropertyStatement) {
+        var propertyStatement = <Statement.PropertyStatement> statement;
+        var values = new Values(propertyStatement.expressions, this, stack);
 
         var macro;
-        if (macro = this.getPropertyMacro(statement.name, values, stack)) {
+        if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
           stack.propertyMacro.push(macro);
           macro.getScope(values, stack).eachStatement(stack, callback);
           stack.propertyMacro.pop()
@@ -317,27 +256,24 @@ class Scope {
     var properties = {};
 
     this.eachStatement(stack, (scope, statement) => {
-      if (statement.type == StatementType.LAYER) {
-        layers.push(statement.scope.evaluateLayerScope(stack));
+      if (statement instanceof Statement.LayerStatement) {
+        var layerStatement = <Statement.LayerStatement> statement;
 
-      } else if (statement.type == StatementType.CLASS) {
-        classes.push(statement.scope.evaluateClassScope(stack))
+        layers.push(layerStatement.scope.evaluateLayerScope(stack));
 
-      } else if (statement.type == StatementType.PROPERTY) {
-        // TODO refactor Values to accept this as a constructor
-        var values = new Values(
-          _.map(statement.expressions, (expression) => {
-            return { expression: expression }
-          }),
-          scope,
-          stack
-        );
+      } else if (statement instanceof Statement.ClassStatement) {
+        var classStatement = <Statement.ClassStatement> statement;
+        classes.push(classStatement.scope.evaluateClassScope(stack))
 
+      } else if (statement instanceof Statement.PropertyStatement) {
+        var propertyStatement = <Statement.PropertyStatement> statement;
+
+        var values = new Values(propertyStatement.expressions, scope, stack);
         if (values.length != 1 || values.positional.length != 1) {
           throw new Error("Cannot apply " + values.length + " args to primitive property " + name)
         }
 
-        properties[statement.name] = Value.evaluate(values.positional[0], stack);
+        properties[propertyStatement.name] = Value.evaluate(values.positional[0], stack);
       }
     });
 

@@ -2,6 +2,17 @@ var _ = require('underscore');
 var Utilities = (function () {
     function Utilities() {
     }
+    Utilities.prototype.isArrayOf = function (array, klass) {
+        if (!_.isArray(array)) {
+            return false;
+        }
+        for (var i in array) {
+            if (!(array[i] instanceof klass)) {
+                return false;
+            }
+        }
+        return true;
+    };
     Utilities.prototype.mapMethod = function (list, method) {
         var args = [];
         for (var _i = 2; _i < arguments.length; _i++) {

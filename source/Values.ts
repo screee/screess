@@ -5,6 +5,7 @@ import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
 
+// TODO rename
 interface Value {
   name?: string;
   expression: Expression;
@@ -16,7 +17,15 @@ class Values {
   public positional:Value[];
   public named:{[s:string]:Value};
 
-  constructor(args:Value[], scope:Scope, stack:Stack) {
+  constructor(args:Expression[], scope:Scope, stack:Stack);
+  constructor(args:Value[], scope:Scope, stack:Stack);
+  constructor(args:any[], scope:Scope, stack:Stack) {
+    if (_.isArrayOf(args, Expression)) {
+      args = _.map(args, (expression:Expression) => {
+        return { expression: expression }
+      })
+    }
+
     this.positional = [];
     this.named = {};
 

@@ -7,17 +7,8 @@ var Stack = require('../Stack');
 var _ = require("../utilities");
 var ScopeType = require('./ScopeType');
 var MapboxGLStyleSpec = require('../MapboxGLStyleSpec');
+var Statement = require('../Statement');
 var Globals = require('../globals');
-var StatementType;
-(function (StatementType) {
-    StatementType[StatementType["LOOP"] = 0] = "LOOP";
-    StatementType[StatementType["LAYER"] = 1] = "LAYER";
-    StatementType[StatementType["CLASS"] = 2] = "CLASS";
-    StatementType[StatementType["PROPERTY"] = 3] = "PROPERTY";
-    StatementType[StatementType["IF"] = 4] = "IF";
-    StatementType[StatementType["ELSE"] = 5] = "ELSE";
-    StatementType[StatementType["ELSE_IF"] = 6] = "ELSE_IF";
-})(StatementType || (StatementType = {}));
 var Scope = (function () {
     function Scope(parent, name, statements) {
         if (name === void 0) { name = null; }
@@ -58,69 +49,44 @@ var Scope = (function () {
     Scope.prototype.addProperty = function (name, expressions) {
         // TODO check for duplicate properties
         assert(name != null);
-        this.statements.push({
-            type: 3 /* PROPERTY */,
-            name: name,
-            expressions: expressions
-        });
+        this.statements.push(new Statement.PropertyStatement(name, expressions));
     };
+    // TODO rename to addClass
     Scope.prototype.addClassScope = function (name) {
         // TODO ensure class scopes are merged properly
         var scope = new Scope(this, name);
-        this.statements.push({
-            type: 2 /* CLASS */,
-            scope: scope
-        });
+        this.statements.push(new Statement.ClassStatement(name, scope));
         return scope;
     };
+    // TODO rename to addLayer
     Scope.prototype.addLayerScope = function (name) {
         // TODO check for duplicate layer scopes
         var scope = new Scope(this, name);
-        this.statements.push({
-            type: 1 /* LAYER */,
-            scope: scope
-        });
+        this.statements.push(new Statement.LayerStatement(name, scope));
         return scope;
     };
     Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
-        var loop = {
-            valueIdentifier: valueIdentifier,
-            keyIdentifier: keyIdentifier,
-            collectionExpression: collectionExpression,
-            scope: new Scope(this)
-        };
-        this.statements.push({
-            type: 0 /* LOOP */,
-            loop: loop
-        });
-        return loop.scope;
+        var scope = new Scope(this);
+        this.statements.push(new Statement.LoopStatement(scope, valueIdentifier, keyIdentifier, collectionExpression));
+        return scope;
     };
     Scope.prototype.addIf = function (expression) {
         var scope = new Scope(this);
-        this.statements.push({
-            type: 4 /* IF */,
-            expressions: [expression],
-            scope: scope
-        });
+        this.statements.push(new Statement.IfStatement(expression, scope));
         return scope;
     };
     Scope.prototype.addElseIf = function (expression) {
         var scope = new Scope(this);
-        this.statements.push({
-            type: 6 /* ELSE_IF */,
-            expressions: [expression],
-            scope: scope
-        });
+        this.statements.push(new Statement.ElseIfStatement(expression, scope));
         return scope;
     };
     Scope.prototype.addElse = function () {
         var scope = new Scope(this);
-        this.statements.push({
-            type: 5 /* ELSE */,
-            scope: scope
-        });
+        this.statements.push(new Statement.ElseStatement(scope));
         return scope;
     };
+    //////////////////////////////////////////////////////////////////////////////
+    // Macro Construction
     Scope.prototype.addLiteralValueMacros = function (values) {
         for (var identifier in values) {
             this.addLiteralValueMacro(identifier, values[identifier]);
@@ -174,12 +140,12 @@ var Scope = (function () {
         var statements = this.statements;
         for (var i = 0; i < statements.length; i++) {
             var statement = statements[i];
-            if (statement.type == 0 /* LOOP */) {
-                var loop = statement.loop;
-                var scope = loop.scope;
-                var collectionExpression = loop.collectionExpression;
-                var valueIdentifier = loop.valueIdentifier;
-                var keyIdentifier = loop.keyIdentifier;
+            if (statement instanceof Statement.LoopStatement) {
+                var loopStatement = statement;
+                var scope = loopStatement.scope;
+                var collectionExpression = loopStatement.collectionExpression;
+                var valueIdentifier = loopStatement.valueIdentifier;
+                var keyIdentifier = loopStatement.keyIdentifier;
                 var collection = collectionExpression.toValue(this, stack);
                 assert(_.isArray(collection) || _.isObject(collection));
                 for (var key in collection) {
@@ -191,31 +157,31 @@ var Scope = (function () {
                     scope.eachStatement(stack, callback);
                 }
             }
-            else if (statement.type == 4 /* IF */) {
-                if (statement.expressions[0].toValue(this, stack)) {
-                    statement.scope.eachStatement(stack, callback);
+            else if (statement instanceof Statement.IfStatement) {
+                var ifStatement = statement;
+                if (ifStatement.expression.toValue(this, stack)) {
+                    ifStatement.scope.eachStatement(stack, callback);
                     continue;
                 }
                 var flag = false;
-                while (statements[i + 1] && statements[i + 1].type == 6 /* ELSE_IF */) {
-                    if (statements[++i].expressions[0].toValue(this, stack)) {
-                        statements[i].scope.eachStatement(stack, callback);
+                while (statements[i + 1] instanceof Statement.ElseIfStatement) {
+                    var elseIfStatement = statements[++i];
+                    if (elseIfStatement.expression.toValue(this, stack)) {
+                        elseIfStatement.scope.eachStatement(stack, callback);
                         flag = true;
                         break;
                     }
                 }
-                if (!flag && statements[i + 1] && statements[i + 1].type == 5 /* ELSE */) {
-                    statement = statements[++i];
-                    statement.scope.eachStatement(stack, callback);
+                if (!flag && statements[i + 1] instanceof Statement.ElseStatement) {
+                    var elseStatement = statements[++i];
+                    elseStatement.scope.eachStatement(stack, callback);
                 }
             }
-            else if (statement.type == 3 /* PROPERTY */) {
-                // TODO refactor Values to accept this as a constructor
-                var values = new Values(_.map(statement.expressions, function (expression) {
-                    return { expression: expression };
-                }), this, stack);
+            else if (statement instanceof Statement.PropertyStatement) {
+                var propertyStatement = statement;
+                var values = new Values(propertyStatement.expressions, this, stack);
                 var macro;
-                if (macro = this.getPropertyMacro(statement.name, values, stack)) {
+                if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
                     stack.propertyMacro.push(macro);
                     macro.getScope(values, stack).eachStatement(stack, callback);
                     stack.propertyMacro.pop();
@@ -235,21 +201,21 @@ var Scope = (function () {
         var classes = [];
         var properties = {};
         this.eachStatement(stack, function (scope, statement) {
-            if (statement.type == 1 /* LAYER */) {
-                layers.push(statement.scope.evaluateLayerScope(stack));
+            if (statement instanceof Statement.LayerStatement) {
+                var layerStatement = statement;
+                layers.push(layerStatement.scope.evaluateLayerScope(stack));
             }
-            else if (statement.type == 2 /* CLASS */) {
-                classes.push(statement.scope.evaluateClassScope(stack));
+            else if (statement instanceof Statement.ClassStatement) {
+                var classStatement = statement;
+                classes.push(classStatement.scope.evaluateClassScope(stack));
             }
-            else if (statement.type == 3 /* PROPERTY */) {
-                // TODO refactor Values to accept this as a constructor
-                var values = new Values(_.map(statement.expressions, function (expression) {
-                    return { expression: expression };
-                }), scope, stack);
+            else if (statement instanceof Statement.PropertyStatement) {
+                var propertyStatement = statement;
+                var values = new Values(propertyStatement.expressions, scope, stack);
                 if (values.length != 1 || values.positional.length != 1) {
                     throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
                 }
-                properties[statement.name] = Value.evaluate(values.positional[0], stack);
+                properties[propertyStatement.name] = Value.evaluate(values.positional[0], stack);
             }
         });
         layers = _.sortBy(layers, 'z-index');

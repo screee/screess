@@ -2,6 +2,16 @@ import _ = require('underscore');
 
 export class Utilities {
 
+  isArrayOf(array:any, klass:Function) {
+    if (!_.isArray(array)) { return false }
+
+    for (var i in array) {
+      if (!(array[i] instanceof klass)) { return false }
+    }
+
+    return true
+  }
+
   mapMethod<T, U>(
     list:_.List<T>,
     method:string,
