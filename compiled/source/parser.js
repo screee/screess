@@ -33,7 +33,8 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
-          return this.stylesheet.scope.evaluateGlobalScope();
+          this.stack = new this.Stack();
+          return this.stylesheet.scope.evaluate(this.Scope.Type.GLOBAL, this.stack);
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,
@@ -152,13 +153,13 @@ module.exports = (function() {
         peg$c59 = "#",
         peg$c60 = { type: "literal", value: "#", description: "\"#\"" },
         peg$c61 = function(name) {return (function() {
-          return this.pushScope(this.scope.addLayerScope(name));
+          return this.pushScope(this.scope.addLayer(name));
         }).apply(__initializer);
         },
         peg$c62 = ".",
         peg$c63 = { type: "literal", value: ".", description: "\".\"" },
         peg$c64 = function(name) {return (function() {
-          return this.pushScope(this.scope.addClassScope(name));
+          return this.pushScope(this.scope.addClass(name));
         }).apply(__initializer);
         },
         peg$c65 = function(name, args) {return (function() {
@@ -4564,6 +4565,7 @@ module.exports = (function() {
       assert = require('assert');
       this.Stylesheet = require('./Stylesheet');
       this.Scope = require('./Scope');
+      this.Stack = require('./Stack');
       this.ColorValue = require('./values/ColorValue');
       this.AttributeReferenceValue = require('./values/AttributeReferenceValue');
       this.FunctionValue = require("./values/FunctionValue");

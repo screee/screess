@@ -5,6 +5,7 @@
 
   @Stylesheet = require('./Stylesheet')
   @Scope = require('./Scope')
+  @Stack = require('./Stack')
 
   @ColorValue = require('./values/ColorValue')
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
@@ -37,7 +38,7 @@
     @scope = @scope.parent
 }
 
-global = statements { @stylesheet.scope.evaluateGlobalScope() }
+global = statements { @stack = new @Stack(); @stylesheet.scope.evaluate(@Scope.Type.GLOBAL, @stack) }
 
 identifier = a:[A-Za-z$]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
@@ -110,10 +111,10 @@ conditional =
 
 
 layer =
-  ("#" name:identifier? { @pushScope(@scope.addLayerScope(name)) }) scope
+  ("#" name:identifier? { @pushScope(@scope.addLayer(name)) }) scope
 
 class =
-  ("." name:identifier { @pushScope(@scope.addClassScope(name)) }) scope
+  ("." name:identifier { @pushScope(@scope.addClass(name)) }) scope
 
 propertyMacroDefinition =
   (name:identifier args:propertyMacroDefinitionArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
