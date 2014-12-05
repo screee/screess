@@ -19,17 +19,20 @@ var StatementType;
     StatementType[StatementType["ELSE_IF"] = 6] = "ELSE_IF";
 })(StatementType || (StatementType = {}));
 var Scope = (function () {
-    // TODO remove "name"
-    function Scope(stylesheet, parent, name, statements) {
+    function Scope(parent, name, statements) {
         if (name === void 0) { name = null; }
         if (statements === void 0) { statements = []; }
-        this.stylesheet = stylesheet;
-        this.parent = parent;
         this.name = name;
         this.statements = statements;
         this.valueMacros = [];
         this.propertyMacros = [];
-        if (this.parent == null) {
+        if (parent instanceof Scope) {
+            this.parent = parent;
+            this.stylesheet = parent.stylesheet;
+        }
+        else {
+            this.parent = null;
+            this.stylesheet = parent;
             for (var macroName in Globals.valueMacros) {
                 var fn = Globals.valueMacros[macroName];
                 this.addValueMacro(macroName, null, fn);
@@ -63,7 +66,7 @@ var Scope = (function () {
     };
     Scope.prototype.addClassScope = function (name) {
         // TODO ensure class scopes are merged properly
-        var scope = new Scope(this.stylesheet, this, name);
+        var scope = new Scope(this, name);
         this.statements.push({
             type: 2 /* CLASS */,
             scope: scope
@@ -72,7 +75,7 @@ var Scope = (function () {
     };
     Scope.prototype.addLayerScope = function (name) {
         // TODO check for duplicate layer scopes
-        var scope = new Scope(this.stylesheet, this, name);
+        var scope = new Scope(this, name);
         this.statements.push({
             type: 1 /* LAYER */,
             scope: scope
@@ -84,7 +87,7 @@ var Scope = (function () {
             valueIdentifier: valueIdentifier,
             keyIdentifier: keyIdentifier,
             collectionExpression: collectionExpression,
-            scope: new Scope(this.stylesheet, this)
+            scope: new Scope(this)
         };
         this.statements.push({
             type: 0 /* LOOP */,
@@ -93,7 +96,7 @@ var Scope = (function () {
         return loop.scope;
     };
     Scope.prototype.addIf = function (expression) {
-        var scope = new Scope(this.stylesheet, this);
+        var scope = new Scope(this);
         this.statements.push({
             type: 4 /* IF */,
             expressions: [expression],
@@ -102,7 +105,7 @@ var Scope = (function () {
         return scope;
     };
     Scope.prototype.addElseIf = function (expression) {
-        var scope = new Scope(this.stylesheet, this);
+        var scope = new Scope(this);
         this.statements.push({
             type: 6 /* ELSE_IF */,
             expressions: [expression],
@@ -111,7 +114,7 @@ var Scope = (function () {
         return scope;
     };
     Scope.prototype.addElse = function () {
-        var scope = new Scope(this.stylesheet, this);
+        var scope = new Scope(this);
         this.statements.push({
             type: 5 /* ELSE */,
             scope: scope

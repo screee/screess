@@ -41,19 +41,30 @@ interface Statement {
 
 class Scope {
 
+  public parent:Scope;
+  public stylesheet:Stylesheet;
+
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
-  // TODO remove "name"
+  constructor(stylesheet:Stylesheet, name?:string, statements?:Statement[]);
+  constructor(parent:Scope, name?:string, statements?:Statement[]);
   constructor(
-      public stylesheet:Stylesheet,
-      public parent:Scope,
+      parent,
+      public name:string = null,
       public statements:Statement[] = []
   ) {
     this.valueMacros = [];
     this.propertyMacros = [];
 
-    if (this.parent == null) {
+    if (parent instanceof Scope) {
+      this.parent = parent;
+      this.stylesheet = parent.stylesheet;
+
+    } else { // parent instanceof stylesheet
+      this.parent = null;
+      this.stylesheet = parent;
+
       for (var macroName in Globals.valueMacros) {
         var fn = Globals.valueMacros[macroName];
         this.addValueMacro(macroName, null, fn);
@@ -94,7 +105,7 @@ class Scope {
 
   addClassScope(name:string):Scope {
     // TODO ensure class scopes are merged properly
-    var scope = new Scope(this.stylesheet, this, name)
+    var scope = new Scope(this, name)
 
     this.statements.push({
       type: StatementType.CLASS,
@@ -106,7 +117,7 @@ class Scope {
 
   addLayerScope(name?:string):Scope {
     // TODO check for duplicate layer scopes
-    var scope = new Scope(this.stylesheet, this, name)
+    var scope = new Scope(this, name)
 
     this.statements.push({
       type: StatementType.LAYER,
@@ -122,7 +133,7 @@ class Scope {
       valueIdentifier: valueIdentifier,
       keyIdentifier: keyIdentifier,
       collectionExpression: collectionExpression,
-      scope: new Scope(this.stylesheet, this)
+      scope: new Scope(this)
     }
 
     this.statements.push({
@@ -134,7 +145,7 @@ class Scope {
   }
 
   addIf(expression:Expression):Scope {
-    var scope = new Scope(this.stylesheet, this);
+    var scope = new Scope(this);
 
     this.statements.push({
       type: StatementType.IF,
@@ -146,7 +157,7 @@ class Scope {
   }
 
   addElseIf(expression:Expression):Scope {
-    var scope = new Scope(this.stylesheet, this);
+    var scope = new Scope(this);
 
     this.statements.push({
       type: StatementType.ELSE_IF,
@@ -158,7 +169,7 @@ class Scope {
   }
 
   addElse():Scope {
-    var scope = new Scope(this.stylesheet, this);
+    var scope = new Scope(this);
 
     this.statements.push({
       type: StatementType.ELSE,

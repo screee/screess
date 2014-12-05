@@ -8,14 +8,14 @@ var PropertyMacro = (function () {
         this.argDefinition = argDefinition;
         this.body = body;
         var _Scope = require("../scopes/Scope");
-        this.scope = new _Scope(this.parentScope.stylesheet, this.parentScope);
+        this.scope = new _Scope(this.parentScope);
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
             return !argDefinition.expression;
         });
         this.argLengthMax = this.argDefinition.length;
     }
     PropertyMacro.prototype.getScope = function (values, stack) {
-        var scope = new Scope(this.scope.stylesheet, this.scope, null, this.scope.statements);
+        var scope = new Scope(this.scope, null, this.scope.statements);
         var args = values.evaluate(this.argDefinition, stack);
         scope.addLiteralValueMacros(args);
         return scope;
