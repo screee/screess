@@ -27,8 +27,6 @@ class BooleanLogicExpression extends Expression {
       (expression) => { return expression.evaluate(scope, stack) }
     )
 
-    console.log("TEST", operator, values)
-
     if (operator == "any") {
       if (_.all(values, isFalse)) { return [false] }
       values = _.reject(values, isFalse)
