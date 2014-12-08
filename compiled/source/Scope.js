@@ -279,7 +279,7 @@ var Scope = (function () {
                 var propertyStatement = statement;
                 var values = new Values(propertyStatement.expressions, scope, stack);
                 if (values.length != 1 || values.positional.length != 1) {
-                    throw new Error("Cannot apply " + values.length + " args to primitive property " + name);
+                    throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name);
                 }
                 properties[propertyStatement.name] = Value.evaluate(values.positional[0], stack);
             }

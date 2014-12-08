@@ -8,18 +8,27 @@ import _ = require("../utilities");
 
 class SetOperatorExpression extends Expression {
 
-  constructor(public left:Expression, public operator:string, public right:Expression) { super() }
-
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    var lvalue = this.left.evaluateToIntermediate(scope, stack);
-    var rvalue = this.right.evaluateToIntermediate(scope, stack);
-
-    assert(lvalue instanceof AttributeReferenceValue);
-    assert(rvalue instanceof Array);
-
-    return [[this.operator, lvalue.name].concat(Value.evaluate(rvalue, stack))]
+  private static operators = {
+    "in": (needle, haystack) => { return _.contains(haystack, needle) },
+    "!in": (needle, haystack) => { return !_.contains(haystack, needle) }
   }
 
+  constructor(public needle:Expression, public operator:string, public haystack:Expression) { super() }
+
+  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+    var needle = this.needle.evaluateToIntermediate(scope, stack);
+    var haystack = this.haystack.evaluateToIntermediate(scope, stack);
+    var operator = this.operator;
+
+    assert(haystack instanceof Array);
+
+    if (needle instanceof AttributeReferenceValue) {
+      return [[operator, needle.name].concat(Value.evaluate(haystack, stack))]
+    } else {
+      return [SetOperatorExpression.operators[operator](needle, haystack)]
+    }
+
+  }
 }
 
 export = SetOperatorExpression;

@@ -17,13 +17,51 @@ var ComparisonOperatorExpression = (function (_super) {
         this.right = right;
     }
     ComparisonOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
-        var lvalue = this.left.evaluateToIntermediate(scope, stack);
-        var rvalue = this.right.evaluateToIntermediate(scope, stack);
-        // Only one of the values can be an AttributeReferenceValue and it must be
-        // the lvalue
-        assert(lvalue instanceof AttributeReferenceValue);
-        assert(!(rvalue instanceof AttributeReferenceValue));
-        return [[this.operator, lvalue.name, Value.evaluate(rvalue, stack)]];
+        var left = this.left.evaluateToIntermediate(scope, stack);
+        var right = this.right.evaluateToIntermediate(scope, stack);
+        var operator = this.operator;
+        if (right instanceof AttributeReferenceValue) {
+            var temp = left;
+            left = right;
+            right = temp;
+            operator = ComparisonOperatorExpression.operatorInverses[operator];
+        }
+        if (left instanceof AttributeReferenceValue) {
+            assert(!(right instanceof AttributeReferenceValue));
+            // TODO create a FilterValue class that will evaluate this later.
+            return [[operator, left.name, Value.evaluate(right, stack)]];
+        }
+        else {
+            return [ComparisonOperatorExpression.operators[operator](left, right)];
+        }
+    };
+    ComparisonOperatorExpression.operators = {
+        "==": function (left, right) {
+            return left == right;
+        },
+        ">=": function (left, right) {
+            return left >= right;
+        },
+        "<=": function (left, right) {
+            return left <= right;
+        },
+        "<": function (left, right) {
+            return left < right;
+        },
+        ">": function (left, right) {
+            return left > right;
+        },
+        "!=": function (left, right) {
+            return left != right;
+        }
+    };
+    ComparisonOperatorExpression.operatorInverses = {
+        "==": "==",
+        ">=": "<=",
+        "<=": ">=",
+        "<": ">",
+        ">": "<",
+        "!=": "!="
     };
     return ComparisonOperatorExpression;
 })(Expression);

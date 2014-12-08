@@ -2700,7 +2700,7 @@ module.exports = (function() {
       if (s0 === peg$FAILED) {
         s0 = peg$parsebooleanLogicExpression();
         if (s0 === peg$FAILED) {
-          s0 = peg$parsefilterWeakExpression();
+          s0 = peg$parsefilterStrongExpression();
         }
       }
 
@@ -2721,7 +2721,7 @@ module.exports = (function() {
       }
 
       s0 = peg$currPos;
-      s1 = peg$parsefilterWeakExpression();
+      s1 = peg$parsefilterStrongExpression();
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$parsewhitespace();
@@ -2835,7 +2835,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsefilterWeakExpression() {
+    function peg$parsefilterStrongExpression() {
       var s0;
 
       var key    = peg$currPos * 54 + 29,

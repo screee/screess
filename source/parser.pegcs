@@ -147,10 +147,10 @@ expression =
 filterExpression =
   notOperatorExpression /
   booleanLogicExpression /
-  filterWeakExpression
+  filterStrongExpression
 
 booleanLogicExpression =
-  left:filterWeakExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
+  left:filterStrongExpression whitespace* operator:("||" / "&&") whitespace* right:expression { new @BooleanLogicExpression(operator, [left, right]) }
 
 notOperatorExpression =
   "!" whitespace* expression:expression { new @NotOperatorExpression(expression) }
@@ -159,7 +159,7 @@ notOperatorExpression =
 //         Filter Weak Expression          //
 /////////////////////////////////////////////
 
-filterWeakExpression =
+filterStrongExpression =
   groupExpression /
   setOperatorExpression /
   comparisonOperatorExpression /

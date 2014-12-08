@@ -332,13 +332,13 @@ interface UnderscoreStatic {
 		iterator: _.ListIterator<T, boolean>,
 		context?: any): T[];
 
-	/**
-	* @see _.reject
-	**/
-	reject<T>(
-		object: _.Dictionary<T>,
-		iterator: _.ObjectIterator<T, boolean>,
-		context?: any): T[];
+	// /**
+	// * @see _.reject
+	// **/
+	// reject<T>(
+	// 	object: _.Dictionary<T>,
+	// 	iterator: _.ObjectIterator<T, boolean>,
+	// 	context?: any): T[];
 
 	/**
 	* Returns true if all of the values in the list pass the iterator truth test. Delegates to the
