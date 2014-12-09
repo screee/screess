@@ -25,7 +25,6 @@ var BooleanLogicExpression = (function (_super) {
         var values = _.map(this.expressions, function (expression) {
             return expression.evaluate(scope, stack);
         });
-        console.log("TEST", operator, values);
         if (operator == "any") {
             if (_.all(values, isFalse)) {
                 return [false];
@@ -33,6 +32,9 @@ var BooleanLogicExpression = (function (_super) {
             values = _.reject(values, isFalse);
             if (values.length === 0) {
                 return [true];
+            }
+            else if (values.length === 1) {
+                return [values[0]];
             }
             else if (_.any(values, isTrue)) {
                 return [true];
@@ -45,6 +47,9 @@ var BooleanLogicExpression = (function (_super) {
             values = _.reject(values, isTrue);
             if (values.length === 0) {
                 return [true];
+            }
+            else if (values.length === 1) {
+                return [values[0]];
             }
             else if (_.any(values, isFalse)) {
                 return [false];

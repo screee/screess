@@ -71,3 +71,11 @@ describe "filters", ->
     it "should parse the '||' operator with literals", ->
       assert.equal(parseFilter("1 == 2 || 2 == 2"), true)
       assert.equal(parseFilter("1 == 2 || 1 == 2"), false)
+
+    it "should parse the '&&' operator with literals and attribute references", ->
+      assert.deepEqual(
+        parseFilter("1 == 1 && @foo == 1 && @bar == 2"),
+        ["all", ["==", "foo", 1], ["==", "bar", 2]]
+      )
+      assert.deepEqual(parseFilter("1 == 1 && @foo == 1"), ["==", "foo", 1])
+      assert.equal(parseFilter("1 == 2 && @foo == 1"), false)
