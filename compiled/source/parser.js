@@ -38,8 +38,8 @@ module.exports = (function() {
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,
-        peg$c2 = /^[A-Za-z$]/,
-        peg$c3 = { type: "class", value: "[A-Za-z$]", description: "[A-Za-z$]" },
+        peg$c2 = /^[A-Za-z]/,
+        peg$c3 = { type: "class", value: "[A-Za-z]", description: "[A-Za-z]" },
         peg$c4 = [],
         peg$c5 = /^[a-zA-Z0-9\-_]/,
         peg$c6 = { type: "class", value: "[a-zA-Z0-9\\-_]", description: "[a-zA-Z0-9\\-_]" },

@@ -4,7 +4,7 @@ assert = require("assert")
 describe "filters", ->
 
   parseFilter = (filter) ->
-    stylesheet = parse "#layer { $type: background; $filter: #{filter} }"
+    stylesheet = parse "#layer { type: background; filter: #{filter} }"
     stylesheet.layers[0].filter
 
   describe "typecheck operator", ->

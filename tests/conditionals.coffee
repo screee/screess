@@ -11,7 +11,7 @@ describe "conditionals", ->
       stylesheet = parse """
         #test {
           if true {
-            $type: background
+            type: background
           }
         }
       """
@@ -22,9 +22,9 @@ describe "conditionals", ->
 
       stylesheet = parse """
         #test {
-          $type: background
+          type: background
           if false {
-            $type: fill
+            type: fill
           }
         }
       """
@@ -35,9 +35,9 @@ describe "conditionals", ->
       stylesheet = parse """
         #test {
           if false {
-            $type: fill
+            type: fill
           } else {
-            $type: background
+            type: background
           }
         }
       """
@@ -48,11 +48,11 @@ describe "conditionals", ->
       stylesheet = parse """
         #test {
           if false {
-            $type: fill
+            type: fill
           } else if true {
-            $type: background
+            type: background
           } else {
-            $type: line
+            type: line
           }
         }
       """
@@ -64,7 +64,7 @@ describe "conditionals", ->
     stylesheet = parse """
       #test {
         if 1 == 1 {
-          $type: background
+          type: background
         }
       }
     """

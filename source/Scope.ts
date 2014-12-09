@@ -178,6 +178,7 @@ class Scope {
   }
 
   // Properties, layers, classes
+  // TODO refactor into statement classes?
   eachPrimitiveStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void): void {
     var statements = this.statements;
 
@@ -320,21 +321,21 @@ class Scope {
       var paintProperties = {};
       var layoutProperties = {};
 
-      var type = properties['$type'] || 'raster';
+      var type = properties['type'] || 'raster';
 
       for (var name in properties) {
         var value = properties[name];
 
-        if (_.startsWith(name, '$')) {
-          metaProperties[name.slice(1)] = value;
-        } else if (name == 'z-index') {
+        if (name == 'z-index') {
           metaProperties['z-index'] = value;
-        } else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+        } else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
           paintProperties[name] = value;
-        } else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+        } else if (_.contains(MapboxGLStyleSpec[type].layout, name) || name == 'scree-test-layout') {
           layoutProperties[name] = value;
+        } else if (_.contains(MapboxGLStyleSpec.meta, name) || name == 'scree-test-meta') {
+          metaProperties[name] = value;
         } else {
-          assert(false);
+          assert(false, "Property name '" + name + "' is unknown");
         }
       }
 

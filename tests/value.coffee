@@ -5,13 +5,13 @@ describe "value", ->
 
   parseValue = (value, context = {}) ->
     if context.filterLvalue
-      stylesheet = parse "#layer { $type: background; $filter: #{value} == 1 }"
+      stylesheet = parse "#layer { type: background; filter: #{value} == 1 }"
       stylesheet.layers[0].filter[1]
     else if context.filterRvalue
-      stylesheet = parse "#layer { $type: background; $filter: @test == #{value} }"
+      stylesheet = parse "#layer { type: background; filter: @test == #{value} }"
       stylesheet.layers[0].filter[2]
     else
-      stylesheet = parse "#layer { $type: background; background-color: #{value} }"
+      stylesheet = parse "#layer { type: background; background-color: #{value} }"
       stylesheet.layers[0].paint['background-color']
 
   describe "array", ->
@@ -135,60 +135,60 @@ describe "arithmetic operators", ->
 
   it "should apply '+'", ->
     stylesheet = parse """
-      #test { $value: 1 + 1; }
+      #test { scree-test-meta: 1 + 1; }
     """
-    assert.equal stylesheet.layers[0]['value'], 2
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 2
 
   it "should apply '-'", ->
     stylesheet = parse """
-      #test { $value: 3 - 1; }
+      #test { scree-test-meta: 3 - 1; }
     """
-    assert.equal stylesheet.layers[0]['value'], 2
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 2
 
   it "should apply '*'", ->
     stylesheet = parse """
-      #test { $value: 2 * 2; }
+      #test { scree-test-meta: 2 * 2; }
     """
-    assert.equal stylesheet.layers[0]['value'], 4
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 4
 
   it "should apply '/'", ->
     stylesheet = parse """
-      #test { $value: 4 / 2; }
+      #test { scree-test-meta: 4 / 2; }
     """
-    assert.equal stylesheet.layers[0]['value'], 2
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 2
 
   it "should apply to function values as rvalues", ->
     stylesheet = parse """
-      #test { $value: 1 + function(base:0.5 1:1 2:2) }
+      #test { scree-test-meta: 1 + function(base:0.5 1:1 2:2) }
     """
-    assert.deepEqual stylesheet.layers[0]['value'], {
+    assert.deepEqual stylesheet.layers[0]['scree-test-meta'], {
       base: 0.5,
       stops: [[1, 2], [2, 3]]
     }
 
   it "should apply to function values as lvalues", ->
     stylesheet = parse """
-      #test { $value: function(base:0.5 1:1 2:2) + 1 }
+      #test { scree-test-meta: function(base:0.5 1:1 2:2) + 1 }
     """
-    assert.deepEqual stylesheet.layers[0]['value'], {
+    assert.deepEqual stylesheet.layers[0]['scree-test-meta'], {
       base: 0.5,
       stops: [[1, 2], [2, 3]]
     }
 
   it "should support chaining", ->
     stylesheet = parse """
-      #test { $value: 1 + 1 + 1 + 1; }
+      #test { scree-test-meta: 1 + 1 + 1 + 1; }
     """
-    assert.equal stylesheet.layers[0]['value'], 4
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 4
 
   it "should support order of operations", ->
     stylesheet = parse """
-      #test { $value: 2 * 2 + 2 * 2; }
+      #test { scree-test-meta: 2 * 2 + 2 * 2; }
     """
-    assert.equal stylesheet.layers[0]['value'], 8
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 8
 
   it "should support parenthesis", ->
     stylesheet = parse """
-      #test { $value: 2 * (2 + 2); }
+      #test { scree-test-meta: 2 * (2 + 2); }
     """
-    assert.equal stylesheet.layers[0]['value'], 8
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 8

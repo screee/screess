@@ -39,23 +39,23 @@ var Scope = (function () {
                 var metaProperties = { 'z-index': 0 };
                 var paintProperties = {};
                 var layoutProperties = {};
-                var type = properties['$type'] || 'raster';
+                var type = properties['type'] || 'raster';
                 for (var name in properties) {
                     var value = properties[name];
-                    if (_.startsWith(name, '$')) {
-                        metaProperties[name.slice(1)] = value;
-                    }
-                    else if (name == 'z-index') {
+                    if (name == 'z-index') {
                         metaProperties['z-index'] = value;
                     }
-                    else if (_.contains(MapboxGLStyleSpec[type].paint, name)) {
+                    else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
                         paintProperties[name] = value;
                     }
-                    else if (_.contains(MapboxGLStyleSpec[type].layout, name)) {
+                    else if (_.contains(MapboxGLStyleSpec[type].layout, name) || name == 'scree-test-layout') {
                         layoutProperties[name] = value;
                     }
+                    else if (_.contains(MapboxGLStyleSpec.meta, name) || name == 'scree-test-meta') {
+                        metaProperties[name] = value;
+                    }
                     else {
-                        assert(false);
+                        assert(false, "Property name '" + name + "' is unknown");
                     }
                 }
                 if (layers) {
@@ -200,6 +200,7 @@ var Scope = (function () {
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
     // Properties, layers, classes
+    // TODO refactor into statement classes?
     Scope.prototype.eachPrimitiveStatement = function (stack, callback) {
         var statements = this.statements;
         for (var i = 0; i < statements.length; i++) {

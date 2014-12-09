@@ -5,19 +5,19 @@ _ = require("../compiled/source/utilities")
 describe "whitespace", ->
 
   it "should allow for a scope on one line", ->
-    stylesheet = parse '#test { $type: background; background-color: red }'
+    stylesheet = parse '#test { type: background; background-color: red }'
     assert.deepEqual stylesheet.layers[0].type, 'background'
     assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
   it "should allow for a scope on one line with a trailing semicolon", ->
-    stylesheet = parse '#test { $type: background; background-color: red; }'
+    stylesheet = parse '#test { type: background; background-color: red; }'
     assert.deepEqual stylesheet.layers[0].type, 'background'
     assert.deepEqual stylesheet.layers[0].paint['background-color'], 'red'
 
   it "should allow for a scope with seperated by newlines", ->
     stylesheet = parse '''
       #test {
-        $type: background
+        type: background
         background-color: red
       }
     '''
@@ -27,7 +27,7 @@ describe "whitespace", ->
   it "should allow for a scope seperated by semicolons and newlines", ->
     stylesheet = parse '''
       #test {
-        $type: background;
+        type: background;
         background-color: red
       }
     '''
@@ -37,7 +37,7 @@ describe "whitespace", ->
   it "should allow for a scope seperated by semicolons and newlines with a trailing semicolon", ->
     stylesheet = parse '''
       #test {
-        $type: background;
+        type: background;
         background-color: red;
       }
     '''
@@ -47,9 +47,7 @@ describe "whitespace", ->
   it "should allow for a scope with empty lines", ->
     stylesheet = parse '''
       #test {
-
-        $type: background;
-
+        type: background;
       }
     '''
     assert.deepEqual stylesheet.layers[0].type, 'background'
@@ -58,7 +56,7 @@ describe "whitespace", ->
     stylesheet = parse """
       second(one two) = two
       #layer {
-        $type: second(
+        type: second(
           foo
           background
         )
@@ -69,18 +67,18 @@ describe "whitespace", ->
   it "should allow for an array's values to span multiple lines", ->
     stylesheet = parse """
       #layer {
-        $type: background
-        $test: [
+        type: background
+        scree-test-meta: [
           1
           2
         ]
       }
     """
-    assert.deepEqual stylesheet.layers[0].test, [1, 2]
+    assert.deepEqual stylesheet.layers[0]['scree-test-meta'], [1, 2]
 
   it "should allow for a property's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
-      type-second(one, two) = { $type: two }
+      type-second(one, two) = { type: two }
       #layer {
         type-second: (
           foo
@@ -94,7 +92,7 @@ describe 'comments', ->
   it "should be ignored at the end of a line", ->
     stylesheet = parse '''
       #test { // test
-        $type: background // test
+        type: background // test
         background-color: red // test
       } // test
     '''
@@ -106,7 +104,7 @@ describe 'comments', ->
       // test
       #test {
         // test
-        $type: background
+        type: background
         // test
         background-color: red
         // test

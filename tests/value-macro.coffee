@@ -9,21 +9,21 @@ describe "value macro", ->
       stylesheet = parse """
         test(value) = value
         #layer {
-          $type: background;
+          type: background;
           test = test(17)
-          $foo: test
+          scree-test-meta: test
         }
       """
-      assert.equal stylesheet.layers[0].foo, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   it "should turn into a literal string if undefined", ->
     stylesheet = parse """
       #layer {
-        $type: background
-        $bar: baz
+        type: background
+        scree-test-meta: baz
       }
     """
-    assert.equal stylesheet.layers[0].bar, "baz"
+    assert.equal stylesheet.layers[0]['scree-test-meta'], "baz"
 
   describe "return values", ->
 
@@ -31,22 +31,22 @@ describe "value macro", ->
       stylesheet = parse """
         identity(value) = value
         #layer {
-          $type: background
-          $bar: identity(17)
+          type: background
+          scree-test-meta: identity(17)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should return multiple values to another value macro", ->
       stylesheet = parse """
         identity(one two) = one two
         second(one two three) = two
         #layer {
-          $type: background
-          $bar: second(0 identity(1 2))
+          type: background
+          scree-test-meta: second(0 identity(1 2))
         }
       """
-      assert.equal stylesheet.layers[0].bar, 1
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 1
 
   describe "argument evaluation", ->
 
@@ -54,61 +54,61 @@ describe "value macro", ->
       stylesheet = parse """
         foo = 17
         #layer {
-          $type: background
-          $bar: foo
+          type: background
+          scree-test-meta: foo
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should evaluate with positional arguments", ->
       stylesheet = parse """
         foo(one, two, three, four) = three
         #layer {
-          $type: background
-          $bar: foo(1 2 3 4)
+          type: background
+          scree-test-meta: foo(1 2 3 4)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 3
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 3
 
     it "should evaluate with named arguments", ->
       stylesheet = parse """
         foo(one, two, three, four) = three
         #layer {
-          $type: background
-          $bar: foo(four:4 three:3 two:2 one:1)
+          type: background
+          scree-test-meta: foo(four:4 three:3 two:2 one:1)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 3
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 3
 
     it "should evaluate with positional and named arguments", ->
       stylesheet = parse """
         foo(foo bar) = bar
         #layer {
-          $type: background
-          $bar: foo(bar:17 10)
+          type: background
+          scree-test-meta: foo(bar:17 10)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should evaluate using an optional argument", ->
       stylesheet = parse """
         foo(one, two = 17) = two
         #layer {
-          $type: background
-          $bar: foo(0)
+          type: background
+          scree-test-meta: foo(0)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should override an optional argument", ->
       stylesheet = parse """
         foo(one, two = 0) = two
         #layer {
-          $type: background
-          $bar: foo(0, 17)
+          type: background
+          scree-test-meta: foo(0, 17)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   describe "argument matching", ->
 
@@ -118,32 +118,32 @@ describe "value macro", ->
         foo(one, two) = two
         foo(one, two, three) = one
         #layer {
-          $type: background
-          $bar: foo(0, 17)
+          type: background
+          scree-test-meta: foo(0, 17)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should match by names of named arguments", ->
       stylesheet = parse """
         foo(foo, bar) = one
         foo(one, two) = two
         #layer {
-          $type: background
-          $bar: foo(two:17 0)
+          type: background
+          scree-test-meta: foo(two:17 0)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should match with optional arguments", ->
       stylesheet = parse """
         foo(one, two, three=3) = two
         #layer {
-          $type: background
-          $bar: foo(0, 17)
+          type: background
+          scree-test-meta: foo(0, 17)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   describe "scope", ->
 
@@ -151,39 +151,39 @@ describe "value macro", ->
       stylesheet = parse """
         identity(value) = value
         #layer {
-          $type: background
-          $bar: identity(identity(17))
+          type: background
+          scree-test-meta: identity(identity(17))
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should apply other value macros to optional arguments", ->
       stylesheet = parse """
         inner = 17
         outer(value=inner) = value
         #layer {
-          $type: background
-          $bar: outer
+          type: background
+          scree-test-meta: outer
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should apply other value macros", ->
       stylesheet = parse """
         inner = 17
         outer = inner
         #layer {
-          $type: background
-          $bar: outer
+          type: background
+          scree-test-meta: outer
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
     it "should apply other value macros in the global scope", ->
       stylesheet = parse """
         #layer {
-          $type: background
-          $bar: identity(17)
+          type: background
+          scree-test-meta: identity(17)
         }
       """
-      assert.equal stylesheet.layers[0].bar, 17
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17

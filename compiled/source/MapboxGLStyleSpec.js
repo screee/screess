@@ -1,4 +1,15 @@
 var MapboxGLSpec = {
+    meta: [
+        'id',
+        'type',
+        'ref',
+        'source',
+        'source-layer',
+        'minzoom',
+        'maxzoom',
+        'interactive',
+        'filter'
+    ],
     background: {
         layout: [],
         paint: [
