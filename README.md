@@ -86,7 +86,7 @@ Operators work almost everywhere! Order of operations should work as expected.
 }
 ```
 
-Function values are created using the special `funciton` value macro
+Function values are created using the special `function` value macro
 
 ```
 #water {
@@ -102,7 +102,7 @@ Function values are created using the special `funciton` value macro
 }
 ```
 
-You may create `if` blocks and `for` blocks in your stylesheet to factor out structure. The below example also demonstrates using map objects. 
+You may create `if` blocks and `for` blocks in your stylesheet to factor out structure. The below example also demonstrates using map objects and unnamed layers. 
 
 ```
 lake-types = [
