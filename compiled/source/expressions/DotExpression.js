@@ -17,7 +17,6 @@ var DotExpression = (function (_super) {
     }
     DotExpression.prototype.evaluateToIntermediates = function (scope, stack) {
         var base = this.baseExpression.evaluateToIntermediates(scope, stack)[0];
-        assert(base[this.property] !== undefined);
         return [base[this.property]];
     };
     return DotExpression;

@@ -26,6 +26,8 @@
   @DotExpression = require('./expressions/DotExpression')
   @SubscriptExpression = require('./expressions/SubscriptExpression')
   @ArithmeticOperatorExpression = require('./expressions/ArithmeticOperatorExpression')
+  @NullCoalescingExpression = require('./expressions/NullCoalescingExpression')
+  @TernaryExpression = require('./expressions/TernaryExpression')
 
   @stylesheet = new @Stylesheet()
   @globalScope = @scope = @stylesheet.scope
@@ -188,6 +190,15 @@ arithmeticExpression =
 arithmeticStrongExpression =
   left:valueExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
   "(" whitespace* expression:arithmeticExpression whitespace* ")" { expression } /
+  conditionalExpression
+
+/////////////////////////////////////////////
+//            Conditional Expression       //
+/////////////////////////////////////////////
+
+conditionalExpression =
+  head:valueExpression whitespaceWeak* '??' whitespaceWeak* tail:conditionalExpression { new @NullCoalescingExpression(head, tail) } /
+  condition:valueExpression whitespaceWeak* '?' whitespaceWeak* trueExpression:conditionalExpression whitespaceWeak* ':' whitespaceWeak* falseExpression:conditionalExpression { new @TernaryExpression(condition, trueExpression, falseExpression) } /
   valueExpression
 
 /////////////////////////////////////////////
@@ -211,7 +222,7 @@ valueExpression =
   }
 
 /////////////////////////////////////////////
-//         Weak Value Expression           //
+//           Weak Value Expression         //
 /////////////////////////////////////////////
 
 valueWeakExpression =

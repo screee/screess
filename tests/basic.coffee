@@ -2,6 +2,17 @@
 assert = require("assert")
 _ = require('../compiled/source/utilities')
 
+parseValue = (value, context = {}) ->
+    if context.filterLvalue
+      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} == 1 }"
+      stylesheet.layers[0]['scree-test-meta'][1]
+    else if context.filterRvalue
+      stylesheet = parse "#layer { type: background; scree-test-meta: @test == #{value} }"
+      stylesheet.layers[0]['scree-test-meta'][2]
+    else
+      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} }"
+      stylesheet.layers[0]['scree-test-meta']
+
 it "should mark the stylesheet as version 6", ->
   assert.deepEqual parse("").version, 6
 
@@ -176,3 +187,18 @@ describe "sublayers", ->
           }
         }
       """
+
+describe "conditional operators", ->
+
+  it "should parse conditional assignment operator", ->
+    value = parseValue "true ? one : two"
+    assert.equal(value, "one")
+
+    value = parseValue "false ? one : two"
+    assert.equal(value, "two")
+
+  it "should parse null coalescing operator", ->
+    value = parseValue "null ?? one ?? two"
+    assert.equal(value, "one")
+
+

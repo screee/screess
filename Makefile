@@ -6,7 +6,7 @@ build: build-pegjs build-ts-source build-coffee-source build-ts-bin
 build-pegjs:
 	pegjs \
 		--plugin pegjs-coffee-plugin \
-		--allowed-start-rules global,valueExpression,propertyMacroDefinitionArguments,valueMacroDefinitionArguments \
+		--allowed-start-rules global,expression \
 		--cache \
 			source/parser.pegcs \
 			compiled/source/parser.js

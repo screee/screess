@@ -12,7 +12,7 @@ class StringExpression extends Expression {
     var match;
 
     while (match = (/#\{(.*)\}/).exec(output)) {
-      var expression = parse(match[1], {startRule: 'valueExpression'});
+      var expression = parse(match[1], {startRule: 'expression'});
       var value = expression.evaluate(scope, stack);
 
       var matchStart = match.index
@@ -25,7 +25,7 @@ class StringExpression extends Expression {
     }
 
     while (match = (/(@[a-zA-Z_-]+)/).exec(output)) {
-      var expression = parse(match[1], {startRule: 'valueExpression'});
+      var expression = parse(match[1], {startRule: 'expression'});
       var value = expression.evaluate(scope, stack);
 
       var matchStart = match.index

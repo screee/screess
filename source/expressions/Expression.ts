@@ -16,7 +16,7 @@ class Expression {
     throw new Error("Abstract method");
   }
 
-  evaluate(scope, stack):any[] {
+  evaluate(scope, stack):any {
     return Value.evaluate(this.evaluateToIntermediate(scope, stack), stack);
   }
 

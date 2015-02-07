@@ -13,7 +13,6 @@ class DotExpression extends Expression {
 
   evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
     var base = this.baseExpression.evaluateToIntermediates(scope, stack)[0];
-    assert(base[this.property] !== undefined);
     return [base[this.property]];
   }
 

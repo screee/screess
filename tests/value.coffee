@@ -5,14 +5,14 @@ describe "value", ->
 
   parseValue = (value, context = {}) ->
     if context.filterLvalue
-      stylesheet = parse "#layer { type: background; filter: #{value} == 1 }"
-      stylesheet.layers[0].filter[1]
+      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} == 1 }"
+      stylesheet.layers[0]['scree-test-meta'][1]
     else if context.filterRvalue
-      stylesheet = parse "#layer { type: background; filter: @test == #{value} }"
-      stylesheet.layers[0].filter[2]
+      stylesheet = parse "#layer { type: background; scree-test-meta: @test == #{value} }"
+      stylesheet.layers[0]['scree-test-meta'][2]
     else
-      stylesheet = parse "#layer { type: background; background-color: #{value} }"
-      stylesheet.layers[0].paint['background-color']
+      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} }"
+      stylesheet.layers[0]['scree-test-meta']
 
   describe "array", ->
 
@@ -96,6 +96,9 @@ describe "value", ->
 
     it "should parse with literal values interpolated", ->
       assert.equal parseValue('"test #{7} test"'), "test 7 test"
+
+    it "should parse with macro value references interpolated", ->
+      assert.equal parseValue('"test #{foo} test"'), "test foo test"
 
     it "should parse with attribute reference values", ->
       assert.equal parseValue('"test @foo test"'), "test {foo} test"
@@ -192,3 +195,5 @@ describe "arithmetic operators", ->
       #test { scree-test-meta: 2 * (2 + 2); }
     """
     assert.equal stylesheet.layers[0]['scree-test-meta'], 8
+
+
