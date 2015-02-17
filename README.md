@@ -106,9 +106,9 @@ You may create `if` blocks and `for` blocks in your stylesheet to factor out str
 
 ```
 lake-types = [
-  small: [area-min: 0 area-max: 1000 color: #2491dd]
-  medium: [area-min: 1000 area-max: 10000 color: #1d73b0]
-  large: [area-min: 10000 area-max: null color: #196499]
+  small:  [area-min: 0     area-max: 1000  color: #2491dd]
+  medium: [area-min: 1000  area-max: 10000 color: #1d73b0]
+  large:  [area-min: 10000 area-max: null  color: #196499]
 ]
 
 for lake-type in lake-types {
@@ -119,7 +119,7 @@ for lake-type in lake-types {
       layer: "water"
     )
     type: fill
-    filter: @area > lake-type.area-min && (lake-type.area-max == null || @area <= area-max)
+    filter: @area > lake-type.area-min && (lake-type.area-max == null || @area <= lake-type.area-max)
     fill-color: lake-type.color
   }
 }
