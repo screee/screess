@@ -1,6 +1,6 @@
 import Value = require("./values/value")
-import Values = require("./Values")
-import ValuesDefinition = require('./ValuesDefinition')
+import ValueSet = require("./ValueSet")
+import ValueSetDefinition = require('./ValueSetDefinition')
 import assert = require("assert")
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
@@ -125,19 +125,19 @@ class Scope {
   }
 
   addLiteralValueMacro(identifier:string, value:any) {
-    this.addValueMacro(identifier, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
+    this.addValueMacro(identifier, ValueSetDefinition.ZERO, [new LiteralExpression(value)]);
   }
 
-  addValueMacro(name:String, argDefinition:ValuesDefinition, body:Function);
-  addValueMacro(name:String, argDefinition:ValuesDefinition, body:Expression[]);
-  addValueMacro(name:String, argDefinition:ValuesDefinition, body:any) {
+  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Function);
+  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Expression[]);
+  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:any) {
     var ValueMacro_ = require("./macros/ValueMacro");
     var macro = new ValueMacro_(name, argDefinition, this, body);
 
     return this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:ValuesDefinition, body:ValuesDefinition):Scope {
+  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:ValueSetDefinition):Scope {
     var PropertyMacro = require("./macros/PropertyMacro");
     var macro = new PropertyMacro(this, name, argDefinition, body)
     this.propertyMacros.unshift(macro)
@@ -148,7 +148,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation Helpers
 
-  getValueMacro(name:string, values:Values, stack:Stack):ValueMacro {
+  getValueMacro(name:string, values:ValueSet, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
@@ -163,7 +163,7 @@ class Scope {
     }
   }
 
-  getPropertyMacro(name:string, values:Values, stack:Stack):PropertyMacro {
+  getPropertyMacro(name:string, values:ValueSet, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
       if (macro.matches(name, values) && !_.contains(stack.propertyMacro, macro)) {
@@ -226,7 +226,7 @@ class Scope {
 
       } else if (statement instanceof Statement.PropertyStatement) {
         var propertyStatement = <Statement.PropertyStatement> statement;
-        var values = new Values(propertyStatement.expressions, this, stack);
+        var values = new ValueSet(propertyStatement.expressions, this, stack);
 
         var macro;
         if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
@@ -266,7 +266,7 @@ class Scope {
       } else if (statement instanceof Statement.PropertyStatement) {
         var propertyStatement = <Statement.PropertyStatement> statement;
 
-        var values = new Values(propertyStatement.expressions, scope, stack);
+        var values = new ValueSet(propertyStatement.expressions, scope, stack);
         if (values.length != 1 || values.positional.length != 1) {
           throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name)
         }

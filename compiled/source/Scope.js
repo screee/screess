@@ -1,6 +1,6 @@
 var Value = require("./values/value");
-var Values = require("./Values");
-var ValuesDefinition = require('./ValuesDefinition');
+var ValueSet = require("./ValueSet");
+var ValueSetDefinition = require('./ValueSetDefinition');
 var assert = require("assert");
 var LiteralExpression = require('./expressions/LiteralExpression');
 var _ = require("./utilities");
@@ -156,7 +156,7 @@ var Scope = (function () {
         }
     };
     Scope.prototype.addLiteralValueMacro = function (identifier, value) {
-        this.addValueMacro(identifier, ValuesDefinition.ZERO, [new LiteralExpression(value)]);
+        this.addValueMacro(identifier, ValueSetDefinition.ZERO, [new LiteralExpression(value)]);
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         var ValueMacro_ = require("./macros/ValueMacro");
@@ -239,7 +239,7 @@ var Scope = (function () {
             }
             else if (statement instanceof Statement.PropertyStatement) {
                 var propertyStatement = statement;
-                var values = new Values(propertyStatement.expressions, this, stack);
+                var values = new ValueSet(propertyStatement.expressions, this, stack);
                 var macro;
                 if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
                     stack.propertyMacro.push(macro);
@@ -273,7 +273,7 @@ var Scope = (function () {
             }
             else if (statement instanceof Statement.PropertyStatement) {
                 var propertyStatement = statement;
-                var values = new Values(propertyStatement.expressions, scope, stack);
+                var values = new ValueSet(propertyStatement.expressions, scope, stack);
                 if (values.length != 1 || values.positional.length != 1) {
                     throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name);
                 }

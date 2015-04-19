@@ -25,7 +25,7 @@ describe "property macro", ->
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
-    it "should accept arguments", ->
+    it "should accept property-style arguments", ->
       stylesheet = parse """
         second(one, two) = { background-color: two }
         #layer { type: 'background'; second: "baz" "bar" }
@@ -39,6 +39,62 @@ describe "property macro", ->
         #layer { type: 'background'; second: args }
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
+    it "should accept function-style arguments", ->
+      stylesheet = parse """
+        second(one, two) = { background-color: two }
+        #layer { type: 'background'; second("baz" "bar") }
+      """
+      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
+  it "should apply value macros", ->
+    stylesheet = parse """
+      property(value) = { background-color: identity(value) }
+      #layer { type: 'background'; property: "bar" }
+    """
+    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
+  it "should apply other property macros", ->
+    stylesheet = parse """
+      inner(value) = { background-color: value }
+      outer(value) = { inner: value }
+      #layer { type: 'background'; outer: "bar" }
+    """
+    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
+  it "should respect default arguments in property-style invocation", ->
+    stylesheet = parse """
+      property(one, two = #fff) = { background-color: two }
+      #layer {
+        type: 'background'
+        property: 0
+      }
+    """
+    assert.equal stylesheet.layers[0].paint['background-color'], '#ffffff'
+
+  it "should respect default arguments in function-style invocation", ->
+    stylesheet = parse """
+      property(one, two = #fff) = { background-color: two }
+      #layer {
+        type: 'background'
+        property(0)
+      }
+    """
+    assert.equal stylesheet.layers[0].paint['background-color'], '#ffffff'
+
+
+  it "should select a property macro by the number of arguments supplied", ->
+    stylesheet = parse """
+      property = { background-color: 0 }
+      property(value) = { background-color: value }
+      #layer {
+        type: 'background'
+        property: 17
+      }
+    """
+    assert.equal stylesheet.layers[0].paint['background-color'], 17
+
+
 
   it "should apply value macros", ->
     stylesheet = parse """
@@ -75,4 +131,6 @@ describe "property macro", ->
       }
     """
     assert.equal stylesheet.layers[0].paint['background-color'], 17
+
+
 

@@ -11,7 +11,7 @@
   @AttributeReferenceValue = require('./values/AttributeReferenceValue')
   @FunctionValue = require("./values/FunctionValue")
 
-  @ValuesDefinition = require("./ValuesDefinition")
+  @ValueSetDefinition = require("./ValueSetDefinition")
 
   @LiteralExpression = require('./expressions/LiteralExpression')
   @StringExpression = require("./expressions/StringExpression")
@@ -36,8 +36,11 @@
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
     assert(scope.parent == @scope, "Next scope must be child of current scope")
     @scope = scope
+
   @popScope = =>
     @scope = @scope.parent
+
+  @rehead = (head, tail) => [head].concat(@_.pluck(tail, 1))
 }
 
 global = statements { @stack = new @Stack(); @stylesheet.scope.evaluate(@Scope.Type.GLOBAL, @stack) }
@@ -52,20 +55,38 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                                Expressions                                 //
+//                              Expression Sets                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-expressionsSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
-expressionsSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
+expressionSetSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
+expressionSetSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
-// TODO these should return a Values object
-expressionsUnnamedWeak =
-  head:expression tail:(expressionsSeperatorWeak expression)* { [head].concat(tail.map (e) -> e[1]) } /
-  "(" whitespace* expressions:expressionsUnnamedStrong whitespace* ")" { expressions }
+// TODO simplify heirarchy
+// TODO standardize inclusion of / lack of parens
+// TODO create standard ExpressionSet class
 
-expressionsUnnamedStrong =
-  head:expression tail:(expressionsSeperatorStrong expression)* { [head].concat(tail.map (e) -> e[1]) }
+expressionSetUnnamedWeak =
+  head:expression tail:(expressionSetSeperatorWeak expression)* { @rehead(head, tail) } /
+  "(" whitespace* expressions:expressionSetUnnamedStrong whitespace* ")" { expressions }
+
+expressionSetUnnamedStrong =
+  head:expression tail:(expressionSetSeperatorStrong expression)* { @rehead(head, tail) }
+
+expressionSetMixedStrong =
+  head:expressionSetMixedStrongItem tail:(expressionSetSeperatorStrong expressionSetMixedStrongItem)* { @rehead(head, tail) } /
+
+expressionSetMixedStrongItem =
+  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
+  expression:expression { { expression: expression } }
+
+expressionSetDefinition =
+  "(" whitespace* head:expressionSetDefinitionItem tail:(expressionSetSeperatorStrong expressionSetDefinitionItem)* whitespace* ")" { new @ValueSetDefinition(@rehead(head, tail), @scope) } /
+  "" { @ValueSetDefinition.ZERO }
+
+expressionSetDefinitionItem =
+  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
+  name:identifier { name: name }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -88,22 +109,15 @@ statement =
   property
 
 property =
-  name:identifier ":" whitespace* expressions:expressionsUnnamedWeak { @scope.addProperty(name, expressions) } /
+  name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak { @scope.addProperty(name, expressions) } /
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { @scope.addProperty(name, expressions) } /
   name:identifier { @scope.addProperty(name, []) }
 
 valueMacroDefinition =
-  name:identifier args:valueMacroDefinitionArguments whitespace* "=" whitespace* expressions:expressionsUnnamedWeak { @scope.addValueMacro(name, args, expressions) }
-
-valueMacroDefinitionArguments =
-  "(" whitespace* head:valueMacroDefinitionArgument tail:(expressionsSeperatorStrong valueMacroDefinitionArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(@_.pluck(tail, 1)), @scope) } /
-  "" { @ValuesDefinition.ZERO }
-
-valueMacroDefinitionArgument =
-  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
-  name:identifier { name: name }
+  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expressions:expressionSetUnnamedWeak { @scope.addValueMacro(name, args, expressions) }
 
 loop =
-  ("for" whitespace+ keyIdentifier:identifier expressionsSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
+  ("for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
   ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
 
 conditional =
@@ -119,15 +133,7 @@ class =
   ("." name:identifier { @pushScope(@scope.addClass(name)) }) scope
 
 propertyMacroDefinition =
-  (name:identifier args:propertyMacroDefinitionArguments whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
-
-propertyMacroDefinitionArguments =
-  "(" whitespace* head:propertyMacroDefinitionArgument tail:(expressionsSeperatorWeak propertyMacroDefinitionArgument)* whitespace* ")" { new @ValuesDefinition([head].concat(tail.map (e) -> e[1]), @scope) } /
-  "" { @ValuesDefinition.ZERO }
-
-propertyMacroDefinitionArgument =
-  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression:expression } /
-  name:identifier { name: name }
+  (name:identifier args:expressionSetDefinition whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
 
 scope =
   (whitespace* "{" body:statements "}" { @popScope() })
@@ -236,28 +242,23 @@ literalExpression =
   value:value { new @LiteralExpression(value) }
 
 valueMacroReferenceExpression =
-  name:identifier expressions:valueMacroReferenceExpressionArguments { new @ValueMacroReferenceExpression(name, expressions) }
-
-valueMacroReferenceExpressionArguments =
-  "(" whitespace* head:valueMacroReferenceExpressionArgument tail:(expressionsSeperatorStrong valueMacroReferenceExpressionArgument)* whitespace* ")" { [head].concat(@_.pluck(tail, 1) ) } /
-  "" { [] }
-
-valueMacroReferenceExpressionArgument =
-  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
-  expression:expression { { expression: expression } }
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @ValueMacroReferenceExpression(name, expressions) } /
+  name:identifier { new @ValueMacroReferenceExpression(name, []) }
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) } /
   "'" body:[^\']* "'" { new @StringExpression(body.join("")) }
 
+// Use standard expressionSet rules
 arrayExpression =
-  "[" whitespace* expressions:expressionsUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
+  "[" whitespace* expressions:expressionSetUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
 
 mapExpression =
   "[" whitespace* expressions:mapExpressionItems whitespace* "]" { new @MapExpression(expressions) }
 
+// Use standard expressionSet rules
 mapExpressionItems =
-  head:mapExpressionItem tail:(expressionsSeperatorStrong mapExpressionItem)* { [head].concat(tail.map (e) -> e[1]) }
+  head:mapExpressionItem tail:(expressionSetSeperatorStrong mapExpressionItem)* { @rehead(head, tail) }
 
 mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }

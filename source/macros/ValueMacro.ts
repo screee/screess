@@ -1,6 +1,6 @@
 import Expression = require('../expressions/Expression')
-import ValuesDefinition = require('../ValuesDefinition')
-import Values = require('../Values')
+import ValueSetDefinition = require('../ValueSetDefinition')
+import ValueSet = require('../ValueSet')
 import Scope = require('../Scope')
 import LiteralExpression = require('../expressions/LiteralExpression')
 import assert = require('assert')
@@ -11,9 +11,9 @@ class ValueMacro {
 
   public body:Function;
 
-  constructor(name:string, argDefinition:ValuesDefinition, parentScope:Scope, body:Expression[]);
-  constructor(name:string, argDefinition:ValuesDefinition, parentScope:Scope, body:Function);
-  constructor(public name:string, public argDefinition:ValuesDefinition, public parentScope:Scope, body:any) {
+  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Expression[]);
+  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Function);
+  constructor(public name:string, public argDefinition:ValueSetDefinition, public parentScope:Scope, body:any) {
     if (_.isArray(body)) {
       this.body = (args, stack) => {
         var scope = new Scope(parentScope)
@@ -33,11 +33,11 @@ class ValueMacro {
     }
   }
 
-  matches(name:string, argValues:Values):boolean {
+  matches(name:string, argValues:ValueSet):boolean {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  evaluateToIntermediates(argValues:Values, stack:Stack) {
+  evaluateToIntermediates(argValues:ValueSet, stack:Stack) {
     var args = argValues.evaluate(this.argDefinition, stack);
     var values = this.body(args, stack);
     return values;

@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var Values = require('../Values');
+var ValueSet = require('../ValueSet');
 var ValueMacroReferenceExpression = (function (_super) {
     __extends(ValueMacroReferenceExpression, _super);
     // TODO add type to argumentExpressions
@@ -15,7 +15,7 @@ var ValueMacroReferenceExpression = (function (_super) {
         this.argumentExpressions = argumentExpressions;
     }
     ValueMacroReferenceExpression.prototype.evaluateToIntermediates = function (scope, stack) {
-        var argValues = new Values(this.argumentExpressions, scope, stack);
+        var argValues = new ValueSet(this.argumentExpressions, scope, stack);
         var macro = scope.getValueMacro(this.name, argValues, stack);
         if (!macro) {
             throw new Error("Could not find value macro " + this.name);

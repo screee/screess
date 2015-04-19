@@ -3,20 +3,20 @@ import Scope = require('./Scope')
 import _ = require('./utilities')
 import Expression = require('./expressions/Expression');
 
-interface Definition {
+interface ValueDefinition {
   name: string;
   index?: number;
   expression?: Expression;
 }
 
-class ValuesDefinition {
+class ValueSetDefinition {
 
-  static ZERO:ValuesDefinition = new ValuesDefinition([], null);
+  static ZERO:ValueSetDefinition = new ValueSetDefinition([], null);
 
-  public named:{[name:string]: Definition};
+  public named:{[name:string]: ValueDefinition};
   public length:number;
 
-  constructor(public definitions:Definition[], public scope:Scope) {
+  constructor(public definitions:ValueDefinition[], public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }
@@ -35,4 +35,4 @@ class ValuesDefinition {
   }
 }
 
-export = ValuesDefinition;
+export = ValueSetDefinition;

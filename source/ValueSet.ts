@@ -1,17 +1,16 @@
 import assert = require('assert');
-import ValuesDefinition = require('./ValuesDefinition');
+import ValueSetDefinition = require('./ValueSetDefinition');
 import Scope = require("./Scope");
 import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
 
-// TODO rename
 interface Value {
   name?: string;
   expression: Expression;
 }
 
-class Values {
+class ValueSet {
 
   public length:number;
   public positional:Value[];
@@ -44,7 +43,7 @@ class Values {
     this.length = this.positional.length + _.values(this.named).length;
   }
 
-  matches(argDefinition:ValuesDefinition):boolean {
+  matches(argDefinition:ValueSetDefinition):boolean {
     if (!argDefinition) { return true }
 
     var indicies = _.times(argDefinition.length, () => { return false });
@@ -77,7 +76,7 @@ class Values {
   }
 
   evaluate(
-      argDefinition:ValuesDefinition,
+      argDefinition:ValueSetDefinition,
       stack:Stack
   ):{[s:string]: any} {
 
@@ -116,6 +115,6 @@ class Values {
   }
 }
 
-export = Values;
+export = ValueSet;
 
 

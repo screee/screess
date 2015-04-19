@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import util = require('util');
 import Scope = require("../Scope");
-import Values = require('../Values');
+import ValueSet = require('../ValueSet');
 import Stack = require("../Stack");
 import _ = require("../utilities");
 
@@ -18,7 +18,7 @@ class ValueMacroReferenceExpression extends Expression {
   }
 
   evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    var argValues = new Values(this.argumentExpressions, scope, stack);
+    var argValues = new ValueSet(this.argumentExpressions, scope, stack);
 
     var macro = scope.getValueMacro(this.name, argValues, stack);
     if (!macro ) {
