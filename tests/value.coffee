@@ -89,10 +89,11 @@ describe "value", ->
 
   describe "string", ->
 
-    # TODO allow single quoted strings
-
-    it "should parse", ->
+    it "should parse double quoted strings", ->
       assert.equal parseValue('"foo"'), "foo"
+
+    it "should parse single quoted strings", ->
+      assert.equal parseValue("'foo'"), "foo"
 
     it "should parse with literal values interpolated", ->
       assert.equal parseValue('"test {7} test"'), "test 7 test"
@@ -106,8 +107,23 @@ describe "value", ->
     it "should parse with attribute reference values interpolated", ->
       assert.equal parseValue('"test {@foo} test"'), "test {foo} test"
 
+    it "should parse with an escaped '{'", ->
+      assert.equal parseValue('"\\{"'), "{"
+
+    it "should parse with an escaped '{'", ->
+      assert.equal parseValue('"\\@"'), "@"
+
+    it "should parse with an escaped '\\'", ->
+      assert.equal parseValue('"\\\\"'), "\\"
+
     it "should parse an empty string", ->
       assert.equal parseValue('""'), ""
+
+    it "should fail for unclosed {}", ->
+      assert.throws -> parseValue('"{"')
+
+    it "should fail for malformed attribute reference", ->
+      assert.throws -> parseValue('"@"')
 
   describe "function value", ->
 

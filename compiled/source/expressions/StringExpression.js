@@ -40,6 +40,7 @@ var StringExpression = (function (_super) {
                 while (i + 1 < input.length && !_.isWhitespace(input[i + 1])) {
                     expression += input[++i];
                 }
+                assert(expression.length > 1);
                 output += parseExpression(expression).evaluate(scope, stack).toString();
             }
             else {
