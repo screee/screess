@@ -1,40 +1,51 @@
 import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
+import _ = require("../utilities");
 var parse = require("../parser").parse;
+var assert = require("assert");
 
 class StringExpression extends Expression {
 
   constructor(public body:string) { super() }
 
   evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    var output = this.body;
-    var match;
 
-    while (match = (/#\{(.*)\}/).exec(output)) {
-      var expression = parse(match[1], {startRule: 'expression'});
-      var value = expression.evaluate(scope, stack);
-
-      var matchStart = match.index
-      var matchEnd = match.index + match[0].length
-
-      output =
-        output.substr(0, matchStart) +
-        value.toString() +
-        output.substr(matchEnd);
+    function parseExpression(input:string):Expression {
+      return parse(input, { startRule: 'expression' });
     }
 
-    while (match = (/(@[a-zA-Z_-]+)/).exec(output)) {
-      var expression = parse(match[1], {startRule: 'expression'});
-      var value = expression.evaluate(scope, stack);
+    var input = this.body;
+    var output = '';
+    var skip = false;
 
-      var matchStart = match.index
-      var matchEnd = match.index + match[0].length
+    for (var i = 0; i < input.length; i++) {
 
-      output =
-        output.substr(0, matchStart) +
-        value.toString() +
-        output.substr(matchEnd);
+      if (!skip && input[i] == '\\') {
+        skip = true;
+        continue;
+
+      } else if (!skip && input[i] == '{') {
+        var expression = '';
+        while (input[i + 1] != '}') {
+          assert(i < input.length); // TODO throw string interpolation exception
+          expression += input[++i];
+        }
+        output += parseExpression(expression).evaluate(scope, stack).toString();
+        i++ // Skip the closing '}'
+
+      } else if (!skip && input[i] == '@') {
+          var expression = '@';
+          while (i + 1 < input.length && !_.isWhitespace(input[i + 1])) {
+            expression += input[++i];
+          }
+          output += parseExpression(expression).evaluate(scope, stack).toString();
+
+      } else {
+          output += input[i];
+          skip = false;
+      }
+
     }
 
     return [output];

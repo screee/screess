@@ -55,7 +55,11 @@ export class Utilities {
     return hash;
   }
 
-  startsWith(value:string, prefix:string) {
+  startsWith(value: string, prefix: string):boolean {
     return value.slice(0, prefix.length) == prefix;
+  }
+
+  isWhitespace(value:string):boolean {
+    return /^\s+$/.test(value)
   }
 }

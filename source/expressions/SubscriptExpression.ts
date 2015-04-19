@@ -2,7 +2,7 @@ import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import assert = require('assert')
-import _ = require('underscore')
+import _ = require("../utilities");
 
 // TODO merge this class with DotExpression
 class SubscriptExpression extends Expression {

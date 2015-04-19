@@ -50,6 +50,9 @@ var Utilities = (function () {
     Utilities.prototype.startsWith = function (value, prefix) {
         return value.slice(0, prefix.length) == prefix;
     };
+    Utilities.prototype.isWhitespace = function (value) {
+        return /^\s+$/.test(value);
+    };
     return Utilities;
 })();
 exports.Utilities = Utilities;

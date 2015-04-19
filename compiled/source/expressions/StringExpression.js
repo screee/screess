@@ -5,7 +5,9 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
+var _ = require("../utilities");
 var parse = require("../parser").parse;
+var assert = require("assert");
 var StringExpression = (function (_super) {
     __extends(StringExpression, _super);
     function StringExpression(body) {
@@ -13,21 +15,37 @@ var StringExpression = (function (_super) {
         this.body = body;
     }
     StringExpression.prototype.evaluateToIntermediates = function (scope, stack) {
-        var output = this.body;
-        var match;
-        while (match = (/#\{(.*)\}/).exec(output)) {
-            var expression = parse(match[1], { startRule: 'expression' });
-            var value = expression.evaluate(scope, stack);
-            var matchStart = match.index;
-            var matchEnd = match.index + match[0].length;
-            output = output.substr(0, matchStart) + value.toString() + output.substr(matchEnd);
+        function parseExpression(input) {
+            return parse(input, { startRule: 'expression' });
         }
-        while (match = (/(@[a-zA-Z_-]+)/).exec(output)) {
-            var expression = parse(match[1], { startRule: 'expression' });
-            var value = expression.evaluate(scope, stack);
-            var matchStart = match.index;
-            var matchEnd = match.index + match[0].length;
-            output = output.substr(0, matchStart) + value.toString() + output.substr(matchEnd);
+        var input = this.body;
+        var output = '';
+        var skip = false;
+        for (var i = 0; i < input.length; i++) {
+            if (!skip && input[i] == '\\') {
+                skip = true;
+                continue;
+            }
+            else if (!skip && input[i] == '{') {
+                var expression = '';
+                while (input[i + 1] != '}') {
+                    assert(i < input.length); // TODO throw string interpolation exception
+                    expression += input[++i];
+                }
+                output += parseExpression(expression).evaluate(scope, stack).toString();
+                i++; // Skip the closing '}'
+            }
+            else if (!skip && input[i] == '@') {
+                var expression = '@';
+                while (i + 1 < input.length && !_.isWhitespace(input[i + 1])) {
+                    expression += input[++i];
+                }
+                output += parseExpression(expression).evaluate(scope, stack).toString();
+            }
+            else {
+                output += input[i];
+                skip = false;
+            }
         }
         return [output];
     };

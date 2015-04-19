@@ -1,7 +1,7 @@
 import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
-import _ = require('underscore');
+import _ = require("../utilities");
 
 class NullCoalescingExpression extends Expression {
 
