@@ -16,8 +16,11 @@ describe "value", ->
 
   describe "javascript", ->
 
-    it "can be embedded in an expression", ->
+    it "can be embedded", ->
       assert.deepEqual parseValue("`'bar'.toUpperCase()`"), 'BAR'
+
+    it "can be embedded and access macros", ->
+      assert.deepEqual parseValue("`macro.toUpperCase()`"), 'FOO'
 
   describe "array", ->
 
