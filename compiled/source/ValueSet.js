@@ -84,6 +84,7 @@ var ValueSet = (function () {
             return args;
         }
     };
+    ValueSet.ZERO = new ValueSet([], null, null);
     return ValueSet;
 })();
 module.exports = ValueSet;

@@ -12,6 +12,8 @@ interface Value {
 
 class ValueSet {
 
+  static ZERO: ValueSet = new ValueSet([], null, null);
+
   public length:number;
   public positional:Value[];
   public named:{[s:string]:Value};

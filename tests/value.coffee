@@ -19,8 +19,8 @@ describe "value", ->
     it "can be embedded", ->
       assert.deepEqual parseValue("`'bar'.toUpperCase()`"), 'BAR'
 
-    it "can be embedded and access macros", ->
-      assert.deepEqual parseValue("`macro.toUpperCase()`"), 'FOO'
+    it "can access scope and stack", ->
+      assert.deepEqual parseValue("`!!(scope && stack)`"), true
 
   describe "array", ->
 
