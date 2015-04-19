@@ -156,10 +156,7 @@ class Scope {
       }
     }
 
-    if (this.isGlobal() && values.length == 0) {
-      var ValueMacro_ = require("./macros/ValueMacro");
-      return new ValueMacro_(name, ValuesDefinition.ZERO, this, [new LiteralExpression(name)]);
-    } else if (this.parent) {
+    if (this.parent) {
       return this.parent.getValueMacro(name, values, stack);
     } else {
       return null;

@@ -5,13 +5,13 @@ describe "value", ->
 
   parseValue = (value, context = {}) ->
     if context.filterLvalue
-      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} == 1 }"
+      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: #{value} == 1 }"
       stylesheet.layers[0]['scree-test-meta'][1]
     else if context.filterRvalue
-      stylesheet = parse "#layer { type: background; scree-test-meta: @test == #{value} }"
+      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: @test == #{value} }"
       stylesheet.layers[0]['scree-test-meta'][2]
     else
-      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} }"
+      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: #{value} }"
       stylesheet.layers[0]['scree-test-meta']
 
   describe "array", ->
@@ -23,7 +23,7 @@ describe "value", ->
       assert.deepEqual parseValue("[1 2 3]"), [1,2,3]
 
     it "should allow filters to be members", ->
-      assert.deepEqual parseValue("[@class == footway]"), [["==", "class", "footway"]]
+      assert.deepEqual parseValue("[@class == 'footway']"), [["==", "class", "footway"]]
 
     it "should allow nested arrays", ->
       assert.deepEqual parseValue("[[[[ 1 ]]]]"), [[[[1]]]]
@@ -49,7 +49,7 @@ describe "value", ->
       assert.deepEqual parseValue('[one:[two:[three: 3]]].one["two"].three'), 3
 
     it "should allow filters to be members", ->
-      assert.deepEqual parseValue("[filter: @class == footway]"), {filter: ["==", "class", "footway"]}
+      assert.deepEqual parseValue("[filter: @class == 'footway']"), {filter: ["==", "class", "footway"]}
 
   describe "number", ->
 
@@ -98,7 +98,7 @@ describe "value", ->
       assert.equal parseValue('"test #{7} test"'), "test 7 test"
 
     it "should parse with macro value references interpolated", ->
-      assert.equal parseValue('"test #{foo} test"'), "test foo test"
+      assert.equal parseValue('"test #{macro} test"'), "test foo test"
 
     it "should parse with attribute reference values", ->
       assert.equal parseValue('"test @foo test"'), "test {foo} test"

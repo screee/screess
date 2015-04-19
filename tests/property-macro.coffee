@@ -9,7 +9,7 @@ describe "property macro", ->
       stylesheet = parse """
         property(value) = { background-color: value }
         #layer {
-          type: background
+          type: 'background'
           property = { property: 17 }
           property
         }
@@ -21,14 +21,14 @@ describe "property macro", ->
     it "should apply a property macro with no arguments", ->
       stylesheet = parse """
         property = { background-color: "bar" }
-        #layer { type: background; property }
+        #layer { type: 'background'; property }
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
     it "should accept arguments", ->
       stylesheet = parse """
         second(one, two) = { background-color: two }
-        #layer { type: background; second: "baz" "bar" }
+        #layer { type: 'background'; second: "baz" "bar" }
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
@@ -36,14 +36,14 @@ describe "property macro", ->
       stylesheet = parse """
         args = "baz" "bar"
         second(one, two) = { background-color: two }
-        #layer { type: background; second: args }
+        #layer { type: 'background'; second: args }
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
   it "should apply value macros", ->
     stylesheet = parse """
       property(value) = { background-color: identity(value) }
-      #layer { type: background; property: "bar" }
+      #layer { type: 'background'; property: "bar" }
     """
     assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
@@ -51,7 +51,7 @@ describe "property macro", ->
     stylesheet = parse """
       inner(value) = { background-color: value }
       outer(value) = { inner: value }
-      #layer { type: background; outer: "bar" }
+      #layer { type: 'background'; outer: "bar" }
     """
     assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
@@ -59,7 +59,7 @@ describe "property macro", ->
     stylesheet = parse """
       property(one, two=17) = { background-color: two }
       #layer {
-        type: background
+        type: 'background'
         property: 0
       }
     """
@@ -70,7 +70,7 @@ describe "property macro", ->
       property = { background-color: 0 }
       property(value) = { background-color: value }
       #layer {
-        type: background
+        type: 'background'
         property: 17
       }
     """

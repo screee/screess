@@ -1,3 +1,4 @@
+// TODO use official MBGL style spec module instead
 var MapboxGLSpec = {
     meta: [
         'id',

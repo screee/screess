@@ -247,7 +247,8 @@ valueMacroReferenceExpressionArgument =
   expression:expression { { expression: expression } }
 
 stringExpression =
-  "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) }
+  "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) } /
+  "'" body:[^\']* "'" { new @StringExpression(body.join("")) }
 
 arrayExpression =
   "[" whitespace* expressions:expressionsUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }

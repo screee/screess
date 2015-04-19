@@ -9,21 +9,21 @@ describe "value macro", ->
       stylesheet = parse """
         test(value) = value
         #layer {
-          type: background;
+          type: 'background';
           test = test(17)
           scree-test-meta: test
         }
       """
       assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
-  it "should turn into a literal string if undefined", ->
-    stylesheet = parse """
-      #layer {
-        type: background
-        scree-test-meta: baz
-      }
-    """
-    assert.equal stylesheet.layers[0]['scree-test-meta'], "baz"
+  it "should not turn into a literal string if undefined", ->
+    assert.throws ->
+      stylesheet = parse """
+        #layer {
+          type: 'background'
+          scree-test-meta: baz
+        }
+      """
 
   describe "return values", ->
 
@@ -31,7 +31,7 @@ describe "value macro", ->
       stylesheet = parse """
         identity(value) = value
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: identity(17)
         }
       """
@@ -42,7 +42,7 @@ describe "value macro", ->
         identity(one two) = one two
         second(one two three) = two
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: second(0 identity(1 2))
         }
       """
@@ -54,7 +54,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo = 17
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo
         }
       """
@@ -64,7 +64,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(one, two, three, four) = three
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(1 2 3 4)
         }
       """
@@ -74,7 +74,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(one, two, three, four) = three
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(four:4 three:3 two:2 one:1)
         }
       """
@@ -84,7 +84,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(foo bar) = bar
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(bar:17 10)
         }
       """
@@ -94,7 +94,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(one, two = 17) = two
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(0)
         }
       """
@@ -104,7 +104,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(one, two = 0) = two
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(0, 17)
         }
       """
@@ -118,7 +118,7 @@ describe "value macro", ->
         foo(one, two) = two
         foo(one, two, three) = one
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(0, 17)
         }
       """
@@ -129,7 +129,7 @@ describe "value macro", ->
         foo(foo, bar) = one
         foo(one, two) = two
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(two:17 0)
         }
       """
@@ -139,7 +139,7 @@ describe "value macro", ->
       stylesheet = parse """
         foo(one, two, three=3) = two
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: foo(0, 17)
         }
       """
@@ -151,7 +151,7 @@ describe "value macro", ->
       stylesheet = parse """
         identity(value) = value
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: identity(identity(17))
         }
       """
@@ -162,7 +162,7 @@ describe "value macro", ->
         inner = 17
         outer(value=inner) = value
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: outer
         }
       """
@@ -173,7 +173,7 @@ describe "value macro", ->
         inner = 17
         outer = inner
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: outer
         }
       """
@@ -182,7 +182,7 @@ describe "value macro", ->
     it "should apply other value macros in the global scope", ->
       stylesheet = parse """
         #layer {
-          type: background
+          type: 'background'
           scree-test-meta: identity(17)
         }
       """

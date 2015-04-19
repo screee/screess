@@ -4,20 +4,20 @@ _ = require('../compiled/source/utilities')
 
 parseValue = (value, context = {}) ->
     if context.filterLvalue
-      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} == 1 }"
+      stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} == 1 }"
       stylesheet.layers[0]['scree-test-meta'][1]
     else if context.filterRvalue
-      stylesheet = parse "#layer { type: background; scree-test-meta: @test == #{value} }"
+      stylesheet = parse "#layer { type: 'background'; scree-test-meta: @test == #{value} }"
       stylesheet.layers[0]['scree-test-meta'][2]
     else
-      stylesheet = parse "#layer { type: background; scree-test-meta: #{value} }"
+      stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} }"
       stylesheet.layers[0]['scree-test-meta']
 
 describe "sources", ->
   it "should be respected", ->
     stylesheet = parse """
       #layer {
-        type: background
+        type: 'background'
         source: source(bar: "baz")
       }
     """
@@ -27,7 +27,7 @@ describe "sources", ->
   it "should rename tile-size to tileSize", ->
     stylesheet = parse """
       #layer {
-        type: background
+        type: 'background'
         source: source(tile-size: 17)
       }
     """
@@ -38,9 +38,9 @@ describe "z-index", ->
   it "should work on layers", ->
 
     stylesheet = parse """
-      #second { type: background }
-      #third { type: background }
-      #first { type: background; z-index: -1 }
+      #second { type: 'background' }
+      #third { type: 'background' }
+      #first { type: 'background'; z-index: -1 }
     """
     assert.deepEqual  stylesheet.layers[0].id, "first"
     assert.deepEqual  stylesheet.layers[1].id, "second"
@@ -50,9 +50,9 @@ describe "z-index", ->
 
     stylesheet = parse """
       # {
-        #second { type: background }
-        #third { type: background }
-        #first { type: background; z-index: -1 }
+        #second { type: 'background' }
+        #third { type: 'background' }
+        #first { type: 'background'; z-index: -1 }
       }
     """
     assert.deepEqual  stylesheet.layers[0].layers[0].id, "first"
@@ -120,38 +120,38 @@ describe "loops", ->
 describe "layers", ->
 
   it "should be in the stylesheet", ->
-    stylesheet = parse '#test {type: background}'
+    stylesheet = parse "#test {type: 'background'}"
     assert stylesheet.layers[0]
 
   it "should be allowed to be anonymous", ->
-    stylesheet = parse '# {type: background}'
+    stylesheet = parse "# {type: 'background'}"
     assert.equal stylesheet.layers[0].type, "background"
     assert stylesheet.layers[0].id
 
   it "should respect its name", ->
-    stylesheet = parse '#test {type: background}'
+    stylesheet = parse "#test {type: 'background'}"
     assert.equal stylesheet.layers[0].id, "test"
 
   it "should respect layout properties", ->
-    stylesheet = parse '#test { type: line; line-cap: square }'
+    stylesheet = parse "#test { type: 'line'; line-cap: 'square' }"
     assert.equal stylesheet.layers[0].layout['line-cap'], 'square'
 
   it "should respect paint properties", ->
-    stylesheet = parse '#test { type: line; line-color: red }'
+    stylesheet = parse "#test { type: 'line'; line-color: 'red' }"
     assert.equal stylesheet.layers[0].paint['line-color'], 'red'
 
   it "should respect meta properties", ->
-    stylesheet = parse '#test { type: background; scree-test-meta: "bar" }'
+    stylesheet = parse "#test { type: 'background'; scree-test-meta: 'bar' }"
     assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
   it "should respect its filter", ->
-    stylesheet = parse '#test { type: background; filter: @name == "foo" }'
+    stylesheet = parse "#test { type: 'background'; filter: @name == 'foo' }"
     assert stylesheet.layers[0].filter
 
 describe "sublayers", ->
 
   it "should not have an empty layers array if no sublayers", ->
-    stylesheet = parse '#test { type: background; }'
+    stylesheet = parse "#test { type: 'background'; }"
     assert !stylesheet.layers[0].layers
 
   it "should allow sublayers", ->
@@ -159,8 +159,8 @@ describe "sublayers", ->
       #parent {
 
         #child {
-          type: background
-          background-color: red
+          type: 'background'
+          background-color: 'red'
         }
 
         raster-opacity: 1;
@@ -178,9 +178,9 @@ describe "sublayers", ->
 
       stylesheet = parse """
         #parent {
-          type: background
+          type: 'background'
           #child {
-            type: background
+            type: 'background'
           }
         }
       """
@@ -188,14 +188,14 @@ describe "sublayers", ->
 describe "conditional operators", ->
 
   it "should parse conditional assignment operator", ->
-    value = parseValue "true ? one : two"
-    assert.equal(value, "one")
+    value = parseValue "true ? 1 : 2"
+    assert.equal(value, 1)
 
-    value = parseValue "false ? one : two"
-    assert.equal(value, "two")
+    value = parseValue "false ? 1 : 2"
+    assert.equal(value, 2)
 
   it "should parse null coalescing operator", ->
-    value = parseValue "null ?? one ?? two"
-    assert.equal(value, "one")
+    value = parseValue "null ?? 1 ?? 2"
+    assert.equal(value, 1)
 
 

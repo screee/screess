@@ -4,17 +4,17 @@ assert = require("assert")
 describe "filters", ->
 
   parseFilter = (filter) ->
-    stylesheet = parse "#layer { type: background; filter: #{filter} }"
+    stylesheet = parse "#layer { type: 'background'; filter: #{filter} }"
     stylesheet.layers[0].filter
 
   describe "typecheck operator", ->
     it "should parse the 'is' operator", ->
-        assert.deepEqual parseFilter("is LineString"), ["==", "$type", "LineString"]
+        assert.deepEqual parseFilter("is 'LineString'"), ["==", "$type", "LineString"]
 
   describe "comparison operator", ->
     for operator in ["==", ">=", "<=", "<", ">", "!="]
       it "should parse the '#{operator}' operator with attribute references", ->
-        assert.deepEqual parseFilter("@foo #{operator} \"bar\""), [operator, "foo", "bar"]
+        assert.deepEqual parseFilter("@foo #{operator} 'bar'"), [operator, "foo", "bar"]
 
     it "should parse the '==' operator with literals", ->
       assert.equal parseFilter("1 == 1"), true
