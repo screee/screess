@@ -3,15 +3,8 @@ assert = require("assert")
 _ = require('../compiled/source/utilities')
 
 parseValue = (value, context = {}) ->
-    if context.filterLvalue
-      stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} == 1 }"
-      stylesheet.layers[0]['scree-test-meta'][1]
-    else if context.filterRvalue
-      stylesheet = parse "#layer { type: 'background'; scree-test-meta: @test == #{value} }"
-      stylesheet.layers[0]['scree-test-meta'][2]
-    else
-      stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} }"
-      stylesheet.layers[0]['scree-test-meta']
+  stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} }"
+  stylesheet.layers[0]['scree-test-meta']
 
 describe "sources", ->
   it "should be respected", ->
