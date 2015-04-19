@@ -14,6 +14,11 @@ describe "value", ->
       stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: #{value} }"
       stylesheet.layers[0]['scree-test-meta']
 
+  describe "javascript", ->
+
+    it "can be embedded in an expression", ->
+      assert.deepEqual parseValue("`'bar'.toUpperCase()`"), 'BAR'
+
   describe "array", ->
 
     it "should parse with comma seperators", ->

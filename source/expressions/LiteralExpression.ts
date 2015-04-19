@@ -2,7 +2,7 @@ import Expression = require("./Expression");
 
 class LiteralExpression extends Expression {
 
-  // To be depracated
+  // TODO depracate this
   static literalExpression(value) {
     return new LiteralExpression(value)
   }

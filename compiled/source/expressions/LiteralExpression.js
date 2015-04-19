@@ -11,7 +11,7 @@ var LiteralExpression = (function (_super) {
         _super.call(this);
         this.value = value;
     }
-    // To be depracated
+    // TODO depracate this
     LiteralExpression.literalExpression = function (value) {
         return new LiteralExpression(value);
     };

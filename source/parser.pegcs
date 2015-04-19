@@ -13,7 +13,9 @@
 
   @ValueSetDefinition = require("./ValueSetDefinition")
 
+  # TODO Put these all as properties on one object somewhere
   @LiteralExpression = require('./expressions/LiteralExpression')
+  @JavaScriptExpression = require('./expressions/JavaScriptExpression')
   @StringExpression = require("./expressions/StringExpression")
   @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
   @ComparisonOperatorExpression = require('./expressions/ComparisonOperatorExpression')
@@ -194,7 +196,7 @@ arithmeticExpression =
   arithmeticStrongExpression
 
 arithmeticStrongExpression =
-  left:valueExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
+  left:propertyAccessExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { new @ArithmeticOperatorExpression(left, operator, right) } /
   "(" whitespace* expression:arithmeticExpression whitespace* ")" { expression } /
   conditionalExpression
 
@@ -203,16 +205,16 @@ arithmeticStrongExpression =
 /////////////////////////////////////////////
 
 conditionalExpression =
-  head:valueExpression whitespaceWeak* '??' whitespaceWeak* tail:conditionalExpression { new @NullCoalescingExpression(head, tail) } /
-  condition:valueExpression whitespaceWeak* '?' whitespaceWeak* trueExpression:conditionalExpression whitespaceWeak* ':' whitespaceWeak* falseExpression:conditionalExpression { new @TernaryExpression(condition, trueExpression, falseExpression) } /
-  valueExpression
+  head:propertyAccessExpression whitespaceWeak* '??' whitespaceWeak* tail:conditionalExpression { new @NullCoalescingExpression(head, tail) } /
+  condition:propertyAccessExpression whitespaceWeak* '?' whitespaceWeak* trueExpression:conditionalExpression whitespaceWeak* ':' whitespaceWeak* falseExpression:conditionalExpression { new @TernaryExpression(condition, trueExpression, falseExpression) } /
+  propertyAccessExpression
 
 /////////////////////////////////////////////
 //            Value Expression             //
 /////////////////////////////////////////////
 
-valueExpression =
-  head:valueWeakExpression accesses:(
+propertyAccessExpression =
+  head:atomicExpression accesses:(
     "." (integer / identifier) /
     "[" expression "]"
   )* {
@@ -231,7 +233,8 @@ valueExpression =
 //           Weak Value Expression         //
 /////////////////////////////////////////////
 
-valueWeakExpression =
+atomicExpression =
+  javaScriptExpression /
   literalExpression /
   valueMacroReferenceExpression /
   stringExpression /
@@ -262,6 +265,9 @@ mapExpressionItems =
 
 mapExpressionItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }
+
+javaScriptExpression =
+  "`" body:[^\`]* "`" { new @JavaScriptExpression(body.join("")) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
