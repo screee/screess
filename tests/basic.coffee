@@ -13,9 +13,6 @@ parseValue = (value, context = {}) ->
       stylesheet = parse "#layer { type: background; scree-test-meta: #{value} }"
       stylesheet.layers[0]['scree-test-meta']
 
-it "should mark the stylesheet as version 6", ->
-  assert.deepEqual parse("").version, 6
-
 describe "sources", ->
   it "should be respected", ->
     stylesheet = parse """

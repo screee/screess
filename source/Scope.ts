@@ -308,7 +308,6 @@ class Scope {
       return _.extend(
         properties,
         {
-          version: 6,
           layers: layers,
           sources: sources,
           transition: transition

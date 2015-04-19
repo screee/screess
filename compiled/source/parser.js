@@ -357,8 +357,8 @@ module.exports = (function() {
           return new this.AttributeReferenceValue(name);
         }).apply(__initializer);
         },
-        peg$c154 = /^[0-9a-f]/,
-        peg$c155 = { type: "class", value: "[0-9a-f]", description: "[0-9a-f]" },
+        peg$c154 = /^[0-9a-fA-F]/,
+        peg$c155 = { type: "class", value: "[0-9a-fA-F]", description: "[0-9a-fA-F]" },
         peg$c156 = function(color) {return (function() {
           return this.ColorValue.hex(color.join(""));
         }).apply(__initializer);

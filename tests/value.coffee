@@ -125,8 +125,17 @@ describe "value", ->
 
   describe "color", ->
 
-    it "should parse hex", ->
+    it "should parse 3 character hex with lowercase letters", ->
       assert.equal parseValue('#fff'), "#ffffff"
+
+    it "should parse 3 character hex with capital letters", ->
+      assert.equal parseValue('#FFF'), "#ffffff"
+
+    it "should parse 6 character hex with lowercase letters", ->
+      assert.equal parseValue('#ffffff'), "#ffffff"
+
+    it "should parse 6 character hex with capital letters", ->
+      assert.equal parseValue('#FFFFFF'), "#ffffff"
 
     it "should parse a color function", ->
       assert.equal parseValue('rgba(255 255 255 1)'), "#ffffff"

@@ -26,10 +26,6 @@ if (CLI['watch']) {
   });
 }
 
-function escape(input:string):string {
-  return input.replace(" ", "\\ ")
-}
-
 function preview(style:string):void {
   var command1 =
     'env ' +
@@ -58,8 +54,7 @@ function compile() {
     inputStream.on("end", () => {
       try {
         var output = JSON.stringify(Parser.parse(input), null, 2) + "\n";
-        // TODO run the linter within ScreeSS library
-        Linter(output);
+        Linter.validate(output);
 
         if (outputStream == process.stdout) {
           outputStream.write(output, ENCODING);

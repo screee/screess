@@ -29,7 +29,6 @@ var Scope = (function () {
                 delete properties["transition-duration"];
                 stack.scope.pop();
                 return _.extend(properties, {
-                    version: 6,
                     layers: layers,
                     sources: sources,
                     transition: transition

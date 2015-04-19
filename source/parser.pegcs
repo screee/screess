@@ -293,5 +293,5 @@ attributeReferenceValue =
   "@" name:identifier { new @AttributeReferenceValue(name) }
 
 colorValue =
-  "#" color:[0-9a-f]+ { @ColorValue.hex(color.join("")) }
+  "#" color:[0-9a-fA-F]+ { @ColorValue.hex(color.join("")) }
 
