@@ -7,7 +7,7 @@ Value = require './values/Value'
 module.exports =
 
   valueMacros:
-    identity: (args) -> _.values args
+    identity: (args) -> _.values(args)[0]
 
     hsv: (args)  -> ColorValue.hsla(args['0'], args['1'], args['2'], 1)
     hsva: (args) -> ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])

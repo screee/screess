@@ -1,0 +1,11 @@
+hsva(h, s, v, a) = `ColorValue.hsla(h, s, v, a)`
+hsla(h, s, l, a) = `ColorValue.hsla(h, s, l, a)`
+rgba(r, g, b, a) = `ColorValue.rgba(r, g, b, a)`
+
+rgb(r, g, b) = rgba(r, g, b, 1)
+hsl(h, s, l) = hsla(h, s, l, 1)
+hsv(h, s, v) = hsva(h, s, v, 1)
+
+identity (value) = value
+
+range(start, stop, step) = `_.range(start, stop, step)`

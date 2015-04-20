@@ -15,7 +15,7 @@
   module.exports = {
     valueMacros: {
       identity: function(args) {
-        return _.values(args);
+        return _.values(args)[0];
       },
       hsv: function(args) {
         return ColorValue.hsla(args['0'], args['1'], args['2'], 1);

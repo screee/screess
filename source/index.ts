@@ -1,0 +1,37 @@
+/// <reference path="../definitions/index.d.ts" />
+
+export var parser = require("./parser");
+export import eval = require("./eval")
+export import Scope = require("./Scope")
+export import Stack = require("./Stack")
+export import Statement = require("./Statement")
+export import Stylesheet = require("./Stylesheet")
+export import utilities = require("./utilities")
+export import ValueSet = require("./ValueSet")
+export import ValueSetDefinition = require("./ValueSetDefinition")
+
+export import ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression")
+export import ArrayExpression = require("./expressions/ArrayExpression")
+export import BooleanLogicExpression = require("./expressions/BooleanLogicExpression")
+export import ComparisonOperatorExpression = require("./expressions/ComparisonOperatorExpression")
+export import DotExpression = require("./expressions/DotExpression")
+export import Expression = require("./expressions/Expression")
+export import JavaScriptExpression = require("./expressions/JavaScriptExpression")
+export import LiteralExpression = require("./expressions/LiteralExpression")
+export import MapExpression = require("./expressions/MapExpression")
+export import NotOperatorExpression = require("./expressions/NotOperatorExpression")
+export import NullCoalescingExpression = require("./expressions/NullCoalescingExpression")
+export import SetOperatorExpression = require("./expressions/SetOperatorExpression")
+export import StringExpression = require("./expressions/StringExpression")
+export import SubscriptExpression = require("./expressions/SubscriptExpression")
+export import TernaryExpression = require("./expressions/TernaryExpression")
+export import TypeCheckOperatorExpression = require("./expressions/TypeCheckOperatorExpression")
+export import ValueMacroReferenceExpression = require("./expressions/ValueMacroReferenceExpression")
+
+export import PropertyMacro = require("./macros/PropertyMacro")
+export import ValueMacro = require("./macros/ValueMacro")
+
+export import AttributeReferenceValue = require("./values/AttributeReferenceValue")
+export import ColorValue = require("./values/ColorValue")
+export import FunctionValue = require("./values/FunctionValue")
+export import Value = require("./values/Value")

@@ -3,33 +3,7 @@
   @_ = require './utilities'
   assert = require 'assert'
 
-  @Stylesheet = require('./Stylesheet')
-  @Scope = require('./Scope')
-  @Stack = require('./Stack')
-
-  @ColorValue = require('./values/ColorValue')
-  @AttributeReferenceValue = require('./values/AttributeReferenceValue')
-  @FunctionValue = require("./values/FunctionValue")
-
-  @ValueSetDefinition = require("./ValueSetDefinition")
-
-  # TODO Put these all as properties on one object somewhere
-  @LiteralExpression = require('./expressions/LiteralExpression')
-  @JavaScriptExpression = require('./expressions/JavaScriptExpression')
-  @StringExpression = require("./expressions/StringExpression")
-  @ValueMacroReferenceExpression = require('./expressions/ValueMacroReferenceExpression')
-  @ComparisonOperatorExpression = require('./expressions/ComparisonOperatorExpression')
-  @TypeCheckOperatorExpression = require('./expressions/TypeCheckOperatorExpression')
-  @BooleanLogicExpression = require('./expressions/BooleanLogicExpression')
-  @SetOperatorExpression = require('./expressions/SetOperatorExpression')
-  @NotOperatorExpression = require('./expressions/NotOperatorExpression')
-  @ArrayExpression = require('./expressions/ArrayExpression')
-  @MapExpression = require('./expressions/MapExpression')
-  @DotExpression = require('./expressions/DotExpression')
-  @SubscriptExpression = require('./expressions/SubscriptExpression')
-  @ArithmeticOperatorExpression = require('./expressions/ArithmeticOperatorExpression')
-  @NullCoalescingExpression = require('./expressions/NullCoalescingExpression')
-  @TernaryExpression = require('./expressions/TernaryExpression')
+  @_.extend(@, require("./index"))
 
   @stylesheet = new @Stylesheet()
   @globalScope = @scope = @stylesheet.scope
