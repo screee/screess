@@ -12,11 +12,11 @@ var MapExpression = (function (_super) {
         _super.call(this);
         this.entries = entries;
     }
-    MapExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    MapExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var value = _.objectMap(this.entries, function (entry) {
             return [entry.name, entry.expression.evaluateToIntermediate(scope, stack)];
         });
-        return [value];
+        return value;
     };
     return MapExpression;
 })(Expression);

@@ -120,8 +120,8 @@ module.exports = (function() {
           return this.scope.addProperty(name, []);
         }).apply(__initializer);
         },
-        peg$c44 = function(name, args, expressions) {return (function() {
-          return this.scope.addValueMacro(name, args, expressions);
+        peg$c44 = function(name, args, expression) {return (function() {
+          return this.scope.addValueMacro(name, args, expression);
         }).apply(__initializer);
         },
         peg$c45 = "for",
@@ -1877,7 +1877,7 @@ module.exports = (function() {
                   s7 = peg$parsewhitespace();
                 }
                 if (s6 !== peg$FAILED) {
-                  s7 = peg$parseexpressionSetUnnamedWeak();
+                  s7 = peg$parseexpression();
                   if (s7 !== peg$FAILED) {
                     peg$reportedPos = s0;
                     s1 = peg$c44(s1, s3, s7);

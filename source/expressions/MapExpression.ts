@@ -16,12 +16,12 @@ class MapExpression extends Expression {
     super();
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var value = _.objectMap(this.entries, (entry) => {
       return [entry.name, entry.expression.evaluateToIntermediate(scope, stack)]
     });
 
-    return [value];
+    return value;
   }
 
 }

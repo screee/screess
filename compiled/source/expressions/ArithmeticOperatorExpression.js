@@ -16,7 +16,7 @@ var ArithmeticOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ArithmeticOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    ArithmeticOperatorExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var _this = this;
         var left = this.left.evaluateToIntermediate(scope, stack);
         var right = this.right.evaluateToIntermediate(scope, stack);
@@ -35,21 +35,21 @@ var ArithmeticOperatorExpression = (function (_super) {
             }
         }
         if (_.isNumber(left) && _.isNumber(right)) {
-            return [apply(left, this.operator, right)];
+            return apply(left, this.operator, right);
         }
         else if (_.isNumber(left) && right instanceof FunctionValue) {
             var base = right.base;
             var stops = _.map(right.stops, function (value) {
                 return [value[0], apply(left, _this.operator, value[1])];
             });
-            return [new FunctionValue(base, stops)];
+            return new FunctionValue(base, stops);
         }
         else if (left instanceof FunctionValue && _.isNumber(right)) {
             var base = left.base;
             var stops = _.map(left.stops, function (value) {
                 return [value[0], apply(value[1], _this.operator, right)];
             });
-            return [new FunctionValue(base, stops)];
+            return new FunctionValue(base, stops);
         }
         else {
             assert(false);

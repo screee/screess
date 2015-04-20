@@ -118,18 +118,19 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Macro Construction
 
-  addLiteralValueMacros(values:{[name:string]:any}):void {
-    for (var identifier in values) {
-      this.addLiteralValueMacro(identifier, values[identifier]);
+  addLiteralValueMacros(macros:{[name:string]:any}):void {
+    for (var identifier in macros) {
+      var value = macros[identifier];
+      this.addLiteralValueMacro(identifier, value);
     }
   }
 
   addLiteralValueMacro(identifier:string, value:any) {
-    this.addValueMacro(identifier, ValueSetDefinition.ZERO, [new LiteralExpression(value)]);
+    this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
   }
 
   addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Function);
-  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Expression[]);
+  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Expression);
   addValueMacro(name:String, argDefinition:ValueSetDefinition, body:any) {
     var ValueMacro_ = require("./macros/ValueMacro");
     var macro = new ValueMacro_(name, argDefinition, this, body);

@@ -37,14 +37,6 @@ describe "property macros", ->
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
 
-    it "should accept multiple return values from a property macro", ->
-      stylesheet = parse """
-        foz = "baz" "bar"
-        foo(one two) = { background-color: two }
-        #layer { type: 'background'; foo: foz }
-      """
-      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
-
   it "should apply value macros", ->
     stylesheet = parse """
       foo(value) = { background-color: identity(value) }

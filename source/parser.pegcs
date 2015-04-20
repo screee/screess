@@ -116,7 +116,7 @@ property =
   name:identifier { @scope.addProperty(name, []) }
 
 valueMacroDefinition =
-  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expressions:expressionSetUnnamedWeak { @scope.addValueMacro(name, args, expressions) }
+  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expression:expression { @scope.addValueMacro(name, args, expression) }
 
 loop =
   ("for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /

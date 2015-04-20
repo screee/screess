@@ -13,13 +13,13 @@ var TernaryExpression = (function (_super) {
         this.trueExpression = trueExpression;
         this.falseExpression = falseExpression;
     }
-    TernaryExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    TernaryExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var conditionValue = this.conditionExpression.evaluate(scope, stack);
         if (conditionValue === true) {
-            return this.trueExpression.evaluateToIntermediates(scope, stack);
+            return this.trueExpression.evaluateToIntermediate(scope, stack);
         }
         else if (conditionValue === false) {
-            return this.falseExpression.evaluateToIntermediates(scope, stack);
+            return this.falseExpression.evaluateToIntermediate(scope, stack);
         }
         else {
             throw new Error("Compile-time condition could not be resolved.");

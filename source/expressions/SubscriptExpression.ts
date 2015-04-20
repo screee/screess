@@ -11,13 +11,13 @@ class SubscriptExpression extends Expression {
     super()
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var base = this.baseExpression.evaluateToIntermediate(scope, stack);
     var property = this.propertyExpression.evaluateToIntermediate(scope, stack);
     assert(_.isString(property) || _.isNumber(property));
 
     assert(base[property] !== undefined);
-    return [base[property]];
+    return base[property];
   }
 
 }

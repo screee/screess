@@ -1,3 +1,4 @@
+var Expression = require('../expressions/Expression');
 var Scope = require('../Scope');
 var assert = require('assert');
 var _ = require("../utilities");
@@ -6,16 +7,14 @@ var ValueMacro = (function () {
         this.name = name;
         this.argDefinition = argDefinition;
         this.parentScope = parentScope;
-        if (_.isArray(body)) {
+        if (body instanceof Expression) {
             this.body = function (args, stack) {
                 var scope = new Scope(parentScope);
                 scope.addLiteralValueMacros(args);
                 stack.scope.push(scope);
-                var values = _.map(body, function (expression) {
-                    return expression.evaluateToIntermediate(scope, stack);
-                });
+                var value = body.evaluateToIntermediate(scope, stack);
                 stack.scope.pop();
-                return values;
+                return value;
             };
         }
         else if (_.isFunction(body)) {
@@ -28,8 +27,8 @@ var ValueMacro = (function () {
     ValueMacro.prototype.matches = function (name, argValues) {
         return name == this.name && argValues.matches(this.argDefinition);
     };
-    ValueMacro.prototype.evaluateToIntermediates = function (argValues, stack) {
-        var args = argValues.evaluate(this.argDefinition, stack);
+    ValueMacro.prototype.evaluateToIntermediate = function (argValues, stack) {
+        var args = argValues.toObject(this.argDefinition, stack);
         var values = this.body(args, stack);
         return values;
     };

@@ -9,8 +9,8 @@ class TypeCheckExpression extends Expression {
 
   constructor(public type:Expression) { super() }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack) {
-    return [["==", "$type", this.type.evaluate(scope, stack)]]
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
+    return ["==", "$type", this.type.evaluate(scope, stack)];
   }
 }
 

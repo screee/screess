@@ -150,13 +150,14 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Macro Construction
-    Scope.prototype.addLiteralValueMacros = function (values) {
-        for (var identifier in values) {
-            this.addLiteralValueMacro(identifier, values[identifier]);
+    Scope.prototype.addLiteralValueMacros = function (macros) {
+        for (var identifier in macros) {
+            var value = macros[identifier];
+            this.addLiteralValueMacro(identifier, value);
         }
     };
     Scope.prototype.addLiteralValueMacro = function (identifier, value) {
-        this.addValueMacro(identifier, ValueSetDefinition.ZERO, [new LiteralExpression(value)]);
+        this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         var ValueMacro_ = require("./macros/ValueMacro");

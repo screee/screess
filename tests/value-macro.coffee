@@ -25,28 +25,15 @@ describe "value macro", ->
         }
       """
 
-  describe "return values", ->
-
-    it "should return one value", ->
-      stylesheet = parse """
-        identity(value) = value
-        #layer {
-          type: 'background'
-          scree-test-meta: identity(17)
-        }
-      """
-      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
-
-    it "should return multiple values to another value macro", ->
-      stylesheet = parse """
-        identity(one two) = one two
-        second(one two three) = two
-        #layer {
-          type: 'background'
-          scree-test-meta: second(0 identity(1 2))
-        }
-      """
-      assert.equal stylesheet.layers[0]['scree-test-meta'], 1
+  it "should return values", ->
+    stylesheet = parse """
+      identity(value) = value
+      #layer {
+        type: 'background'
+        scree-test-meta: identity(17)
+      }
+    """
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   describe "argument evaluation", ->
 

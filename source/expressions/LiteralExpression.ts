@@ -2,7 +2,6 @@ import Expression = require("./Expression");
 
 class LiteralExpression extends Expression {
 
-  // TODO depracate this
   static literalExpression(value) {
     return new LiteralExpression(value)
   }
@@ -11,8 +10,8 @@ class LiteralExpression extends Expression {
     super()
   }
 
-  evaluateToIntermediates():any[] {
-    return [this.value];
+  evaluateToIntermediate():any {
+    return this.value;
   }
 
 }

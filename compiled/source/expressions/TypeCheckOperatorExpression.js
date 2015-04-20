@@ -11,8 +11,8 @@ var TypeCheckExpression = (function (_super) {
         _super.call(this);
         this.type = type;
     }
-    TypeCheckExpression.prototype.evaluateToIntermediates = function (scope, stack) {
-        return [["==", "$type", this.type.evaluate(scope, stack)]];
+    TypeCheckExpression.prototype.evaluateToIntermediate = function (scope, stack) {
+        return ["==", "$type", this.type.evaluate(scope, stack)];
     };
     return TypeCheckExpression;
 })(Expression);

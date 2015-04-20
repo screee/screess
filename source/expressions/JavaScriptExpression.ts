@@ -13,8 +13,8 @@ class JavaScriptExpression extends Expression {
     super()
   }
 
-  evaluateToIntermediates(scope: Scope, stack: Stack): any[] {
-    return [eval(this.source, scope, stack)];
+  evaluateToIntermediate(scope: Scope, stack: Stack):any {
+    return eval(this.source, scope, stack);
   }
 
 }

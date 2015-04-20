@@ -14,7 +14,7 @@ var StringExpression = (function (_super) {
         _super.call(this);
         this.body = body;
     }
-    StringExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    StringExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         function parseExpression(input) {
             return parse(input, { startRule: 'expression' });
         }
@@ -48,7 +48,7 @@ var StringExpression = (function (_super) {
                 skip = false;
             }
         }
-        return [output];
+        return output;
     };
     return StringExpression;
 })(Expression);

@@ -11,20 +11,19 @@ class ValueMacro {
 
   public body:Function;
 
-  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Expression[]);
+  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Expression);
   constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Function);
   constructor(public name:string, public argDefinition:ValueSetDefinition, public parentScope:Scope, body:any) {
-    if (_.isArray(body)) {
+    if (body instanceof Expression) {
       this.body = (args, stack) => {
         var scope = new Scope(parentScope)
         scope.addLiteralValueMacros(args)
 
         stack.scope.push(scope);
-        var values = _.map(body, (expression:Expression) => {
-          return expression.evaluateToIntermediate(scope, stack)
-        })
+        var value = body.evaluateToIntermediate(scope, stack);
         stack.scope.pop();
-        return values;
+
+        return value;
       }
     } else if (_.isFunction(body)) {
       this.body = body;
@@ -37,8 +36,8 @@ class ValueMacro {
     return name == this.name && argValues.matches(this.argDefinition);
   }
 
-  evaluateToIntermediates(argValues:ValueSet, stack:Stack) {
-    var args = argValues.evaluate(this.argDefinition, stack);
+  evaluateToIntermediate(argValues:ValueSet, stack:Stack) {
+    var args = argValues.toObject(this.argDefinition, stack);
     var values = this.body(args, stack);
     return values;
   }

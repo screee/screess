@@ -19,28 +19,28 @@
           source.tileSize = source["tile-size"];
           delete source["tile-size"];
         }
-        return [stack.getGlobalScope().addSource(source)];
+        return stack.getGlobalScope().addSource(source);
       },
       identity: function(args) {
         return _.values(args);
       },
       hsv: function(args) {
-        return [ColorValue.hsla(args['0'], args['1'], args['2'], 1)];
+        return ColorValue.hsla(args['0'], args['1'], args['2'], 1);
       },
       hsva: function(args) {
-        return [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])];
+        return ColorValue.hsla(args['0'], args['1'], args['2'], args['3']);
       },
       hsl: function(args) {
-        return [ColorValue.hsla(args['0'], args['1'], args['2'], 1)];
+        return ColorValue.hsla(args['0'], args['1'], args['2'], 1);
       },
       hsla: function(args) {
-        return [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])];
+        return ColorValue.hsla(args['0'], args['1'], args['2'], args['3']);
       },
       rgb: function(args) {
-        return [ColorValue.rgba(args['0'], args['1'], args['2'], 1)];
+        return ColorValue.rgba(args['0'], args['1'], args['2'], 1);
       },
       rgba: function(args) {
-        return [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])];
+        return ColorValue.rgba(args['0'], args['1'], args['2'], args['3']);
       },
       'function': function(args) {
         var key, stop, stops, value;
@@ -57,12 +57,12 @@
           }
         }
         assert(stops.length > 0);
-        return [new FunctionValue(args.base, stops)];
+        return new FunctionValue(args.base, stops);
       },
       range: function(args) {
         var start, step, stop;
         start = args[0], stop = args[1], step = args[2];
-        return [_.range(start, stop, step)];
+        return _.range(start, stop, step);
       }
     }
   };

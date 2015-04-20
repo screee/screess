@@ -12,16 +12,16 @@ module.exports =
       if source["tile-size"]
         source.tileSize = source["tile-size"]
         delete source["tile-size"]
-      return [stack.getGlobalScope().addSource(source)]
+      return stack.getGlobalScope().addSource(source)
 
     identity: (args) -> _.values args
 
-    hsv: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsva: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    hsl: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], 1)]
-    hsla: (args) -> [ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])]
-    rgb: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], 1)]
-    rgba: (args) -> [ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])]
+    hsv: (args)  -> ColorValue.hsla(args['0'], args['1'], args['2'], 1)
+    hsva: (args) -> ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])
+    hsl: (args)  -> ColorValue.hsla(args['0'], args['1'], args['2'], 1)
+    hsla: (args) -> ColorValue.hsla(args['0'], args['1'], args['2'], args['3'])
+    rgb: (args)  -> ColorValue.rgba(args['0'], args['1'], args['2'], 1)
+    rgba: (args) -> ColorValue.rgba(args['0'], args['1'], args['2'], args['3'])
 
     'function': (args) ->
       stops = []
@@ -30,11 +30,11 @@ module.exports =
         if (stop = parseInt(key)) != NaN then stops.push([stop, value])
         else assert false
       assert stops.length > 0
-      [new FunctionValue(args.base, stops)]
+      new FunctionValue(args.base, stops)
 
     range: (args) ->
       [start, stop, step] = args
-      [_.range(start, stop, step)]
+      _.range(start, stop, step)
 
 
 

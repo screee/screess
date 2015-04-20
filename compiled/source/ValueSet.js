@@ -12,13 +12,12 @@ var ValueSet = (function () {
         this.named = {};
         for (var i in args) {
             var arg = args[i];
-            var argValues = arg.expression.evaluateToIntermediates(scope, stack);
+            var argValue = arg.expression.evaluateToIntermediate(scope, stack);
             if (arg.name) {
-                assert(argValues.length == 1);
-                this.named[arg.name] = argValues[0];
+                this.named[arg.name] = argValue;
             }
             else {
-                this.positional = this.positional.concat(argValues);
+                this.positional.push(argValue);
             }
         }
         this.length = this.positional.length + _.values(this.named).length;
@@ -56,7 +55,7 @@ var ValueSet = (function () {
         }
         return _.all(indicies);
     };
-    ValueSet.prototype.evaluate = function (argDefinition, stack) {
+    ValueSet.prototype.toObject = function (argDefinition, stack) {
         assert(this.matches(argDefinition));
         if (!argDefinition) {
             return _.extend(_.objectMap(this.positional, function (values, index) {

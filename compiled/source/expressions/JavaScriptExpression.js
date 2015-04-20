@@ -13,8 +13,8 @@ var JavaScriptExpression = (function (_super) {
         _super.call(this);
         this.source = source;
     }
-    JavaScriptExpression.prototype.evaluateToIntermediates = function (scope, stack) {
-        return [eval(this.source, scope, stack)];
+    JavaScriptExpression.prototype.evaluateToIntermediate = function (scope, stack) {
+        return eval(this.source, scope, stack);
     };
     return JavaScriptExpression;
 })(Expression);

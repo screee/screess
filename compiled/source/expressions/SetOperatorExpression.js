@@ -17,16 +17,17 @@ var SetOperatorExpression = (function (_super) {
         this.operator = operator;
         this.haystack = haystack;
     }
-    SetOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    SetOperatorExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var needle = this.needle.evaluateToIntermediate(scope, stack);
         var haystack = this.haystack.evaluateToIntermediate(scope, stack);
         var operator = this.operator;
+        haystack = Value.evaluate(haystack, stack);
         assert(haystack instanceof Array);
         if (needle instanceof AttributeReferenceValue) {
-            return [[operator, needle.name].concat(Value.evaluate(haystack, stack))];
+            return [operator, needle.name].concat(haystack);
         }
         else {
-            return [SetOperatorExpression.operators[operator](needle, haystack)];
+            return SetOperatorExpression.operators[operator](needle, haystack);
         }
     };
     SetOperatorExpression.operators = {

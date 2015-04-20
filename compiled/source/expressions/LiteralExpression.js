@@ -11,12 +11,11 @@ var LiteralExpression = (function (_super) {
         _super.call(this);
         this.value = value;
     }
-    // TODO depracate this
     LiteralExpression.literalExpression = function (value) {
         return new LiteralExpression(value);
     };
-    LiteralExpression.prototype.evaluateToIntermediates = function () {
-        return [this.value];
+    LiteralExpression.prototype.evaluateToIntermediate = function () {
+        return this.value;
     };
     return LiteralExpression;
 })(Expression);

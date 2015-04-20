@@ -16,7 +16,7 @@ var PropertyMacro = (function () {
     }
     PropertyMacro.prototype.getScope = function (values, stack) {
         var scope = new Scope(this.scope, null, this.scope.statements);
-        var args = values.evaluate(this.argDefinition, stack);
+        var args = values.toObject(this.argDefinition, stack);
         scope.addLiteralValueMacros(args);
         return scope;
     };

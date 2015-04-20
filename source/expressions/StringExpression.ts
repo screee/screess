@@ -9,7 +9,7 @@ class StringExpression extends Expression {
 
   constructor(public body:string) { super() }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
 
     function parseExpression(input:string):Expression {
       return parse(input, { startRule: 'expression' });
@@ -49,7 +49,7 @@ class StringExpression extends Expression {
 
     }
 
-    return [output];
+    return output;
   }
 }
 

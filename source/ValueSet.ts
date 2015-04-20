@@ -32,13 +32,12 @@ class ValueSet {
 
     for (var i in args) {
       var arg = args[i];
-      var argValues = arg.expression.evaluateToIntermediates(scope, stack)
+      var argValue = arg.expression.evaluateToIntermediate(scope, stack)
 
       if (arg.name) {
-        assert(argValues.length == 1);
-        this.named[arg.name] = argValues[0]
+        this.named[arg.name] = argValue;
       } else {
-        this.positional = this.positional.concat(argValues)
+        this.positional.push(argValue);
       }
     }
 
@@ -77,7 +76,7 @@ class ValueSet {
     return _.all(indicies);
   }
 
-  evaluate(
+  toObject(
       argDefinition:ValueSetDefinition,
       stack:Stack
   ):{[s:string]: any} {

@@ -25,7 +25,7 @@ class PropertyMacro {
 
   getScope(values:ValueSet, stack:Stack):Scope {
     var scope = new Scope(this.scope, null, this.scope.statements)
-    var args = values.evaluate(this.argDefinition, stack);
+    var args = values.toObject(this.argDefinition, stack);
     scope.addLiteralValueMacros(args)
     return scope
   }

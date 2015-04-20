@@ -11,7 +11,7 @@ class ArithmeticOperatorExpression extends Expression {
     super();
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var left = this.left.evaluateToIntermediate(scope, stack);
     var right = this.right.evaluateToIntermediate(scope, stack);
 
@@ -23,21 +23,21 @@ class ArithmeticOperatorExpression extends Expression {
     }
 
     if (_.isNumber(left) && _.isNumber(right)) {
-      return [apply(left, this.operator, right)];
+      return apply(left, this.operator, right);
 
     } else if (_.isNumber(left) && right instanceof FunctionValue) {
       var base = right.base
       var stops = <[number, number][]> _.map(right.stops, (value) => {
         return [value[0], apply(left, this.operator, value[1])]
       })
-      return [ new FunctionValue(base, stops) ]
+      return new FunctionValue(base, stops);
 
     } else if (left instanceof FunctionValue && _.isNumber(right)) {
       var base = left.base
       var stops = <[number, number][]> _.map(left.stops, (value) => {
         return [value[0], apply(value[1], this.operator, right)]
       })
-      return [ new FunctionValue(base, stops) ]
+      return new FunctionValue(base, stops);
 
     } else {
       assert(false);

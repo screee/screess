@@ -7,12 +7,12 @@ class NullCoalescingExpression extends Expression {
 
   constructor(public headExpression:Expression, public tailExpression:Expression) { super(); }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var headValue = this.headExpression.evaluate(scope, stack);
     if (headValue == null) {
-      return this.tailExpression.evaluateToIntermediates(scope, stack);
+      return this.tailExpression.evaluateToIntermediate(scope, stack);
     } else {
-      return [headValue];
+      return headValue;
     }
   }
 

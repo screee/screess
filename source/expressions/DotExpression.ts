@@ -11,9 +11,9 @@ class DotExpression extends Expression {
     assert(this.baseExpression instanceof Expression)
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    var base = this.baseExpression.evaluateToIntermediates(scope, stack)[0];
-    return [base[this.property]];
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
+    var base = this.baseExpression.evaluateToIntermediate(scope, stack);
+    return base[this.property];
   }
 
 }

@@ -12,13 +12,13 @@ var NullCoalescingExpression = (function (_super) {
         this.headExpression = headExpression;
         this.tailExpression = tailExpression;
     }
-    NullCoalescingExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    NullCoalescingExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var headValue = this.headExpression.evaluate(scope, stack);
         if (headValue == null) {
-            return this.tailExpression.evaluateToIntermediates(scope, stack);
+            return this.tailExpression.evaluateToIntermediate(scope, stack);
         }
         else {
-            return [headValue];
+            return headValue;
         }
     };
     return NullCoalescingExpression;

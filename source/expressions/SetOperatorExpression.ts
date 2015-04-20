@@ -15,17 +15,18 @@ class SetOperatorExpression extends Expression {
 
   constructor(public needle:Expression, public operator:string, public haystack:Expression) { super() }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var needle = this.needle.evaluateToIntermediate(scope, stack);
     var haystack = this.haystack.evaluateToIntermediate(scope, stack);
     var operator = this.operator;
 
+    haystack = Value.evaluate(haystack, stack);
     assert(haystack instanceof Array);
 
     if (needle instanceof AttributeReferenceValue) {
-      return [[operator, needle.name].concat(Value.evaluate(haystack, stack))]
+      return [operator, needle.name].concat(haystack);
     } else {
-      return [SetOperatorExpression.operators[operator](needle, haystack)]
+      return SetOperatorExpression.operators[operator](needle, haystack)
     }
 
   }

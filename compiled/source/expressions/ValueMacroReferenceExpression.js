@@ -14,13 +14,13 @@ var ValueMacroReferenceExpression = (function (_super) {
         this.name = name;
         this.argumentExpressions = argumentExpressions;
     }
-    ValueMacroReferenceExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    ValueMacroReferenceExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var argValues = new ValueSet(this.argumentExpressions, scope, stack);
         var macro = scope.getValueMacro(this.name, argValues, stack);
         if (!macro) {
             throw new Error("Could not find value macro " + this.name);
         }
-        return macro.evaluateToIntermediates(argValues, stack);
+        return macro.evaluateToIntermediate(argValues, stack);
     };
     return ValueMacroReferenceExpression;
 })(Expression);

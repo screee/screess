@@ -7,19 +7,13 @@ import _ = require("../utilities");
 class ArrayExpression extends Expression {
 
   constructor(public expressions:Expression[]) {
-    super()
+    super();
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    var values = []
-
-    for (var i in this.expressions) {
-      var expression = this.expressions[i]
-      var expressionValues = expression.evaluateToIntermediates(scope, stack)
-      values = values.concat(expressionValues)
-    }
-
-    return [values];
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
+    return _.map(this.expressions, function(expression: Expression): any {
+      return expression.evaluateToIntermediate(scope, stack);
+    });
   }
 
 }

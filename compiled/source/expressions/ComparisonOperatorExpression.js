@@ -16,7 +16,7 @@ var ComparisonOperatorExpression = (function (_super) {
         this.operator = operator;
         this.right = right;
     }
-    ComparisonOperatorExpression.prototype.evaluateToIntermediates = function (scope, stack) {
+    ComparisonOperatorExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var left = this.left.evaluateToIntermediate(scope, stack);
         var right = this.right.evaluateToIntermediate(scope, stack);
         var operator = this.operator;
@@ -29,10 +29,10 @@ var ComparisonOperatorExpression = (function (_super) {
         if (left instanceof AttributeReferenceValue) {
             assert(!(right instanceof AttributeReferenceValue));
             // TODO create a FilterValue class that will evaluate this later.
-            return [[operator, left.name, Value.evaluate(right, stack)]];
+            return [operator, left.name, Value.evaluate(right, stack)];
         }
         else {
-            return [ComparisonOperatorExpression.operators[operator](left, right)];
+            return ComparisonOperatorExpression.operators[operator](left, right);
         }
     };
     ComparisonOperatorExpression.operators = {

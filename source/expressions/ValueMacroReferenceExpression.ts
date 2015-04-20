@@ -17,15 +17,15 @@ class ValueMacroReferenceExpression extends Expression {
     super()
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var argValues = new ValueSet(this.argumentExpressions, scope, stack);
 
     var macro = scope.getValueMacro(this.name, argValues, stack);
-    if (!macro ) {
+    if (!macro) {
       throw new Error("Could not find value macro " + this.name);
     }
 
-    return macro.evaluateToIntermediates(argValues, stack);
+    return macro.evaluateToIntermediate(argValues, stack);
   }
 }
 

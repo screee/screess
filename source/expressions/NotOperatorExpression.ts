@@ -8,8 +8,8 @@ class SetOperatorExpression extends Expression {
 
   constructor(public expression:Expression) { super(); }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
-    return [["none", this.expression.evaluate(scope, stack)]];
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
+    return ["none", this.expression.evaluate(scope, stack)];
   }
 
 }

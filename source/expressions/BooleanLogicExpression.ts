@@ -19,7 +19,7 @@ class BooleanLogicExpression extends Expression {
     super();
   }
 
-  evaluateToIntermediates(scope:Scope, stack:Stack):any[] {
+  evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var operator = BooleanLogicExpression.operators[this.operator];
 
     var values:any[] = _.map(
@@ -28,28 +28,28 @@ class BooleanLogicExpression extends Expression {
     )
 
     if (operator == "any") {
-      if (_.all(values, isFalse)) { return [false] }
+      if (_.all(values, isFalse)) { return false }
 
       values = _.reject(values, isFalse)
 
-      if (values.length === 0) { return [true] }
-      else if (values.length === 1) { return [values[0]] }
-      else if (_.any(values, isTrue)) { return [true] }
+      if (values.length === 0) { return true }
+      else if (values.length === 1) { return values[0] }
+      else if (_.any(values, isTrue)) { return true }
 
     } else if (operator == "all") {
-      if (_.all(values, isTrue)) { return [true] }
+      if (_.all(values, isTrue)) { return true }
 
       values = _.reject(values, isTrue)
 
-      if (values.length === 0) { return [true] }
-      else if (values.length === 1) { return [values[0]] }
-      else if (_.any(values, isFalse)) { return [false] }
+      if (values.length === 0) { return true }
+      else if (values.length === 1) { return values[0] }
+      else if (_.any(values, isFalse)) { return false }
 
     } else {
       assert(false)
     }
 
-    return [[operator].concat(values)]
+    return [operator].concat(values)
   }
 
 }
