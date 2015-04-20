@@ -272,7 +272,7 @@ class Scope {
           throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name)
         }
 
-        properties[propertyStatement.name] = Value.evaluate(values.positional[0], stack);
+        properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
       }
     });
 
@@ -291,7 +291,7 @@ class Scope {
     0: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
       var sources = _.objectMapValues(this.stylesheet.sources, (source, name) => {
         return _.objectMapValues(source, (value, key) => {
-          return Value.evaluate(value, stack);
+          return Value.evaluate(value);
         });
       });
 

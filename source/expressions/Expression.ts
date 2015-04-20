@@ -7,7 +7,7 @@ class Expression {
   }
 
   evaluate(scope, stack):any {
-    return Value.evaluate(this.evaluateToIntermediate(scope, stack), stack);
+    return Value.evaluate(this.evaluateToIntermediate(scope, stack));
   }
 
 }

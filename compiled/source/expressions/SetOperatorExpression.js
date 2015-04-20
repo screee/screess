@@ -21,7 +21,7 @@ var SetOperatorExpression = (function (_super) {
         var needle = this.needle.evaluateToIntermediate(scope, stack);
         var haystack = this.haystack.evaluateToIntermediate(scope, stack);
         var operator = this.operator;
-        haystack = Value.evaluate(haystack, stack);
+        haystack = Value.evaluate(haystack);
         assert(haystack instanceof Array);
         if (needle instanceof AttributeReferenceValue) {
             return [operator, needle.name].concat(haystack);

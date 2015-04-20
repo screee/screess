@@ -36,7 +36,7 @@ var ColorValue = (function (_super) {
     ColorValue.rgba = function (red, green, blue, alpha) {
         return new ColorValue(red, green, blue, alpha);
     };
-    ColorValue.prototype.evaluate = function (stack) {
+    ColorValue.prototype.evaluate = function () {
         if (this.alpha != 1) {
             return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
         }

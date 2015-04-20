@@ -6,7 +6,7 @@ var Expression = (function () {
         throw new Error("Abstract method");
     };
     Expression.prototype.evaluate = function (scope, stack) {
-        return Value.evaluate(this.evaluateToIntermediate(scope, stack), stack);
+        return Value.evaluate(this.evaluateToIntermediate(scope, stack));
     };
     return Expression;
 })();

@@ -11,7 +11,7 @@ var AttributeReferenceValue = (function (_super) {
         _super.call(this);
         this.name = name;
     }
-    AttributeReferenceValue.prototype.evaluate = function (stack) {
+    AttributeReferenceValue.prototype.evaluate = function () {
         return "{" + this.name + "}";
     };
     return AttributeReferenceValue;

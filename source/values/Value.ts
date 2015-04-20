@@ -2,15 +2,15 @@ import Stack = require('../Stack');
 
 class Value {
 
-  static evaluate(value:any, stack:Stack):any {
+  static evaluate(value:any):any {
     if (value && value.evaluate) {
-      return value.evaluate(stack);
+      return value.evaluate();
     } else {
       return value;
     }
   }
 
-  evaluate(stack:Stack):any {
+  evaluate():any {
     throw "Abstract method"
   }
 

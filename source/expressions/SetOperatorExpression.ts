@@ -20,7 +20,7 @@ class SetOperatorExpression extends Expression {
     var haystack = this.haystack.evaluateToIntermediate(scope, stack);
     var operator = this.operator;
 
-    haystack = Value.evaluate(haystack, stack);
+    haystack = Value.evaluate(haystack);
     assert(haystack instanceof Array);
 
     if (needle instanceof AttributeReferenceValue) {

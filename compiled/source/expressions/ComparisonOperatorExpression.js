@@ -29,7 +29,7 @@ var ComparisonOperatorExpression = (function (_super) {
         if (left instanceof AttributeReferenceValue) {
             assert(!(right instanceof AttributeReferenceValue));
             // TODO create a FilterValue class that will evaluate this later.
-            return [operator, left.name, Value.evaluate(right, stack)];
+            return [operator, left.name, Value.evaluate(right)];
         }
         else {
             return ComparisonOperatorExpression.operators[operator](left, right);

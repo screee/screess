@@ -19,7 +19,7 @@ var Scope = (function () {
             0: function (stack, properties, layers, classes) {
                 var sources = _.objectMapValues(_this.stylesheet.sources, function (source, name) {
                     return _.objectMapValues(source, function (value, key) {
-                        return Value.evaluate(value, stack);
+                        return Value.evaluate(value);
                     });
                 });
                 var transition = {
@@ -290,7 +290,7 @@ var Scope = (function () {
                 if (values.length != 1 || values.positional.length != 1) {
                     throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name);
                 }
-                properties[propertyStatement.name] = Value.evaluate(values.positional[0], stack);
+                properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
             }
         });
         layers = _.sortBy(layers, 'z-index');

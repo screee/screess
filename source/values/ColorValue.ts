@@ -46,7 +46,7 @@ class ColorValue extends Value {
     this.lightness =  hsl[2];
   }
 
-  evaluate(stack:Stack):string {
+  evaluate():string {
     if (this.alpha != 1) {
       return "rgba(" + this.red + ", " + this.green + ", " + this.blue + ", " + this.alpha + ")";
     } else {
