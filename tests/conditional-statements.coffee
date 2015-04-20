@@ -2,7 +2,7 @@
 assert = require("assert")
 _ = require('../compiled/source/utilities')
 
-describe "conditionals", ->
+describe "conditional statements", ->
 
   describe "evaluation", ->
 
