@@ -1,6 +1,6 @@
-{parse} = require("../compiled/source/main")
+{parse} = require("../compiled/main")
 assert = require("assert")
-_ = require('../compiled/source/utilities')
+_ = require('../compiled/utilities')
 
 parseValue = (value, context = {}) ->
   stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} }"

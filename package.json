@@ -5,7 +5,7 @@
   "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
   "main": "compiled/node/main",
   "bin": {
-    "screess": "compiled/bin/screess"
+    "screess": "screess"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,10 @@
-clean:
-	rm -r compiled/source/*
+HASHMARK = $(shell echo "\#")
+NEWLINE = $(shell echo "\n")
 
-build: build-pegjs build-ts-source build-coffee-source build-ts-bin
+clean:
+	rm -r compiled/*
+
+build: build-pegjs build-ts-source build-coffee-source
 
 build-pegjs:
 	pegjs \
@@ -9,12 +12,12 @@ build-pegjs:
 		--allowed-start-rules global,expression \
 		--cache \
 			source/parser.pegcs \
-			compiled/source/parser.js
+			compiled/parser.js
 
 build-coffee-source:
 	coffee \
 		--compile \
-		--output compiled/source \
+		--output compiled \
 		--map \
 		source
 
@@ -23,20 +26,8 @@ build-ts-source: build-pegjs build-coffee-source
 		--sourceMap \
 		--target ES5 \
 		--module commonjs \
-		--outDir ./compiled/source \
+		--outDir ./compiled \
 		source/*.ts source/**/*.ts
-
-build-ts-bin:
-	tsc \
-		--sourceMap \
-		--target ES5 \
-		--module commonjs \
-		--outDir compiled/bin/ \
-		bin/screess.ts
-	(echo "#!/usr/bin/env node"; cat compiled/bin/screess.js) > compiled/bin/screess
-	chmod +x compiled/bin/screess
-	rm compiled/bin/screess.js
-
 
 test: build
 	mocha --compilers coffee:coffee-script/register tests

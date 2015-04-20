@@ -1,4 +1,4 @@
-{parse} = require("../compiled/source/main")
+{parse} = require("../compiled/main")
 assert = require("assert")
 
 describe "value macro", ->

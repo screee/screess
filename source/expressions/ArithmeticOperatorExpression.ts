@@ -26,18 +26,14 @@ class ArithmeticOperatorExpression extends Expression {
       return apply(left, this.operator, right);
 
     } else if (_.isNumber(left) && right instanceof FunctionValue) {
-      var base = right.base
-      var stops = <[number, number][]> _.map(right.stops, (value) => {
+      return new FunctionValue(right.base, <[number, number][]> _.map(right.stops, (value) => {
         return [value[0], apply(left, this.operator, value[1])]
-      })
-      return new FunctionValue(base, stops);
+      }));
 
     } else if (left instanceof FunctionValue && _.isNumber(right)) {
-      var base = left.base
-      var stops = <[number, number][]> _.map(left.stops, (value) => {
+      return new FunctionValue(left.base, <[number, number][]> _.map(left.stops, (value) => {
         return [value[0], apply(value[1], this.operator, right)]
-      })
-      return new FunctionValue(base, stops);
+      }));
 
     } else {
       assert(false);
