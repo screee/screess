@@ -11,17 +11,18 @@ describe "sources", ->
     stylesheet = parse """
       #layer {
         type: 'background'
-        source: source(bar: "baz")
+        source-bar: "baz"
       }
     """
     assert.deepEqual _.values(stylesheet.sources)[0], bar: "baz"
     assert stylesheet.layers[0].source
+    assert _.keys(stylesheet.sources)[0] == stylesheet.layers[0].source
 
   it "should rename tile-size to tileSize", ->
     stylesheet = parse """
       #layer {
         type: 'background'
-        source: source(tile-size: 17)
+        source-tile-size: 17
       }
     """
     assert.deepEqual  _.values(stylesheet.sources)[0].tileSize, 17

@@ -15,6 +15,7 @@ var Scope = (function () {
         this.name = name;
         this.statements = statements;
         this.formatScope = {
+            // GLOBAL
             0: function (stack, properties, layers, classes) {
                 var sources = _.objectMapValues(_this.stylesheet.sources, function (source, name) {
                     return _.objectMapValues(source, function (value, key) {
@@ -34,15 +35,24 @@ var Scope = (function () {
                     transition: transition
                 });
             },
+            // LAYER
             1: function (stack, properties, layers, _classes) {
                 var metaProperties = { 'z-index': 0 };
                 var paintProperties = {};
                 var layoutProperties = {};
+                var source = {};
                 var type = properties['type'] || 'raster';
                 for (var name in properties) {
                     var value = properties[name];
+                    // TODO remove scree test props
                     if (name == 'z-index') {
                         metaProperties['z-index'] = value;
+                    }
+                    else if (name == "source-tile-size") {
+                        source["tileSize"] = value;
+                    }
+                    else if (_.startsWith(name, "source-")) {
+                        source[name.substr("source-".length)] = value;
                     }
                     else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
                         paintProperties[name] = value;
@@ -57,6 +67,7 @@ var Scope = (function () {
                         assert(false, "Property name '" + name + "' is unknown");
                     }
                 }
+                metaProperties["source"] = stack.getGlobalScope().addSource(source);
                 if (layers) {
                     if (metaProperties['type']) {
                         assert.equal(metaProperties['type'], 'raster');
@@ -75,6 +86,7 @@ var Scope = (function () {
                     layout: layoutProperties
                 }, metaProperties, classes));
             },
+            // CLASS
             2: function (stack, properties, layers, classes) {
                 // TODO assert there are no child layers or classes
                 // TODO ensure all properties are paint properties, not layout properties

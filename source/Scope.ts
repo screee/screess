@@ -287,6 +287,7 @@ class Scope {
 
   private formatScope:{[type:number]: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]) => {}} = {
 
+    // GLOBAL
     0: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
       var sources = _.objectMapValues(this.stylesheet.sources, (source, name) => {
         return _.objectMapValues(source, (value, key) => {
@@ -313,28 +314,43 @@ class Scope {
       )
     },
 
+    // LAYER
     1: (stack:Stack, properties:{}, layers:Scope[], _classes:Scope[]):any => {
       var metaProperties = { 'z-index': 0 };
       var paintProperties = {};
       var layoutProperties = {};
+      var source = {};
 
       var type = properties['type'] || 'raster';
 
       for (var name in properties) {
         var value = properties[name];
 
+        // TODO remove scree test props
         if (name == 'z-index') {
           metaProperties['z-index'] = value;
+
+        } else if (name == "source-tile-size") {
+          source["tileSize"] = value;
+
+        } else if (_.startsWith(name, "source-")) {
+          source[name.substr("source-".length)] = value;
+
         } else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
           paintProperties[name] = value;
+
         } else if (_.contains(MapboxGLStyleSpec[type].layout, name) || name == 'scree-test-layout') {
           layoutProperties[name] = value;
+
         } else if (_.contains(MapboxGLStyleSpec.meta, name) || name == 'scree-test-meta') {
           metaProperties[name] = value;
+
         } else {
           assert(false, "Property name '" + name + "' is unknown");
         }
       }
+
+      metaProperties["source"] = stack.getGlobalScope().addSource(source);
 
       if (layers) {
         if (metaProperties['type']) {
@@ -362,6 +378,7 @@ class Scope {
       ));
     },
 
+    // CLASS
     2: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
       // TODO assert there are no child layers or classes
       // TODO ensure all properties are paint properties, not layout properties

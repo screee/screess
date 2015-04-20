@@ -14,13 +14,6 @@
 
   module.exports = {
     valueMacros: {
-      source: function(source, stack) {
-        if (source["tile-size"]) {
-          source.tileSize = source["tile-size"];
-          delete source["tile-size"];
-        }
-        return stack.getGlobalScope().addSource(source);
-      },
       identity: function(args) {
         return _.values(args);
       },

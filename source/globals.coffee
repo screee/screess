@@ -7,13 +7,6 @@ Value = require './values/Value'
 module.exports =
 
   valueMacros:
-
-    source: (source, stack) ->
-      if source["tile-size"]
-        source.tileSize = source["tile-size"]
-        delete source["tile-size"]
-      return stack.getGlobalScope().addSource(source)
-
     identity: (args) -> _.values args
 
     hsv: (args)  -> ColorValue.hsla(args['0'], args['1'], args['2'], 1)
