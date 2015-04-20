@@ -4,9 +4,9 @@ var ValueSetDefinition = require('./ValueSetDefinition');
 var assert = require("assert");
 var LiteralExpression = require('./expressions/LiteralExpression');
 var _ = require("./utilities");
-var MapboxGLStyleSpec = require('./MapboxGLStyleSpec');
 var Statement = require('./Statement');
 var Globals = require('./globals');
+var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
     function Scope(parent, name, statements) {
         var _this = this;
@@ -17,11 +17,7 @@ var Scope = (function () {
         this.formatScope = {
             // GLOBAL
             0: function (stack, properties, layers, classes) {
-                var sources = _.objectMapValues(_this.stylesheet.sources, function (source, name) {
-                    return _.objectMapValues(source, function (value, key) {
-                        return Value.evaluate(value);
-                    });
-                });
+                var sources = _this.stylesheet.sources;
                 var transition = {
                     duration: properties["transition-delay"],
                     delay: properties["transition-duration"]
@@ -43,7 +39,7 @@ var Scope = (function () {
                 var source = {};
                 var type = properties['type'] || 'raster';
                 for (var name in properties) {
-                    var value = properties[name];
+                    var value = Value.evaluate(properties[name]);
                     // TODO remove scree test props
                     if (name == 'z-index') {
                         metaProperties['z-index'] = value;
@@ -54,13 +50,13 @@ var Scope = (function () {
                     else if (_.startsWith(name, "source-")) {
                         source[name.substr("source-".length)] = value;
                     }
-                    else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
+                    else if (getPropertyType(7, 1 /* LAYER */, name) == 0 /* PAINT */) {
                         paintProperties[name] = value;
                     }
-                    else if (_.contains(MapboxGLStyleSpec[type].layout, name) || name == 'scree-test-layout') {
+                    else if (getPropertyType(7, 1 /* LAYER */, name) == 1 /* LAYOUT */) {
                         layoutProperties[name] = value;
                     }
-                    else if (_.contains(MapboxGLStyleSpec.meta, name) || name == 'scree-test-meta') {
+                    else if (getPropertyType(7, 1 /* LAYER */, name) == 2 /* META */) {
                         metaProperties[name] = value;
                     }
                     else {
@@ -312,5 +308,37 @@ var Scope;
     })(Scope.Type || (Scope.Type = {}));
     var Type = Scope.Type;
 })(Scope || (Scope = {}));
+var PropertyType;
+(function (PropertyType) {
+    PropertyType[PropertyType["PAINT"] = 0] = "PAINT";
+    PropertyType[PropertyType["LAYOUT"] = 1] = "LAYOUT";
+    PropertyType[PropertyType["META"] = 2] = "META";
+})(PropertyType || (PropertyType = {}));
+function getPropertyType(version, scopeType, name) {
+    assert(scopeType == 1 /* LAYER */);
+    if (name == 'scree-test-paint')
+        return 0 /* PAINT */;
+    else if (name == 'scree-test-layout')
+        return 1 /* LAYOUT */;
+    else if (name == 'scree-test-meta')
+        return 2 /* META */;
+    else {
+        var spec = MBGLStyleSpec["v" + version];
+        for (var i in spec["layout"]) {
+            for (var name_ in spec[spec["layout"][i]]) {
+                if (name == name_)
+                    return 1 /* LAYOUT */;
+            }
+        }
+        for (var i in spec["paint"]) {
+            for (var name_ in spec[spec["paint"][i]]) {
+                if (name == name_)
+                    return 0 /* PAINT */;
+            }
+        }
+        assert(spec["layer"][name]);
+        return 2 /* META */;
+    }
+}
 module.exports = Scope;
 //# sourceMappingURL=Scope.js.map

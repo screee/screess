@@ -8,10 +8,10 @@ import Expression = require('./expressions/Expression');
 import ValueMacro = require('./macros/ValueMacro');
 import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
-import MapboxGLStyleSpec = require('./MapboxGLStyleSpec')
 import Stylesheet = require('./Stylesheet');
 import Statement = require('./Statement');
 var Globals = require('./globals');
+var MBGLStyleSpec = require('mapbox-gl-style-spec');
 
 class Scope {
 
@@ -289,11 +289,7 @@ class Scope {
 
     // GLOBAL
     0: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
-      var sources = _.objectMapValues(this.stylesheet.sources, (source, name) => {
-        return _.objectMapValues(source, (value, key) => {
-          return Value.evaluate(value);
-        });
-      });
+      var sources = this.stylesheet.sources;
 
       var transition = {
         duration: properties["transition-delay"],
@@ -323,8 +319,11 @@ class Scope {
 
       var type = properties['type'] || 'raster';
 
+      // TODO actually parse the version from the global scope, don't hardcode 7
+      var version = 7;
+
       for (var name in properties) {
-        var value = properties[name];
+        var value = Value.evaluate(properties[name]);
 
         // TODO remove scree test props
         if (name == 'z-index') {
@@ -336,13 +335,13 @@ class Scope {
         } else if (_.startsWith(name, "source-")) {
           source[name.substr("source-".length)] = value;
 
-        } else if (_.contains(MapboxGLStyleSpec[type].paint, name) || name == 'scree-test-paint') {
+        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.PAINT) {
           paintProperties[name] = value;
 
-        } else if (_.contains(MapboxGLStyleSpec[type].layout, name) || name == 'scree-test-layout') {
+        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.LAYOUT) {
           layoutProperties[name] = value;
 
-        } else if (_.contains(MapboxGLStyleSpec.meta, name) || name == 'scree-test-meta') {
+        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.META) {
           metaProperties[name] = value;
 
         } else {
@@ -392,6 +391,33 @@ class Scope {
 
 module Scope {
   export enum Type { GLOBAL, LAYER, CLASS }
+}
+
+enum PropertyType { PAINT, LAYOUT, META }
+function getPropertyType(version:number, scopeType: Scope.Type, name: string): PropertyType {
+  assert(scopeType == Scope.Type.LAYER);
+
+  if (name == 'scree-test-paint') return PropertyType.PAINT;
+  else if (name == 'scree-test-layout') return PropertyType.LAYOUT;
+  else if (name == 'scree-test-meta') return PropertyType.META;
+  else {
+    var spec = MBGLStyleSpec["v" + version];
+
+    for (var i in spec["layout"]) {
+      for (var name_ in spec[spec["layout"][i]]) {
+        if (name == name_) return PropertyType.LAYOUT;
+      }
+    }
+
+    for (var i in spec["paint"]) {
+      for (var name_ in spec[spec["paint"][i]]) {
+        if (name == name_) return PropertyType.PAINT;
+      }
+    }
+
+    assert(spec["layer"][name]);
+    return PropertyType.META;
+  }
 }
 
 export = Scope
