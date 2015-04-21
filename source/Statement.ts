@@ -1,5 +1,7 @@
 import Scope = require("./Scope")
 import Expression = require("./expressions/Expression")
+import ExpressionSet = require("./ExpressionSet")
+import assert = require("assert");
 
 class Statement {  }
 
@@ -31,7 +33,7 @@ module Statement {
   export class PropertyStatement extends Statement {
     constructor(
       public name:string,
-      public expressions:Expression[]
+      public expressions:ExpressionSet
     ) { super() }
   }
 

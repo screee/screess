@@ -7,6 +7,8 @@ export import Stack = require("./Stack")
 export import Statement = require("./Statement")
 export import Stylesheet = require("./Stylesheet")
 export import utilities = require("./utilities")
+export import _ = require("./utilities")
+export import ExpressionSet = require("./ExpressionSet")
 export import ValueSet = require("./ValueSet")
 export import ValueSetDefinition = require("./ValueSetDefinition")
 

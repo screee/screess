@@ -122,7 +122,6 @@ var Scope = (function () {
         return this.stylesheet.addSource(source);
     };
     Scope.prototype.addProperty = function (name, expressions) {
-        // TODO check for duplicate properties
         assert(name != null);
         this.statements.push(new Statement.PropertyStatement(name, expressions));
     };
@@ -196,6 +195,31 @@ var Scope = (function () {
             return null;
         }
     };
+    Scope.prototype.eachValueMacro = function (callback) {
+        for (var i in this.valueMacros) {
+            callback(this.valueMacros[i]);
+        }
+        if (this.parent)
+            this.parent.eachValueMacro(callback);
+    };
+    Scope.prototype.getValueMacrosAsFunctions = function (stack) {
+        var names = [];
+        this.eachValueMacro(function (macro) {
+            names.push(macro.name);
+        });
+        names = _.uniq(names);
+        var scope = this;
+        return _.objectMap(names, function (name) {
+            return [name, function () {
+                var args = ValueSet.fromPositionalValues(_.toArray(arguments));
+                var macro = scope.getValueMacro(name, args, stack);
+                if (!macro)
+                    return null;
+                else
+                    return macro.evaluateToIntermediate(args, stack);
+            }];
+        });
+    };
     Scope.prototype.getPropertyMacro = function (name, values, stack) {
         for (var i in this.propertyMacros) {
             var macro = this.propertyMacros[i];
@@ -209,6 +233,7 @@ var Scope = (function () {
     // TODO refactor into statement classes?
     Scope.prototype.eachPrimitiveStatement = function (stack, callback) {
         var statements = this.statements;
+        assert(stack != null);
         for (var i = 0; i < statements.length; i++) {
             var statement = statements[i];
             if (statement instanceof Statement.LoopStatement) {
@@ -250,7 +275,7 @@ var Scope = (function () {
             }
             else if (statement instanceof Statement.PropertyStatement) {
                 var propertyStatement = statement;
-                var values = new ValueSet(propertyStatement.expressions, this, stack);
+                var values = propertyStatement.expressions.toValueSet(this, stack);
                 var macro;
                 if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
                     stack.propertyMacro.push(macro);
@@ -284,7 +309,7 @@ var Scope = (function () {
             }
             else if (statement instanceof Statement.PropertyStatement) {
                 var propertyStatement = statement;
-                var values = new ValueSet(propertyStatement.expressions, scope, stack);
+                var values = propertyStatement.expressions.toValueSet(scope, stack);
                 if (values.length != 1 || values.positional.length != 1) {
                     throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name);
                 }

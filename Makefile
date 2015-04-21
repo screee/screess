@@ -32,5 +32,5 @@ build-ts-source: build-pegjs build-coffee-source
 test: build
 	mocha --compilers coffee:coffee-script/register tests
 
-test-debug: test
-	open http://127.0.0.1:8080/debug?port=5858
+test-debug: build
+	mocha --debug-brk --compilers coffee:coffee-script/register tests

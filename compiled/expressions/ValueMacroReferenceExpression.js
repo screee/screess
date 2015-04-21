@@ -5,22 +5,20 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var ValueSet = require('../ValueSet');
 var ValueMacroReferenceExpression = (function (_super) {
     __extends(ValueMacroReferenceExpression, _super);
-    // TODO add type to argumentExpressions
-    function ValueMacroReferenceExpression(name, argumentExpressions) {
+    function ValueMacroReferenceExpression(name, expressions) {
         _super.call(this);
         this.name = name;
-        this.argumentExpressions = argumentExpressions;
+        this.expressions = expressions;
     }
     ValueMacroReferenceExpression.prototype.evaluateToIntermediate = function (scope, stack) {
-        var argValues = new ValueSet(this.argumentExpressions, scope, stack);
-        var macro = scope.getValueMacro(this.name, argValues, stack);
+        var values = this.expressions.toValueSet(scope, stack);
+        var macro = scope.getValueMacro(this.name, values, stack);
         if (!macro) {
             throw new Error("Could not find value macro " + this.name);
         }
-        return macro.evaluateToIntermediate(argValues, stack);
+        return macro.evaluateToIntermediate(values, stack);
     };
     return ValueMacroReferenceExpression;
 })(Expression);

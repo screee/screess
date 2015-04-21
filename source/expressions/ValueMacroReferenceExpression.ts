@@ -1,31 +1,27 @@
 import Expression = require("./Expression");
+import ExpressionSet = require("../ExpressionSet");
 import util = require('util');
 import Scope = require("../Scope");
 import ValueSet = require('../ValueSet');
 import Stack = require("../Stack");
 import _ = require("../utilities");
-
-interface ArgumentExpression {
-  name?: string;
-  expression: Expression;
-}
+import assert = require("assert");
 
 class ValueMacroReferenceExpression extends Expression {
 
-  // TODO add type to argumentExpressions
-  constructor(public name:string, public argumentExpressions:ArgumentExpression[]) {
-    super()
+  constructor(public name:string, public expressions:ExpressionSet) {
+    super();
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    var argValues = new ValueSet(this.argumentExpressions, scope, stack);
+    var values = this.expressions.toValueSet(scope, stack);
 
-    var macro = scope.getValueMacro(this.name, argValues, stack);
+    var macro = scope.getValueMacro(this.name, values, stack);
     if (!macro) {
       throw new Error("Could not find value macro " + this.name);
     }
 
-    return macro.evaluateToIntermediate(argValues, stack);
+    return macro.evaluateToIntermediate(values, stack);
   }
 }
 

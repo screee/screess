@@ -22,6 +22,19 @@ describe "value", ->
     it "can access scope and stack", ->
       assert.deepEqual parseValue("`!!(scope && stack)`"), true
 
+    it "can access value macros", ->
+      stylesheet = parse """
+        value = "bar"
+        scree-test-meta: `value().toUpperCase()`
+      """
+      assert.equal(stylesheet["scree-test-meta"], "BAR")
+
+    it "can access value macros with arguments", ->
+      stylesheet = parse """
+        scree-test-meta: `identity('bar').toUpperCase()`
+      """
+      assert.equal(stylesheet["scree-test-meta"], "BAR")
+
   describe "array", ->
 
     it "should parse with comma seperators", ->

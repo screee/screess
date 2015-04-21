@@ -5,6 +5,7 @@ import assert = require("assert")
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
+import ExpressionSet = require('./ExpressionSet');
 import ValueMacro = require('./macros/ValueMacro');
 import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
@@ -66,8 +67,7 @@ class Scope {
     return this.stylesheet.addSource(source);
   }
 
-  addProperty(name:string, expressions:Expression[]):void {
-    // TODO check for duplicate properties
+  addProperty(name:string, expressions:ExpressionSet):void {
     assert(name != null);
     this.statements.push(new Statement.PropertyStatement(name, expressions));
   }
@@ -150,6 +150,7 @@ class Scope {
   // Evaluation Helpers
 
   getValueMacro(name:string, values:ValueSet, stack:Stack):ValueMacro {
+    // TODO refactor to use eachValueMacro
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
@@ -164,6 +165,32 @@ class Scope {
     }
   }
 
+  eachValueMacro(callback:(macro:ValueMacro) => void):void {
+    for (var i in this.valueMacros) {
+      callback(this.valueMacros[i]);
+    }
+    if (this.parent) this.parent.eachValueMacro(callback);
+  }
+
+  getValueMacrosAsFunctions(stack:Stack):{[name:string]:any} {
+    var names = [];
+    this.eachValueMacro((macro: ValueMacro) => { names.push(macro.name); });
+    names = _.uniq(names);
+
+    var scope = this;
+
+    return _.objectMap(names, (name) => {
+      return [name, function() {
+        var args = ValueSet.fromPositionalValues(_.toArray(arguments));
+        var macro = scope.getValueMacro(name, args, stack);
+        if (!macro) return null;
+        else return macro.evaluateToIntermediate(args, stack);
+      }];
+    });
+
+  }
+
+  // TODO write eachPropertyMacro
   getPropertyMacro(name:string, values:ValueSet, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
@@ -179,6 +206,7 @@ class Scope {
   // TODO refactor into statement classes?
   eachPrimitiveStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void): void {
     var statements = this.statements;
+    assert(stack != null);
 
     for (var i=0; i < statements.length; i++) {
       var statement = statements[i];
@@ -227,7 +255,8 @@ class Scope {
 
       } else if (statement instanceof Statement.PropertyStatement) {
         var propertyStatement = <Statement.PropertyStatement> statement;
-        var values = new ValueSet(propertyStatement.expressions, this, stack);
+
+        var values = propertyStatement.expressions.toValueSet(this, stack);
 
         var macro;
         if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
@@ -267,7 +296,7 @@ class Scope {
       } else if (statement instanceof Statement.PropertyStatement) {
         var propertyStatement = <Statement.PropertyStatement> statement;
 
-        var values = new ValueSet(propertyStatement.expressions, scope, stack);
+        var values = propertyStatement.expressions.toValueSet(scope, stack);
         if (values.length != 1 || values.positional.length != 1) {
           throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name)
         }

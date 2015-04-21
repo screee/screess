@@ -2,26 +2,44 @@ var assert = require('assert');
 var _ = require('./utilities');
 var Expression = require('./expressions/Expression');
 var ValueSet = (function () {
-    function ValueSet(args, scope, stack) {
-        if (_.isArrayOf(args, Expression)) {
-            args = _.map(args, function (expression) {
-                return { expression: expression };
-            });
-        }
+    function ValueSet(items) {
         this.positional = [];
         this.named = {};
-        for (var i in args) {
-            var arg = args[i];
-            var argValue = arg.expression.evaluateToIntermediate(scope, stack);
-            if (arg.name) {
-                this.named[arg.name] = argValue;
+        for (var i in items) {
+            var item = items[i];
+            if (item.name) {
+                this.named[item.name] = item.value;
             }
             else {
-                this.positional.push(argValue);
+                this.positional.push(item.value);
             }
         }
         this.length = this.positional.length + _.values(this.named).length;
     }
+    ValueSet.fromPositionalExpressions = function (scope, stack, expressions) {
+        assert(scope != null && stack != null);
+        return this.fromExpressions(scope, stack, _.map(expressions, function (expression) {
+            return { expression: expression };
+        }));
+    };
+    ValueSet.fromExpressions = function (scope, stack, expressions) {
+        assert(scope != null && stack != null, "scope and stack");
+        return this.fromValues(_.map(expressions, function (item) {
+            assert(item.expression instanceof Expression);
+            return {
+                value: item.expression.evaluateToIntermediate(scope, stack),
+                name: item.name
+            };
+        }));
+    };
+    ValueSet.fromPositionalValues = function (values) {
+        return this.fromValues(_.map(values, function (value) {
+            return { value: value };
+        }));
+    };
+    ValueSet.fromValues = function (values) {
+        return new ValueSet(values);
+    };
     ValueSet.prototype.matches = function (argDefinition) {
         if (!argDefinition) {
             return true;
@@ -83,7 +101,7 @@ var ValueSet = (function () {
             return args;
         }
     };
-    ValueSet.ZERO = new ValueSet([], null, null);
+    ValueSet.ZERO = new ValueSet([]);
     return ValueSet;
 })();
 module.exports = ValueSet;

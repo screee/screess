@@ -4,6 +4,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var ExpressionSet = require("./ExpressionSet");
+var assert = require("assert");
 var Statement = (function () {
     function Statement() {
     }
@@ -49,6 +51,7 @@ var Statement;
             _super.call(this);
             this.name = name;
             this.expressions = expressions;
+            assert(this.expressions instanceof ExpressionSet);
         }
         return PropertyStatement;
     })(Statement);

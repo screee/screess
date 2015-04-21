@@ -13,6 +13,7 @@ class ValueMacro {
 
   constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Expression);
   constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Function);
+
   constructor(public name:string, public argDefinition:ValueSetDefinition, public parentScope:Scope, body:any) {
     if (body instanceof Expression) {
       this.body = (args, stack) => {

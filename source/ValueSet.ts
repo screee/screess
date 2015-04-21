@@ -1,43 +1,69 @@
 import assert = require('assert');
 import ValueSetDefinition = require('./ValueSetDefinition');
+import Value = require('./values/Value');
 import Scope = require("./Scope");
 import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
 
-interface Value {
-  name?: string;
-  expression: Expression;
+interface ExpressionItem {
+  name?:string;
+  expression:Expression;
 }
+
+interface ValueItem {
+  name?:string;
+  value:any;
+}
+
 
 class ValueSet {
 
-  static ZERO: ValueSet = new ValueSet([], null, null);
+  static fromPositionalExpressions(scope:Scope, stack:Stack, expressions:Expression[]):ValueSet {
+    assert(scope != null && stack != null);
+    return this.fromExpressions(scope, stack, <ExpressionItem[]> _.map(expressions, (expression:Expression):ExpressionItem =>  {
+      return {expression: expression}
+    }));
+  }
+
+  static fromExpressions(scope:Scope, stack:Stack, expressions:ExpressionItem[]):ValueSet {
+    assert(scope != null && stack != null, "scope and stack");
+    return this.fromValues(_.map(expressions, (item:ExpressionItem) => {
+      assert(item.expression instanceof Expression);
+      return {
+        value: item.expression.evaluateToIntermediate(scope, stack),
+        name: item.name
+      }
+    }));
+  }
+
+  static fromPositionalValues(values:any[]):ValueSet {
+    return this.fromValues(<ValueItem[]> _.map(values, (value:any):ValueItem  => {
+      return {value: value}
+    }));
+  }
+
+  static fromValues(values:ValueItem[]):ValueSet {
+    return new ValueSet(values);
+  }
+
+  static ZERO: ValueSet = new ValueSet([]);
 
   public length:number;
   public positional:Value[];
   public named:{[s:string]:Value};
 
-  constructor(args:Expression[], scope:Scope, stack:Stack);
-  constructor(args:Value[], scope:Scope, stack:Stack);
-  constructor(args:any[], scope:Scope, stack:Stack) {
-    if (_.isArrayOf(args, Expression)) {
-      args = _.map(args, (expression:Expression) => {
-        return { expression: expression }
-      })
-    }
-
+  constructor(items:ValueItem[]) {
     this.positional = [];
     this.named = {};
 
-    for (var i in args) {
-      var arg = args[i];
-      var argValue = arg.expression.evaluateToIntermediate(scope, stack)
+    for (var i in items) {
+      var item = items[i];
 
-      if (arg.name) {
-        this.named[arg.name] = argValue;
+      if (item.name) {
+        this.named[item.name] = item.value;
       } else {
-        this.positional.push(argValue);
+        this.positional.push(item.value);
       }
     }
 

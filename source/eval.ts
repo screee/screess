@@ -5,10 +5,12 @@ import _ = require('./utilities');
 import ScreeSS = require("./index");
 
 function eval(source:string, scope: Scope, stack: Stack): any {
-  return VM.runInNewContext(
-    source,
-    _.extend({scope: scope, stack: stack, _: _}, ScreeSS)
+  var sandbox = _.extend(
+    {scope: scope, stack: stack, console: console},
+    scope.getValueMacrosAsFunctions(stack),
+    ScreeSS
   );
+  return VM.runInNewContext(source, sandbox);
 }
 
 export = eval;

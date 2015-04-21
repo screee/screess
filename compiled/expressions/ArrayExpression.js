@@ -13,7 +13,7 @@ var ArrayExpression = (function (_super) {
         this.expressions = expressions;
     }
     ArrayExpression.prototype.evaluateToIntermediate = function (scope, stack) {
-        return _.map(this.expressions, function (expression) {
+        return _.map(this.expressions.toArray(), function (expression) {
             return expression.evaluateToIntermediate(scope, stack);
         });
     };
