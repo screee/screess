@@ -43,7 +43,7 @@ function compile() {
     });
     inputStream.on("end", function () {
         try {
-            var output = JSON.stringify(Parser.parse(input), null, 2) + "\n";
+            var output = JSON.stringify(Parser.parse(input).evaluate(), null, 2) + "\n";
             Linter.validate(output);
             if (outputStream == process.stdout) {
                 outputStream.write(output, ENCODING);

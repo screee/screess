@@ -1,5 +1,7 @@
-{parse} = require("../compiled/main")
 assert = require("assert")
+
+Parser = require("../compiled/main")
+parse = (source) -> Parser.parse(source).evaluate()
 
 describe "filters", ->
 

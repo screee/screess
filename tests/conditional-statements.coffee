@@ -1,6 +1,9 @@
-{parse} = require("../compiled/main")
 assert = require("assert")
 _ = require('../compiled/utilities')
+
+# TODO create high level parser wrapper
+Parser = require("../compiled/main")
+parse = (source) -> Parser.parse(source).evaluate()
 
 describe "conditional statements", ->
 

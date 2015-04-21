@@ -3,8 +3,11 @@ var ValueSet = require("./ValueSet");
 var ValueSetDefinition = require('./ValueSetDefinition');
 var assert = require("assert");
 var LiteralExpression = require('./expressions/LiteralExpression');
+var Stack = require('./Stack');
 var _ = require("./utilities");
 var Statement = require('./Statement');
+var FS = require("fs");
+var Parser = require("./parser");
 var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
@@ -100,6 +103,17 @@ var Scope = (function () {
         else {
             this.parent = null;
             this.stylesheet = parent;
+            this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
+                for (var i in values.positional) {
+                    var filename = values.positional[i];
+                    var stylesheet = Parser.parse(FS.readFileSync(filename, "utf8"));
+                    var scope = stylesheet.scope;
+                    // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
+                    scope.parent = null;
+                    scope.stylesheet = this.stylesheet;
+                    scope.eachPrimitiveStatement(stack, callback);
+                }
+            });
             for (var macroName in Globals.valueMacros) {
                 var fn = Globals.valueMacros[macroName];
                 this.addValueMacro(macroName, null, fn);
@@ -280,7 +294,10 @@ var Scope = (function () {
                 var macro;
                 if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
                     stack.propertyMacro.push(macro);
+                    // Property macros may have primitive statements and/or a body function
                     macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
+                    if (macro.body)
+                        macro.body(values, callback, this, stack);
                     stack.propertyMacro.pop();
                 }
                 else {
@@ -295,6 +312,7 @@ var Scope = (function () {
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
     Scope.prototype.evaluate = function (type, stack) {
+        if (stack === void 0) { stack = new Stack(); }
         stack.scope.push(this);
         var layers = [];
         var classes = [];

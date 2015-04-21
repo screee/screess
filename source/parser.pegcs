@@ -19,7 +19,7 @@
   @rehead = (head, tail) => [head].concat(@_.pluck(tail, 1))
 }
 
-global = statements { @stack = new @Stack(); @stylesheet.scope.evaluate(@Scope.Type.GLOBAL, @stack) }
+global = statements { @stylesheet }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 

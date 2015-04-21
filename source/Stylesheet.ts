@@ -1,6 +1,7 @@
 import Scope = require('./Scope');
 import _ = require('./utilities');
 
+// TODO deprecate this class altogether, just have a global scope?
 class Stylesheet {
 
   public sources:{[name:string]: any};
@@ -16,6 +17,10 @@ class Stylesheet {
     var hash = _.hash(JSON.stringify(source)).toString();
     this.sources[hash] = source;
     return hash;
+  }
+
+  evaluate():any {
+    return this.scope.evaluate(Scope.Type.GLOBAL)
   }
 
 }

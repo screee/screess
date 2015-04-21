@@ -12,7 +12,7 @@ class PropertyMacro {
   public argLengthMin:number;
   public argLengthMax:number;
 
-  constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, public body:Function = null) {
+  constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, public body:(values:ValueSet, scope:Scope, stack:Stack) => void = null) {
     var _Scope = require("../Scope")
     this.scope = new _Scope(this.parentScope)
 

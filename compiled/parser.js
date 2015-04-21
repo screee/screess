@@ -33,8 +33,7 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
-          this.stack = new this.Stack();
-          return this.stylesheet.scope.evaluate(this.Scope.Type.GLOBAL, this.stack);
+          return this.stylesheet;
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,

@@ -1,6 +1,8 @@
-{parse} = require("../compiled/main")
 assert = require("assert")
 _ = require('../compiled/utilities')
+
+Parser = require("../compiled/main")
+parse = (source) -> Parser.parse(source).evaluate()
 
 describe "layers", ->
 

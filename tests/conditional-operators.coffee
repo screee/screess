@@ -3,7 +3,7 @@ assert = require("assert")
 _ = require('../compiled/utilities')
 
 parseValue = (value, context = {}) ->
-  stylesheet = parse "#layer { type: 'background'; scree-test-meta: #{value} }"
+  stylesheet = parse("#layer { type: 'background'; scree-test-meta: #{value} }").evaluate()
   stylesheet.layers[0]['scree-test-meta']
 
 describe "conditional operators", ->

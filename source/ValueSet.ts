@@ -52,8 +52,8 @@ class ValueSet {
   static ZERO: ValueSet = new ValueSet([]);
 
   public length:number;
-  public positional:Value[];
-  public named:{[s:string]:Value};
+  public positional:any[];
+  public named:{[s:string]:any};
 
   constructor(items:ValueItem[]) {
     this.positional = [];

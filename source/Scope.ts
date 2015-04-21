@@ -11,6 +11,8 @@ import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
 import Stylesheet = require('./Stylesheet');
 import Statement = require('./Statement');
+import FS = require("fs");
+var Parser = require("./parser");
 var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 
@@ -40,15 +42,32 @@ class Scope {
       this.parent = null;
       this.stylesheet = parent;
 
+      this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function(values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) {
+        for (var i in values.positional) {
+          var filename = values.positional[i];
+          var stylesheet = Parser.parse(FS.readFileSync(filename, "utf8"));
+          var scope:Scope = stylesheet.scope;
+
+          // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
+          scope.parent = null;
+          scope.stylesheet = this.stylesheet;
+
+          scope.eachPrimitiveStatement(stack, callback);
+        }
+      });
+
+      // TODO replace with self-hosted core library
       for (var macroName in Globals.valueMacros) {
         var fn = Globals.valueMacros[macroName];
         this.addValueMacro(macroName, null, fn);
       }
 
+      // TODO replace with self-hosted core library
       for (var macroName in Globals.propertyMacros) {
         var fn = Globals.propertyMacros[macroName];
         this.addPropertyMacro(macroName, null, fn);
       }
+
     }
   }
 
@@ -138,7 +157,7 @@ class Scope {
     return this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:ValueSetDefinition):Scope {
+  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:(values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => void):Scope {
     var PropertyMacro = require("./macros/PropertyMacro");
     var macro = new PropertyMacro(this, name, argDefinition, body)
     this.propertyMacros.unshift(macro)
@@ -261,7 +280,9 @@ class Scope {
         var macro;
         if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
           stack.propertyMacro.push(macro);
+          // Property macros may have primitive statements and/or a body function
           macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
+          if (macro.body) macro.body(values, callback, this, stack);
           stack.propertyMacro.pop()
         } else {
           callback(this, statement);
@@ -276,7 +297,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
-  evaluate(type:Scope.Type, stack:Stack):{} {
+  evaluate(type:Scope.Type, stack:Stack = new Stack()):{} {
     stack.scope.push(this)
 
     var layers = [];
@@ -423,6 +444,7 @@ module Scope {
 }
 
 enum PropertyType { PAINT, LAYOUT, META }
+
 function getPropertyType(version:number, scopeType: Scope.Type, name: string): PropertyType {
   assert(scopeType == Scope.Type.LAYER);
 

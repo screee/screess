@@ -1,5 +1,6 @@
 var Scope = require('./Scope');
 var _ = require('./utilities');
+// TODO deprecate this class altogether, just have a global scope?
 var Stylesheet = (function () {
     function Stylesheet() {
         this.sources = {};
@@ -10,6 +11,9 @@ var Stylesheet = (function () {
         var hash = _.hash(JSON.stringify(source)).toString();
         this.sources[hash] = source;
         return hash;
+    };
+    Stylesheet.prototype.evaluate = function () {
+        return this.scope.evaluate(0 /* GLOBAL */);
     };
     return Stylesheet;
 })();
