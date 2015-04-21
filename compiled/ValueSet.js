@@ -16,12 +16,14 @@ var ValueSet = (function () {
         }
         this.length = this.positional.length + _.values(this.named).length;
     }
+    // TODO factor into ExpressionSet
     ValueSet.fromPositionalExpressions = function (scope, stack, expressions) {
         assert(scope != null && stack != null);
         return this.fromExpressions(scope, stack, _.map(expressions, function (expression) {
             return { expression: expression };
         }));
     };
+    // TODO factor into ExpressionSet
     ValueSet.fromExpressions = function (scope, stack, expressions) {
         assert(scope != null && stack != null, "scope and stack");
         return this.fromValues(_.map(expressions, function (item) {
@@ -40,10 +42,13 @@ var ValueSet = (function () {
     ValueSet.fromValues = function (values) {
         return new ValueSet(values);
     };
+    // TODO move to ValueSetDefinition class
     ValueSet.prototype.matches = function (argDefinition) {
-        if (!argDefinition) {
+        // TODO remove below line and replace with "assert(argDefinition);"
+        if (!argDefinition)
             return true;
-        }
+        if (argDefinition.isWildcard())
+            return true;
         var indicies = _.times(argDefinition.length, function () {
             return false;
         });
@@ -79,6 +84,9 @@ var ValueSet = (function () {
             return _.extend(_.objectMap(this.positional, function (values, index) {
                 return [index.toString(), values];
             }), this.named);
+        }
+        else if (argDefinition.isWildcard()) {
+            return { arguments: this };
         }
         else {
             var args = {};

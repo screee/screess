@@ -19,6 +19,7 @@ interface ValueItem {
 
 class ValueSet {
 
+  // TODO factor into ExpressionSet
   static fromPositionalExpressions(scope:Scope, stack:Stack, expressions:Expression[]):ValueSet {
     assert(scope != null && stack != null);
     return this.fromExpressions(scope, stack, <ExpressionItem[]> _.map(expressions, (expression:Expression):ExpressionItem =>  {
@@ -26,6 +27,7 @@ class ValueSet {
     }));
   }
 
+  // TODO factor into ExpressionSet
   static fromExpressions(scope:Scope, stack:Stack, expressions:ExpressionItem[]):ValueSet {
     assert(scope != null && stack != null, "scope and stack");
     return this.fromValues(_.map(expressions, (item:ExpressionItem) => {
@@ -70,8 +72,12 @@ class ValueSet {
     this.length = this.positional.length + _.values(this.named).length;
   }
 
+  // TODO move to ValueSetDefinition class
   matches(argDefinition:ValueSetDefinition):boolean {
-    if (!argDefinition) { return true }
+    // TODO remove below line and replace with "assert(argDefinition);"
+    if (!argDefinition) return true;
+
+    if (argDefinition.isWildcard()) return true;
 
     var indicies = _.times(argDefinition.length, () => { return false });
 
@@ -117,6 +123,10 @@ class ValueSet {
         ),
         this.named
       );
+
+    } else if (argDefinition.isWildcard()) {
+      return {arguments: this}
+
     } else {
       var args:{[s:string]: any} = {}
 

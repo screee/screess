@@ -12,11 +12,13 @@ interface ValueDefinition {
 class ValueSetDefinition {
 
   static ZERO:ValueSetDefinition = new ValueSetDefinition([], null);
+  static WILDCARD:ValueSetDefinition = new ValueSetDefinition([], null, true);
 
   public named:{[name:string]: ValueDefinition};
   public length:number;
 
-  constructor(public definitions:ValueDefinition[], public scope:Scope) {
+  // TODO remove scope argument
+  constructor(public definitions:ValueDefinition[], public scope:Scope, public isWildcard_ = false) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }
@@ -32,6 +34,10 @@ class ValueSetDefinition {
     }
 
     this.length = this.definitions.length;
+  }
+
+  public isWildcard():boolean {
+    return this.isWildcard_;
   }
 }
 

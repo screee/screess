@@ -132,6 +132,15 @@ describe "value macro", ->
       """
       assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
+    it "should match with wildcard arguments", ->
+      stylesheet = parse """
+        length(*) = `arguments().length`
+        #layer {
+          scree-test-meta: length(0, 1, 2, 3)
+        }
+      """
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 4
+
   describe "scope", ->
 
     it "should apply recursively in arguments", ->

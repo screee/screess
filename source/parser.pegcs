@@ -64,6 +64,7 @@ expressionSetMixedStrongItem =
 
 
 expressionSetDefinition =
+  "(" whitespace* "*" whitespace* ")" { @ValueSetDefinition.WILDCARD } /
   "(" whitespace* head:expressionSetDefinitionItem tail:(expressionSetSeperatorStrong expressionSetDefinitionItem)* whitespace* ")" { new @ValueSetDefinition(@rehead(head, tail), @scope) } /
   "" { @ValueSetDefinition.ZERO }
 

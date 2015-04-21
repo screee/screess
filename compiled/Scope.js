@@ -220,6 +220,7 @@ var Scope = (function () {
             }];
         });
     };
+    // TODO write eachPropertyMacro
     Scope.prototype.getPropertyMacro = function (name, values, stack) {
         for (var i in this.propertyMacros) {
             var macro = this.propertyMacros[i];
