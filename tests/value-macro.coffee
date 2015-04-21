@@ -134,12 +134,12 @@ describe "value macro", ->
 
     it "should match with wildcard arguments", ->
       stylesheet = parse """
-        length(*) = `arguments().length`
+        length(*) = `arguments().positional`
         #layer {
           scree-test-meta: length(0, 1, 2, 3)
         }
       """
-      assert.equal stylesheet.layers[0]['scree-test-meta'], 4
+      assert.deepEqual stylesheet.layers[0]['scree-test-meta'], [0, 1, 2, 3]
 
   describe "scope", ->
 
