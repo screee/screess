@@ -41,6 +41,7 @@ class Scope {
     } else { // parent instanceof Stylesheet
       this.parent = null;
       this.stylesheet = parent;
+      var that = this;
 
       this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function(values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) {
         for (var i in values.positional) {
@@ -50,9 +51,12 @@ class Scope {
 
           // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
           scope.parent = null;
-          scope.stylesheet = this.stylesheet;
+          scope.stylesheet = that.stylesheet;
 
           scope.eachPrimitiveStatement(stack, callback);
+
+          that.valueMacros = scope.valueMacros.concat(that.valueMacros);
+          that.propertyMacros = scope.propertyMacros.concat(that.propertyMacros);
         }
       });
 

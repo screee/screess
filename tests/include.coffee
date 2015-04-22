@@ -10,3 +10,10 @@ describe "include", ->
       include('tests/include-fixture.screess')
     """
     assert.equal stylesheet["magic-number"], 17
+
+  it "should load value macros", ->
+    stylesheet = parse """
+      include('tests/include-fixture.screess')
+      scree-test-meta: uppercase('baz')
+    """
+    assert.equal stylesheet["scree-test-meta"], "BAZ"

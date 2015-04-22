@@ -1,1 +1,3 @@
 magic-number: 17
+
+uppercase(value) = `value().toUpperCase()`

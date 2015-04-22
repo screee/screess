@@ -103,6 +103,7 @@ var Scope = (function () {
         else {
             this.parent = null;
             this.stylesheet = parent;
+            var that = this;
             this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
                 for (var i in values.positional) {
                     var filename = values.positional[i];
@@ -110,8 +111,10 @@ var Scope = (function () {
                     var scope = stylesheet.scope;
                     // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
                     scope.parent = null;
-                    scope.stylesheet = this.stylesheet;
+                    scope.stylesheet = that.stylesheet;
                     scope.eachPrimitiveStatement(stack, callback);
+                    that.valueMacros = scope.valueMacros.concat(that.valueMacros);
+                    that.propertyMacros = scope.propertyMacros.concat(that.propertyMacros);
                 }
             });
             for (var macroName in Globals.valueMacros) {
