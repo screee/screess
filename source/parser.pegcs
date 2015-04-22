@@ -5,8 +5,6 @@
 
   @_.extend(@, require("./index"))
 
-  @globalScope = @scope = @Scope.createGlobal();
-
   @pushScope = (scope = new @Scope(@scope)) =>
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
     assert(scope.parent == @scope, "Next scope must be child of current scope")
@@ -21,7 +19,7 @@
   @rehead = (head, body) => [head].concat(@_.pluck(body, 1))
 }
 
-global = statements { @globalScope }
+global = ({ @globalScope = @scope = @Scope.createGlobal() }) statements { @globalScope }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
@@ -95,42 +93,52 @@ statement =
   property
 
 // TODO create Statement classes directally, using default Scope creation in pushScope
+// TODO suffix names with "statement"
 
 property =
-  name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak { @scope.addProperty(name, expressions) } /
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { @scope.addProperty(name, expressions) } /
-  name:identifier { @scope.addProperty(name, @ExpressionSet.ZERO) }
+  name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak
+    { @scope.addStatement(new @Statement.PropertyStatement(@scope, name, expressions)) } /
 
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
+    { @scope.addStatement(new @Statement.PropertyStatement(@scope, name, expressions)) } /
+
+  name:identifier
+    { @scope.addStatement(new @Statement.PropertyStatement(@scope, name, @ExpressionSet.ZERO)) }
+
+// TODO treat as a statement?
 valueMacroDefinition =
   name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expression:expression { @scope.addValueMacro(name, args, expression) }
 
 loop =
-  ("for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, keyIdentifier, collection)) }) scope /
-  ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
+  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
+    { @scope.addStatement(new @Statement.LoopStatement(@scope, scope, valueIdentifier, keyIdentifier, collection)) } /
+  "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
+    { @scope.addStatement(new @Statement.LoopStatement(@scope, scope, valueIdentifier, null, collection)) }
 
 conditional =
-  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @Statement.ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
+  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @Statement.ConditionalStatement(@scope, @_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
 
 conditionalIf =
-  condition:("if" whitespace+ condition:expression whitespace* { @pushScope(); condition }) scope:scope { {condition: condition, scope: scope} }
+  "if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
 
 conditionalElseIf =
-  condition:("else if" whitespace+ condition:expression whitespace* { @pushScope(); condition }) scope:scope { {condition: condition, scope: scope} }
+  "else if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
 
 conditionalElse =
-  ("else" whitespace* { @pushScope() }) scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
+  "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
 
 layer =
-  ("#" name:identifier? { @pushScope(@scope.addLayer(name)) }) scope
+  "#" name:identifier? scope:scope { @scope.addStatement(new @Statement.LayerStatement(@scope, name, scope)) }
 
 class =
-  ("." name:identifier { @pushScope(@scope.addClass(name)) }) scope
+  "." name:identifier scope:scope { @scope.addStatement(new @Statement.ClassStatement(@scope, name, scope)) }
 
+// TODO treat as a statement?
 propertyMacroDefinition =
-  (name:identifier args:expressionSetDefinition whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
+  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* scope:scope { @scope.addPropertyMacro(name, args, scope) }
 
 scope =
-  whitespace* "{" body:statements "}" { @popScope() }
+  ({ @pushScope() }) whitespace* "{" body:statements "}" { @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

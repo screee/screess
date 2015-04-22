@@ -11,6 +11,7 @@ var Parser = require("./parser");
 var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
+    // TODO deprecate "name" parameter
     function Scope(parent, name, statements) {
         var _this = this;
         if (parent === void 0) { parent = null; }
@@ -100,10 +101,16 @@ var Scope = (function () {
         this.propertyMacros = [];
         this.sources = {};
     }
+    Scope.getCoreLibrary = function () {
+        if (!this.coreLibrary) {
+            this.coreLibrary = Parser.parse(FS.readFileSync("core.sss", "utf8"));
+        }
+        return this.coreLibrary;
+    };
     Scope.createGlobal = function () {
         var scope = new Scope();
-        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
-            scope.include(values.positional[0], callback, scope, stack);
+        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, null, function (macro, values, stack, callback) {
+            macro.parentScope.includeFile(values.positional[0], stack, callback);
         });
         return scope;
     };
@@ -113,11 +120,13 @@ var Scope = (function () {
     Scope.prototype.getGlobalScope = function () {
         return this.isGlobal() ? this : this.parent.getGlobalScope();
     };
-    Scope.prototype.include = function (filename, callback, scope, stack) {
-        var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
-        scopeIncluded.eachPrimitiveStatement(stack, callback);
-        this.valueMacros = scopeIncluded.valueMacros.concat(this.valueMacros);
-        this.propertyMacros = scopeIncluded.propertyMacros.concat(this.propertyMacros);
+    Scope.prototype.includeFile = function (filename, stack, callback) {
+        this.includeScope(Parser.parse(FS.readFileSync(filename, "utf8")), stack, callback);
+    };
+    Scope.prototype.includeScope = function (scope, stack, callback) {
+        scope.eachPrimitiveStatement(stack, callback);
+        this.valueMacros = scope.valueMacros.concat(this.valueMacros);
+        this.propertyMacros = scope.propertyMacros.concat(this.propertyMacros);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Construction
@@ -125,29 +134,6 @@ var Scope = (function () {
         var hash = _.hash(JSON.stringify(source)).toString();
         this.getGlobalScope().sources[hash] = source;
         return hash;
-    };
-    // TODO deprecate in favor of directly constructing class in parser
-    Scope.prototype.addProperty = function (name, expressions) {
-        assert(name != null);
-        this.statements.push(new Statement.PropertyStatement(name, expressions));
-    };
-    // TODO deprecate in favor of directly constructing class in parser
-    Scope.prototype.addClass = function (name) {
-        var scope = new Scope(this, name);
-        this.statements.push(new Statement.ClassStatement(name, scope));
-        return scope;
-    };
-    // TODO deprecate in favor of directly constructing class in parser
-    Scope.prototype.addLayer = function (name) {
-        var scope = new Scope(this, name);
-        this.statements.push(new Statement.LayerStatement(name, scope));
-        return scope;
-    };
-    // TODO deprecate in favor of directly constructing class in parser
-    Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
-        var scope = new Scope(this);
-        this.statements.push(new Statement.LoopStatement(scope, valueIdentifier, keyIdentifier, collectionExpression));
-        return scope;
     };
     Scope.prototype.addStatement = function (statement) {
         this.statements.push(statement);
@@ -166,13 +152,14 @@ var Scope = (function () {
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
         var ValueMacro_ = require("./macros/ValueMacro");
         var macro = new ValueMacro_(name, argDefinition, this, body);
-        return this.valueMacros.unshift(macro);
+        this.valueMacros.unshift(macro);
     };
-    Scope.prototype.addPropertyMacro = function (name, argDefinition, body) {
+    Scope.prototype.addPropertyMacro = function (name, argDefinition, bodyScope, bodyFunction) {
+        if (bodyScope === void 0) { bodyScope = null; }
+        if (bodyFunction === void 0) { bodyFunction = null; }
         var PropertyMacro = require("./macros/PropertyMacro");
-        var macro = new PropertyMacro(this, name, argDefinition, body);
+        var macro = new PropertyMacro(this, name, argDefinition, bodyScope, bodyFunction);
         this.propertyMacros.unshift(macro);
-        return macro.scope;
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation Helpers
@@ -226,7 +213,6 @@ var Scope = (function () {
         return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
     // Properties, layers, classes
-    // TODO refactor into statement classes?
     Scope.prototype.eachPrimitiveStatement = function (stack, callback) {
         var statements = this.statements;
         assert(stack != null);
@@ -248,6 +234,7 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
+    // Move these into individual files
     Scope.prototype.evaluate = function (type, stack) {
         if (type === void 0) { type = 0 /* GLOBAL */; }
         if (stack === void 0) { stack = new Stack(); }
@@ -259,7 +246,7 @@ var Scope = (function () {
             statement.evaluate(scope, stack, layers, classes, properties);
         };
         if (type == 0 /* GLOBAL */) {
-            this.include("core.sss", evaluatePrimitiveStatement, this, stack);
+            this.includeScope(Scope.getCoreLibrary(), stack, evaluatePrimitiveStatement);
         }
         this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
         layers = _.sortBy(layers, 'z-index');
@@ -270,6 +257,7 @@ var Scope = (function () {
         stack.scope.pop();
         return output;
     };
+    Scope.coreLibrary = null;
     return Scope;
 })();
 var Scope;

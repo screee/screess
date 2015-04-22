@@ -17,11 +17,19 @@ var MBGLStyleSpec = require('mapbox-gl-style-spec');
 
 class Scope {
 
+  private static coreLibrary:Scope = null;
+  static getCoreLibrary():Scope {
+    if (!this.coreLibrary) {
+      this.coreLibrary = Parser.parse(FS.readFileSync("core.sss", "utf8"));
+    }
+    return this.coreLibrary;
+  }
+
   static createGlobal():Scope {
     var scope = new Scope()
 
-    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
-      scope.include(values.positional[0], callback, scope, stack);
+    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, null, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
+      macro.parentScope.includeFile(values.positional[0], stack, callback);
     });
 
     return scope;
@@ -31,6 +39,7 @@ class Scope {
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
+  // TODO deprecate "name" parameter
   constructor(
       public parent:Scope = null,
       public name:string = null,
@@ -49,11 +58,14 @@ class Scope {
     return this.isGlobal() ? this : this.parent.getGlobalScope();
   }
 
-  include(filename:string, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) {
-    var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
-    scopeIncluded.eachPrimitiveStatement(stack, callback);
-    this.valueMacros = scopeIncluded.valueMacros.concat(this.valueMacros);
-    this.propertyMacros = scopeIncluded.propertyMacros.concat(this.propertyMacros);
+  includeFile(filename:string, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
+    this.includeScope(Parser.parse(FS.readFileSync(filename, "utf8")), stack, callback);
+  }
+
+  includeScope(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
+    scope.eachPrimitiveStatement(stack, callback);
+    this.valueMacros = scope.valueMacros.concat(this.valueMacros);
+    this.propertyMacros = scope.propertyMacros.concat(this.propertyMacros);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -63,38 +75,6 @@ class Scope {
     var hash = _.hash(JSON.stringify(source)).toString();
     this.getGlobalScope().sources[hash] = source;
     return hash;
-  }
-
-  // TODO deprecate in favor of directly constructing class in parser
-  addProperty(name:string, expressions:ExpressionSet):void {
-    assert(name != null);
-    this.statements.push(new Statement.PropertyStatement(name, expressions));
-  }
-
-  // TODO deprecate in favor of directly constructing class in parser
-  addClass(name:string):Scope {
-    var scope = new Scope(this, name)
-    this.statements.push(new Statement.ClassStatement(name, scope));
-    return scope;
-  }
-
-  // TODO deprecate in favor of directly constructing class in parser
-  addLayer(name?:string):Scope {
-    var scope = new Scope(this, name)
-    this.statements.push(new Statement.LayerStatement(name, scope));
-    return scope;
-  }
-
-  // TODO deprecate in favor of directly constructing class in parser
-  addLoop(valueIdentifier:string, keyIdentifier:string, collectionExpression:Expression):Scope {
-    var scope = new Scope(this);
-    this.statements.push(new Statement.LoopStatement(
-      scope,
-      valueIdentifier,
-      keyIdentifier,
-      collectionExpression
-    ))
-    return scope;
   }
 
   addStatement(statement:Statement) {
@@ -120,16 +100,13 @@ class Scope {
   addValueMacro(name:String, argDefinition:ValueSetDefinition, body:any) {
     var ValueMacro_ = require("./macros/ValueMacro");
     var macro = new ValueMacro_(name, argDefinition, this, body);
-
-    return this.valueMacros.unshift(macro);
+    this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:(values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => void):Scope {
+  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, bodyScope:Scope = null, bodyFunction:(macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void = null):void {
     var PropertyMacro = require("./macros/PropertyMacro");
-    var macro = new PropertyMacro(this, name, argDefinition, body)
-    this.propertyMacros.unshift(macro)
-
-    return macro.scope
+    var macro = new PropertyMacro(this, name, argDefinition, bodyScope, bodyFunction);
+    this.propertyMacros.unshift(macro);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -138,6 +115,7 @@ class Scope {
   getValueMacro(name:string, values:ValueSet, stack:Stack):ValueMacro {
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
+
       if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
         return macro;
       }
@@ -187,7 +165,6 @@ class Scope {
   }
 
   // Properties, layers, classes
-  // TODO refactor into statement classes?
   eachPrimitiveStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void): void {
     var statements = this.statements;
     assert(stack != null);
@@ -213,6 +190,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
+  // Move these into individual files
   evaluate(type:Scope.Type = Scope.Type.GLOBAL, stack:Stack = new Stack()):{} {
     stack.scope.push(this);
 
@@ -225,7 +203,7 @@ class Scope {
     }
 
     if (type == Scope.Type.GLOBAL) {
-      this.include("core.sss", evaluatePrimitiveStatement, this, stack);
+      this.includeScope(Scope.getCoreLibrary(), stack, evaluatePrimitiveStatement);
     }
 
     this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
