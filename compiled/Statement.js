@@ -4,9 +4,19 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+var Scope = require("./Scope");
+var assert = require("assert");
+var _ = require("./utilities");
+var Value = require("./values/value");
 var Statement = (function () {
     function Statement() {
     }
+    Statement.prototype.eachPrimitiveStatement = function (stack, callback) {
+        assert(false, "abstract method");
+    };
+    Statement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
+        assert(false, "abstract method");
+    };
     return Statement;
 })();
 var Statement;
@@ -20,6 +30,18 @@ var Statement;
             this.keyIdentifier = keyIdentifier;
             this.collectionExpression = collectionExpression;
         }
+        LoopStatement.prototype.eachPrimitiveStatement = function (stack, callback) {
+            var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
+            assert(_.isArray(collection) || _.isObject(collection));
+            for (var key in collection) {
+                var value = collection[key];
+                this.scope.addLiteralValueMacro(this.valueIdentifier, value);
+                if (this.keyIdentifier) {
+                    this.scope.addLiteralValueMacro(this.keyIdentifier, key);
+                }
+                this.scope.eachPrimitiveStatement(stack, callback);
+            }
+        };
         return LoopStatement;
     })(Statement);
     Statement.LoopStatement = LoopStatement;
@@ -30,6 +52,9 @@ var Statement;
             this.name = name;
             this.scope = scope;
         }
+        LayerStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
+            layers.push(this.scope.evaluate(1 /* LAYER */, stack));
+        };
         return LayerStatement;
     })(Statement);
     Statement.LayerStatement = LayerStatement;
@@ -40,6 +65,9 @@ var Statement;
             this.name = name;
             this.scope = scope;
         }
+        ClassStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
+            classes.push(this.scope.evaluate(2 /* CLASS */, stack));
+        };
         return ClassStatement;
     })(Statement);
     Statement.ClassStatement = ClassStatement;
@@ -50,6 +78,13 @@ var Statement;
             this.name = name;
             this.expressions = expressions;
         }
+        PropertyStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
+            var values = this.expressions.toValueSet(scope, stack);
+            if (values.length != 1 || values.positional.length != 1) {
+                throw new Error("Cannot apply " + values.length + " args to primitive property " + this.name);
+            }
+            properties[this.name] = Value.evaluate(values.positional[0]);
+        };
         return PropertyStatement;
     })(Statement);
     Statement.PropertyStatement = PropertyStatement;

@@ -108,7 +108,6 @@ conditional =
   ((whitespace* "else if" whitespace+ expression:expression whitespace* { @pushScope(@scope.addElseIf(expression)) }) scope)*
   ((whitespace* ("else") whitespace* {@pushScope(@scope.addElse())}) scope)?
 
-
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayer(name)) }) scope
 

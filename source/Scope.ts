@@ -20,11 +20,9 @@ class Scope {
   static createGlobal():Scope {
     var scope = new Scope()
 
-    var include = (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
+    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
       scope.include(values.positional[0], callback, scope, stack);
-    }
-
-    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, include);
+    });
 
     return scope;
   }
@@ -73,14 +71,12 @@ class Scope {
   }
 
   addClass(name:string):Scope {
-    // TODO ensure class scopes are merged properly
     var scope = new Scope(this, name)
     this.statements.push(new Statement.ClassStatement(name, scope));
     return scope;
   }
 
   addLayer(name?:string):Scope {
-    // TODO check for duplicate layer scopes
     var scope = new Scope(this, name)
     this.statements.push(new Statement.LayerStatement(name, scope));
     return scope;
@@ -150,7 +146,6 @@ class Scope {
   // Evaluation Helpers
 
   getValueMacro(name:string, values:ValueSet, stack:Stack):ValueMacro {
-    // TODO refactor to use eachValueMacro
     for (var i in this.valueMacros) {
       var macro = this.valueMacros[i];
       if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
@@ -177,12 +172,12 @@ class Scope {
     this.eachValueMacro((macro: ValueMacro) => { names.push(macro.name); });
     names = _.uniq(names);
 
-    var scope = this;
 
     return _.objectMap(names, (name) => {
+      var that = this;
       return [name, function() {
         var args = ValueSet.fromPositionalValues(_.toArray(arguments));
-        var macro = scope.getValueMacro(name, args, stack);
+        var macro = that.getValueMacro(name, args, stack);
         if (!macro) return null;
         else return macro.evaluateToIntermediate(args, stack);
       }];
@@ -190,7 +185,6 @@ class Scope {
 
   }
 
-  // TODO write eachPropertyMacro
   getPropertyMacro(name:string, values:ValueSet, stack:Stack):PropertyMacro {
     for (var i in this.propertyMacros) {
       var macro = this.propertyMacros[i];
@@ -213,44 +207,33 @@ class Scope {
 
       if (statement instanceof Statement.LoopStatement) {
         var loopStatement = <Statement.LoopStatement> statement;
-
-        var scope = loopStatement.scope;
-        var collectionExpression = loopStatement.collectionExpression;
-        var valueIdentifier = loopStatement.valueIdentifier;
-        var keyIdentifier = loopStatement.keyIdentifier;
-
-        var collection = collectionExpression.evaluateToIntermediate(this, stack);
-        assert(_.isArray(collection) || _.isObject(collection))
-
-        for (var key in collection) {
-          var value = collection[key];
-          scope.addLiteralValueMacro(valueIdentifier, value);
-          if (keyIdentifier) { scope.addLiteralValueMacro(keyIdentifier, key); }
-          scope.eachPrimitiveStatement(stack, callback)
-        }
+        loopStatement.eachPrimitiveStatement(stack, callback);
 
       } else if (statement instanceof Statement.IfStatement) {
         var ifStatement = <Statement.IfStatement> statement;
 
+        var done = false;
+
         if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
           ifStatement.scope.eachPrimitiveStatement(stack, callback);
-          continue;
+          done = true;
         }
 
-        var flag = false;
         while (statements[i + 1] instanceof Statement.ElseIfStatement) {
           var elseIfStatement = <Statement.ElseIfStatement> statements[++i];
 
-          if (elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
-            elseIfStatement.scope.eachPrimitiveStatement(stack, callback)
-            flag = true
-            break
+          if (!done && elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
+            elseIfStatement.scope.eachPrimitiveStatement(stack, callback);
+            done = true;
+            break;
           }
         }
 
-        if (!flag && statements[i + 1] instanceof Statement.ElseStatement) {
+        if (statements[i + 1] instanceof Statement.ElseStatement) {
           var elseStatement = <Statement.ElseStatement> statements[++i];
-          elseStatement.scope.eachPrimitiveStatement(stack, callback)
+          if (!done) {
+            elseStatement.scope.eachPrimitiveStatement(stack, callback)
+          }
         }
 
       } else if (statement instanceof Statement.PropertyStatement) {
@@ -286,25 +269,7 @@ class Scope {
     var properties = {};
 
     var evaluatePrimitiveStatement = (scope:Scope, statement:Statement) => {
-      if (statement instanceof Statement.LayerStatement) {
-        var layerStatement = <Statement.LayerStatement> statement;
-
-        layers.push(layerStatement.scope.evaluate(Scope.Type.LAYER, stack));
-
-      } else if (statement instanceof Statement.ClassStatement) {
-        var classStatement = <Statement.ClassStatement> statement;
-        classes.push(classStatement.scope.evaluate(Scope.Type.CLASS, stack))
-
-      } else if (statement instanceof Statement.PropertyStatement) {
-        var propertyStatement = <Statement.PropertyStatement> statement;
-
-        var values = propertyStatement.expressions.toValueSet(scope, stack);
-        if (values.length != 1 || values.positional.length != 1) {
-          throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name)
-        }
-
-        properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
-      }
+      statement.evaluate(scope, stack, layers, classes, properties);
     }
 
     if (type == Scope.Type.GLOBAL) {

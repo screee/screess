@@ -102,10 +102,9 @@ var Scope = (function () {
     }
     Scope.createGlobal = function () {
         var scope = new Scope();
-        var include = function (values, callback, scope, stack) {
+        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
             scope.include(values.positional[0], callback, scope, stack);
-        };
-        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, include);
+        });
         return scope;
     };
     Scope.prototype.isGlobal = function () {
@@ -132,13 +131,11 @@ var Scope = (function () {
         this.statements.push(new Statement.PropertyStatement(name, expressions));
     };
     Scope.prototype.addClass = function (name) {
-        // TODO ensure class scopes are merged properly
         var scope = new Scope(this, name);
         this.statements.push(new Statement.ClassStatement(name, scope));
         return scope;
     };
     Scope.prototype.addLayer = function (name) {
-        // TODO check for duplicate layer scopes
         var scope = new Scope(this, name);
         this.statements.push(new Statement.LayerStatement(name, scope));
         return scope;
@@ -209,16 +206,17 @@ var Scope = (function () {
             this.parent.eachValueMacro(callback);
     };
     Scope.prototype.getValueMacrosAsFunctions = function (stack) {
+        var _this = this;
         var names = [];
         this.eachValueMacro(function (macro) {
             names.push(macro.name);
         });
         names = _.uniq(names);
-        var scope = this;
         return _.objectMap(names, function (name) {
+            var that = _this;
             return [name, function () {
                 var args = ValueSet.fromPositionalValues(_.toArray(arguments));
-                var macro = scope.getValueMacro(name, args, stack);
+                var macro = that.getValueMacro(name, args, stack);
                 if (!macro)
                     return null;
                 else
@@ -226,7 +224,6 @@ var Scope = (function () {
             }];
         });
     };
-    // TODO write eachPropertyMacro
     Scope.prototype.getPropertyMacro = function (name, values, stack) {
         for (var i in this.propertyMacros) {
             var macro = this.propertyMacros[i];
@@ -245,39 +242,28 @@ var Scope = (function () {
             var statement = statements[i];
             if (statement instanceof Statement.LoopStatement) {
                 var loopStatement = statement;
-                var scope = loopStatement.scope;
-                var collectionExpression = loopStatement.collectionExpression;
-                var valueIdentifier = loopStatement.valueIdentifier;
-                var keyIdentifier = loopStatement.keyIdentifier;
-                var collection = collectionExpression.evaluateToIntermediate(this, stack);
-                assert(_.isArray(collection) || _.isObject(collection));
-                for (var key in collection) {
-                    var value = collection[key];
-                    scope.addLiteralValueMacro(valueIdentifier, value);
-                    if (keyIdentifier) {
-                        scope.addLiteralValueMacro(keyIdentifier, key);
-                    }
-                    scope.eachPrimitiveStatement(stack, callback);
-                }
+                loopStatement.eachPrimitiveStatement(stack, callback);
             }
             else if (statement instanceof Statement.IfStatement) {
                 var ifStatement = statement;
+                var done = false;
                 if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
                     ifStatement.scope.eachPrimitiveStatement(stack, callback);
-                    continue;
+                    done = true;
                 }
-                var flag = false;
                 while (statements[i + 1] instanceof Statement.ElseIfStatement) {
                     var elseIfStatement = statements[++i];
-                    if (elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
+                    if (!done && elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
                         elseIfStatement.scope.eachPrimitiveStatement(stack, callback);
-                        flag = true;
+                        done = true;
                         break;
                     }
                 }
-                if (!flag && statements[i + 1] instanceof Statement.ElseStatement) {
+                if (statements[i + 1] instanceof Statement.ElseStatement) {
                     var elseStatement = statements[++i];
-                    elseStatement.scope.eachPrimitiveStatement(stack, callback);
+                    if (!done) {
+                        elseStatement.scope.eachPrimitiveStatement(stack, callback);
+                    }
                 }
             }
             else if (statement instanceof Statement.PropertyStatement) {
@@ -311,22 +297,7 @@ var Scope = (function () {
         var classes = [];
         var properties = {};
         var evaluatePrimitiveStatement = function (scope, statement) {
-            if (statement instanceof Statement.LayerStatement) {
-                var layerStatement = statement;
-                layers.push(layerStatement.scope.evaluate(1 /* LAYER */, stack));
-            }
-            else if (statement instanceof Statement.ClassStatement) {
-                var classStatement = statement;
-                classes.push(classStatement.scope.evaluate(2 /* CLASS */, stack));
-            }
-            else if (statement instanceof Statement.PropertyStatement) {
-                var propertyStatement = statement;
-                var values = propertyStatement.expressions.toValueSet(scope, stack);
-                if (values.length != 1 || values.positional.length != 1) {
-                    throw new Error("Cannot apply " + values.length + " args to primitive property " + propertyStatement.name);
-                }
-                properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
-            }
+            statement.evaluate(scope, stack, layers, classes, properties);
         };
         if (type == 0 /* GLOBAL */) {
             this.include("core.sss", evaluatePrimitiveStatement, this, stack);
