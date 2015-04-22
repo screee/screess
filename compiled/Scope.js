@@ -239,20 +239,7 @@ var Scope = (function () {
                 statement.eachPrimitiveStatement(this, stack, callback);
             }
             else if (statement instanceof Statement.PropertyStatement) {
-                var propertyStatement = statement;
-                var values = propertyStatement.expressions.toValueSet(this, stack);
-                var macro;
-                if (macro = this.getPropertyMacro(propertyStatement.name, values, stack)) {
-                    stack.propertyMacro.push(macro);
-                    // Property macros may have primitive statements and/or a body function
-                    macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
-                    if (macro.body)
-                        macro.body(values, callback, this, stack);
-                    stack.propertyMacro.pop();
-                }
-                else {
-                    callback(this, statement);
-                }
+                statement.eachPrimitiveStatement(this, stack, callback);
             }
             else {
                 callback(this, statement);

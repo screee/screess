@@ -6,6 +6,7 @@ import assert = require("assert");
 import _ = require("./utilities");
 import Value = require("./values/value");
 
+// TODO put each statement class in its own file
 // TODO always pass a scope at statment construction time, don't pass into methods after that
 class Statement {
 
@@ -80,6 +81,21 @@ module Statement {
 
       properties[this.name] = Value.evaluate(values.positional[0]);
     }
+
+    eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
+      var values = this.expressions.toValueSet(scope, stack);
+
+      var macro;
+      if (macro = scope.getPropertyMacro(this.name, values, stack)) {
+        stack.propertyMacro.push(macro);
+        // Property macros may have primitive statements and/or a body function
+        macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
+        if (macro.body) macro.body(values, callback, scope, stack);
+        stack.propertyMacro.pop();
+      } else {
+        callback(scope, this);
+      }
+    }
   }
 
   export class ConditionalStatement extends Statement {
@@ -90,7 +106,6 @@ module Statement {
     eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
       for (var i in this.items) {
         var item = this.items[i];
-        assert(item.scope);
         if (item.condition.evaluateToIntermediate(scope, stack)) {
           item.scope.eachPrimitiveStatement(stack, callback);
           break;
@@ -98,26 +113,6 @@ module Statement {
       }
     }
   }
-
-  // export class IfStatement extends Statement {
-  //   constructor(
-  //     public expression:Expression,
-  //     public scope:Scope
-  //   ) { super() }
-  // }
-
-  // export class ElseIfStatement extends Statement {
-  //   constructor(
-  //     public expression:Expression,
-  //     public scope:Scope
-  //   ) { super() }
-  // }
-
-  // export class ElseStatement extends Statement {
-  //   constructor(
-  //     public scope:Scope
-  //   ) { super() }
-  // }
 
 }
 

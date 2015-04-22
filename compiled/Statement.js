@@ -8,6 +8,7 @@ var Scope = require("./Scope");
 var assert = require("assert");
 var _ = require("./utilities");
 var Value = require("./values/value");
+// TODO put each statement class in its own file
 // TODO always pass a scope at statment construction time, don't pass into methods after that
 var Statement = (function () {
     function Statement() {
@@ -86,6 +87,21 @@ var Statement;
             }
             properties[this.name] = Value.evaluate(values.positional[0]);
         };
+        PropertyStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
+            var values = this.expressions.toValueSet(scope, stack);
+            var macro;
+            if (macro = scope.getPropertyMacro(this.name, values, stack)) {
+                stack.propertyMacro.push(macro);
+                // Property macros may have primitive statements and/or a body function
+                macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
+                if (macro.body)
+                    macro.body(values, callback, scope, stack);
+                stack.propertyMacro.pop();
+            }
+            else {
+                callback(scope, this);
+            }
+        };
         return PropertyStatement;
     })(Statement);
     Statement.PropertyStatement = PropertyStatement;
@@ -99,7 +115,6 @@ var Statement;
         ConditionalStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
             for (var i in this.items) {
                 var item = this.items[i];
-                assert(item.scope);
                 if (item.condition.evaluateToIntermediate(scope, stack)) {
                     item.scope.eachPrimitiveStatement(stack, callback);
                     break;
