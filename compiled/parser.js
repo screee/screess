@@ -33,7 +33,7 @@ module.exports = (function() {
         peg$startRuleFunction  = peg$parseglobal,
 
         peg$c0 = function() {return (function() {
-          return this.stylesheet;
+          return this.globalScope;
         }).apply(__initializer);
         },
         peg$c1 = peg$FAILED,
@@ -4841,8 +4841,7 @@ module.exports = (function() {
       this._ = require('./utilities');
       assert = require('assert');
       this._.extend(this, require("./index"));
-      this.stylesheet = new this.Stylesheet();
-      this.globalScope = this.scope = this.stylesheet.scope;
+      this.globalScope = this.scope = this.Scope.createGlobal();
       this.pushScope = function(scope) {
         assert(scope instanceof _this.Scope, "Malformed arguments to pushScope");
         assert(scope.parent === _this.scope, "Next scope must be child of current scope");

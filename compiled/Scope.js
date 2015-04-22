@@ -13,14 +13,16 @@ var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
     function Scope(parent, name, statements) {
         var _this = this;
+        if (parent === void 0) { parent = null; }
         if (name === void 0) { name = null; }
         if (statements === void 0) { statements = []; }
+        this.parent = parent;
         this.name = name;
         this.statements = statements;
         this.formatScope = {
             // GLOBAL
             0: function (stack, properties, layers, classes) {
-                var sources = _this.stylesheet.sources;
+                var sources = _this.sources;
                 var transition = {
                     duration: properties["transition-delay"],
                     delay: properties["transition-duration"]
@@ -96,37 +98,29 @@ var Scope = (function () {
         };
         this.valueMacros = [];
         this.propertyMacros = [];
-        if (parent instanceof Scope) {
-            this.parent = parent;
-            this.stylesheet = parent.stylesheet;
-        }
-        else {
-            this.parent = null;
-            this.stylesheet = parent;
-            var that = this;
-            this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
-                for (var i in values.positional) {
-                    var filename = values.positional[i];
-                    var stylesheet = Parser.parse(FS.readFileSync(filename, "utf8"));
-                    var scope = stylesheet.scope;
-                    // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
-                    scope.parent = null;
-                    scope.stylesheet = that.stylesheet;
-                    scope.eachPrimitiveStatement(stack, callback);
-                    that.valueMacros = scope.valueMacros.concat(that.valueMacros);
-                    that.propertyMacros = scope.propertyMacros.concat(that.propertyMacros);
-                }
-            });
-            for (var macroName in Globals.valueMacros) {
-                var fn = Globals.valueMacros[macroName];
-                this.addValueMacro(macroName, null, fn);
-            }
-            for (var macroName in Globals.propertyMacros) {
-                var fn = Globals.propertyMacros[macroName];
-                this.addPropertyMacro(macroName, null, fn);
-            }
-        }
+        this.sources = {};
     }
+    Scope.createGlobal = function () {
+        var scope = new Scope();
+        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
+            for (var i in values.positional) {
+                var filename = values.positional[i];
+                var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
+                scopeIncluded.eachPrimitiveStatement(stack, callback);
+                scope.valueMacros = scopeIncluded.valueMacros.concat(scope.valueMacros);
+                scope.propertyMacros = scopeIncluded.propertyMacros.concat(scope.propertyMacros);
+            }
+        });
+        for (var macroName in Globals.valueMacros) {
+            var fn = Globals.valueMacros[macroName];
+            scope.addValueMacro(macroName, null, fn);
+        }
+        for (var macroName in Globals.propertyMacros) {
+            var fn = Globals.propertyMacros[macroName];
+            scope.addPropertyMacro(macroName, null, fn);
+        }
+        return scope;
+    };
     Scope.prototype.isGlobal = function () {
         return !this.parent;
     };
@@ -136,7 +130,9 @@ var Scope = (function () {
     //////////////////////////////////////////////////////////////////////////////
     // Construction
     Scope.prototype.addSource = function (source) {
-        return this.stylesheet.addSource(source);
+        var hash = _.hash(JSON.stringify(source)).toString();
+        this.getGlobalScope().sources[hash] = source;
+        return hash;
     };
     Scope.prototype.addProperty = function (name, expressions) {
         assert(name != null);
@@ -315,6 +311,7 @@ var Scope = (function () {
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
     Scope.prototype.evaluate = function (type, stack) {
+        if (type === void 0) { type = 0 /* GLOBAL */; }
         if (stack === void 0) { stack = new Stack(); }
         stack.scope.push(this);
         var layers = [];

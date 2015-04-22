@@ -4,7 +4,6 @@ exports.eval = require("./eval");
 exports.Scope = require("./Scope");
 exports.Stack = require("./Stack");
 exports.Statement = require("./Statement");
-exports.Stylesheet = require("./Stylesheet");
 exports.utilities = require("./utilities");
 exports._ = require("./utilities");
 exports.ExpressionSet = require("./ExpressionSet");

@@ -9,7 +9,6 @@ import ExpressionSet = require('./ExpressionSet');
 import ValueMacro = require('./macros/ValueMacro');
 import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
-import Stylesheet = require('./Stylesheet');
 import Statement = require('./Statement');
 import FS = require("fs");
 var Parser = require("./parser");
@@ -18,61 +17,48 @@ var MBGLStyleSpec = require('mapbox-gl-style-spec');
 
 class Scope {
 
-  public parent:Scope;
-  public stylesheet:Stylesheet;
+  static createGlobal():Scope {
+    var scope = new Scope()
 
+    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
+      for (var i in values.positional) {
+        var filename = values.positional[i];
+        var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
+
+        scopeIncluded.eachPrimitiveStatement(stack, callback);
+
+        scope.valueMacros = scopeIncluded.valueMacros.concat(scope.valueMacros);
+        scope.propertyMacros = scopeIncluded.propertyMacros.concat(scope.propertyMacros);
+      }
+    });
+
+    // TODO replace with self-hosted core library
+    for (var macroName in Globals.valueMacros) {
+      var fn = Globals.valueMacros[macroName];
+      scope.addValueMacro(macroName, null, fn);
+    }
+
+    // TODO replace with self-hosted core library
+    for (var macroName in Globals.propertyMacros) {
+      var fn = Globals.propertyMacros[macroName];
+      scope.addPropertyMacro(macroName, null, fn);
+    }
+
+    return scope;
+  }
+
+  public sources:{};
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
-  constructor(stylesheet:Stylesheet, name?:string, statements?:Statement[]);
-  constructor(parent:Scope, name?:string, statements?:Statement[]);
   constructor(
-      parent,
+      public parent:Scope = null,
       public name:string = null,
       public statements:Statement[] = []
   ) {
     this.valueMacros = [];
     this.propertyMacros = [];
-
-    if (parent instanceof Scope) {
-      this.parent = parent;
-      this.stylesheet = parent.stylesheet;
-
-    } else { // parent instanceof Stylesheet
-      this.parent = null;
-      this.stylesheet = parent;
-      var that = this;
-
-      this.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function(values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) {
-        for (var i in values.positional) {
-          var filename = values.positional[i];
-          var stylesheet = Parser.parse(FS.readFileSync(filename, "utf8"));
-          var scope:Scope = stylesheet.scope;
-
-          // TODO refactor to make this less bad, remove coupling between scope and stylesheet classes, will reuqire changing the parser
-          scope.parent = null;
-          scope.stylesheet = that.stylesheet;
-
-          scope.eachPrimitiveStatement(stack, callback);
-
-          that.valueMacros = scope.valueMacros.concat(that.valueMacros);
-          that.propertyMacros = scope.propertyMacros.concat(that.propertyMacros);
-        }
-      });
-
-      // TODO replace with self-hosted core library
-      for (var macroName in Globals.valueMacros) {
-        var fn = Globals.valueMacros[macroName];
-        this.addValueMacro(macroName, null, fn);
-      }
-
-      // TODO replace with self-hosted core library
-      for (var macroName in Globals.propertyMacros) {
-        var fn = Globals.propertyMacros[macroName];
-        this.addPropertyMacro(macroName, null, fn);
-      }
-
-    }
+    this.sources = {};
   }
 
   isGlobal():boolean {
@@ -87,7 +73,9 @@ class Scope {
   // Construction
 
   addSource(source:{}):string {
-    return this.stylesheet.addSource(source);
+    var hash = _.hash(JSON.stringify(source)).toString();
+    this.getGlobalScope().sources[hash] = source;
+    return hash;
   }
 
   addProperty(name:string, expressions:ExpressionSet):void {
@@ -301,7 +289,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
-  evaluate(type:Scope.Type, stack:Stack = new Stack()):{} {
+  evaluate(type:Scope.Type = Scope.Type.GLOBAL, stack:Stack = new Stack()):{} {
     stack.scope.push(this)
 
     var layers = [];
@@ -343,7 +331,7 @@ class Scope {
 
     // GLOBAL
     0: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
-      var sources = this.stylesheet.sources;
+      var sources = this.sources;
 
       var transition = {
         duration: properties["transition-delay"],

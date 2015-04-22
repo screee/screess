@@ -5,8 +5,7 @@
 
   @_.extend(@, require("./index"))
 
-  @stylesheet = new @Stylesheet()
-  @globalScope = @scope = @stylesheet.scope
+  @globalScope = @scope = @Scope.createGlobal();
 
   @pushScope = (scope) =>
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
@@ -19,7 +18,7 @@
   @rehead = (head, tail) => [head].concat(@_.pluck(tail, 1))
 }
 
-global = statements { @stylesheet }
+global = statements { @globalScope }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 

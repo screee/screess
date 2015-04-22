@@ -1,10 +1,10 @@
 var Scope = require('./Scope');
 var _ = require('./utilities');
-// TODO deprecate this class altogether, just have a global scope?
+// TODO don't return this from the parser?
 var Stylesheet = (function () {
     function Stylesheet() {
         this.sources = {};
-        this.scope = new Scope(this, null);
+        this.scope = Scope.createGlobal();
     }
     // TODO make Source class
     Stylesheet.prototype.addSource = function (source) {
