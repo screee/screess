@@ -1,6 +1,3 @@
-HASHMARK = $(shell echo "\#")
-NEWLINE = $(shell echo "\n")
-
 clean:
 	rm -r compiled/*
 

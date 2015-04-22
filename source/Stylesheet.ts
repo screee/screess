@@ -14,7 +14,6 @@ class Stylesheet {
     this.scope = Scope.createGlobal();
   }
 
-  // TODO make Source class
   addSource(source:{}):string {
     var hash = _.hash(JSON.stringify(source)).toString();
     this.sources[hash] = source;

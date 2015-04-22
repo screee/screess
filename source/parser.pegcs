@@ -7,15 +7,18 @@
 
   @globalScope = @scope = @Scope.createGlobal();
 
-  @pushScope = (scope) =>
+  @pushScope = (scope = new @Scope(@scope)) =>
     assert(scope instanceof @Scope, "Malformed arguments to pushScope")
     assert(scope.parent == @scope, "Next scope must be child of current scope")
     @scope = scope
 
   @popScope = =>
-    @scope = @scope.parent
+    scopeOld = @scope
+    scopeNew = @scope.parent
+    @scope = scopeNew
+    return scopeOld
 
-  @rehead = (head, tail) => [head].concat(@_.pluck(tail, 1))
+  @rehead = (head, body) => [head].concat(@_.pluck(body, 1))
 }
 
 global = statements { @globalScope }
@@ -91,6 +94,8 @@ statement =
   conditional /
   property
 
+// TODO create Statement classes directally, using default Scope creation in pushScope
+
 property =
   name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak { @scope.addProperty(name, expressions) } /
   name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { @scope.addProperty(name, expressions) } /
@@ -104,9 +109,16 @@ loop =
   ("for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* { @pushScope(@scope.addLoop(valueIdentifier, null, collection)) }) scope
 
 conditional =
-  ("if" whitespace+ expression:expression whitespace* { @pushScope(@scope.addIf(expression)) }) scope
-  ((whitespace* "else if" whitespace+ expression:expression whitespace* { @pushScope(@scope.addElseIf(expression)) }) scope)*
-  ((whitespace* ("else") whitespace* {@pushScope(@scope.addElse())}) scope)?
+  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @Statement.ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
+
+conditionalIf =
+  condition:("if" whitespace+ condition:expression whitespace* { @pushScope(); condition }) scope:scope { {condition: condition, scope: scope} }
+
+conditionalElseIf =
+  condition:("else if" whitespace+ condition:expression whitespace* { @pushScope(); condition }) scope:scope { {condition: condition, scope: scope} }
+
+conditionalElse =
+  ("else" whitespace* { @pushScope() }) scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
 
 layer =
   ("#" name:identifier? { @pushScope(@scope.addLayer(name)) }) scope
@@ -118,7 +130,7 @@ propertyMacroDefinition =
   (name:identifier args:expressionSetDefinition whitespace* "=" whitespace* { @pushScope(@scope.addPropertyMacro(name, args)) }) scope
 
 scope =
-  (whitespace* "{" body:statements "}" { @popScope() })
+  whitespace* "{" body:statements "}" { @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

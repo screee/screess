@@ -7,7 +7,6 @@ var Stylesheet = (function () {
         this.sources = {};
         this.scope = Scope.createGlobal();
     }
-    // TODO make Source class
     Stylesheet.prototype.addSource = function (source) {
         var hash = _.hash(JSON.stringify(source)).toString();
         this.sources[hash] = source;

@@ -126,39 +126,31 @@ var Scope = (function () {
         this.getGlobalScope().sources[hash] = source;
         return hash;
     };
+    // TODO deprecate in favor of directly constructing class in parser
     Scope.prototype.addProperty = function (name, expressions) {
         assert(name != null);
         this.statements.push(new Statement.PropertyStatement(name, expressions));
     };
+    // TODO deprecate in favor of directly constructing class in parser
     Scope.prototype.addClass = function (name) {
         var scope = new Scope(this, name);
         this.statements.push(new Statement.ClassStatement(name, scope));
         return scope;
     };
+    // TODO deprecate in favor of directly constructing class in parser
     Scope.prototype.addLayer = function (name) {
         var scope = new Scope(this, name);
         this.statements.push(new Statement.LayerStatement(name, scope));
         return scope;
     };
+    // TODO deprecate in favor of directly constructing class in parser
     Scope.prototype.addLoop = function (valueIdentifier, keyIdentifier, collectionExpression) {
         var scope = new Scope(this);
         this.statements.push(new Statement.LoopStatement(scope, valueIdentifier, keyIdentifier, collectionExpression));
         return scope;
     };
-    Scope.prototype.addIf = function (expression) {
-        var scope = new Scope(this);
-        this.statements.push(new Statement.IfStatement(expression, scope));
-        return scope;
-    };
-    Scope.prototype.addElseIf = function (expression) {
-        var scope = new Scope(this);
-        this.statements.push(new Statement.ElseIfStatement(expression, scope));
-        return scope;
-    };
-    Scope.prototype.addElse = function () {
-        var scope = new Scope(this);
-        this.statements.push(new Statement.ElseStatement(scope));
-        return scope;
+    Scope.prototype.addStatement = function (statement) {
+        this.statements.push(statement);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Macro Construction
@@ -241,30 +233,10 @@ var Scope = (function () {
         for (var i = 0; i < statements.length; i++) {
             var statement = statements[i];
             if (statement instanceof Statement.LoopStatement) {
-                var loopStatement = statement;
-                loopStatement.eachPrimitiveStatement(stack, callback);
+                statement.eachPrimitiveStatement(this, stack, callback);
             }
-            else if (statement instanceof Statement.IfStatement) {
-                var ifStatement = statement;
-                var done = false;
-                if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
-                    ifStatement.scope.eachPrimitiveStatement(stack, callback);
-                    done = true;
-                }
-                while (statements[i + 1] instanceof Statement.ElseIfStatement) {
-                    var elseIfStatement = statements[++i];
-                    if (!done && elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
-                        elseIfStatement.scope.eachPrimitiveStatement(stack, callback);
-                        done = true;
-                        break;
-                    }
-                }
-                if (statements[i + 1] instanceof Statement.ElseStatement) {
-                    var elseStatement = statements[++i];
-                    if (!done) {
-                        elseStatement.scope.eachPrimitiveStatement(stack, callback);
-                    }
-                }
+            else if (statement instanceof Statement.ConditionalStatement) {
+                statement.eachPrimitiveStatement(this, stack, callback);
             }
             else if (statement instanceof Statement.PropertyStatement) {
                 var propertyStatement = statement;

@@ -6,9 +6,10 @@ import assert = require("assert");
 import _ = require("./utilities");
 import Value = require("./values/value");
 
+// TODO always pass a scope at statment construction time, don't pass into methods after that
 class Statement {
 
-  eachPrimitiveStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
+  eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
     assert(false, "abstract method");
   }
 
@@ -28,7 +29,7 @@ module Statement {
         public collectionExpression:Expression
     ) { super() }
 
-    eachPrimitiveStatement(stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
+    eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
 
       var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
       assert(_.isArray(collection) || _.isObject(collection))
@@ -81,25 +82,42 @@ module Statement {
     }
   }
 
-  export class IfStatement extends Statement {
-    constructor(
-      public expression:Expression,
-      public scope:Scope
-    ) { super() }
+  export class ConditionalStatement extends Statement {
+
+    // TODO only accept a condition, true statement, and false statement; chain for "else if"
+    constructor(public items:{condition:Expression; scope:Scope;}[]) { super(); }
+
+    eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
+      for (var i in this.items) {
+        var item = this.items[i];
+        assert(item.scope);
+        if (item.condition.evaluateToIntermediate(scope, stack)) {
+          item.scope.eachPrimitiveStatement(stack, callback);
+          break;
+        }
+      }
+    }
   }
 
-  export class ElseIfStatement extends Statement {
-    constructor(
-      public expression:Expression,
-      public scope:Scope
-    ) { super() }
-  }
+  // export class IfStatement extends Statement {
+  //   constructor(
+  //     public expression:Expression,
+  //     public scope:Scope
+  //   ) { super() }
+  // }
 
-  export class ElseStatement extends Statement {
-    constructor(
-      public scope:Scope
-    ) { super() }
-  }
+  // export class ElseIfStatement extends Statement {
+  //   constructor(
+  //     public expression:Expression,
+  //     public scope:Scope
+  //   ) { super() }
+  // }
+
+  // export class ElseStatement extends Statement {
+  //   constructor(
+  //     public scope:Scope
+  //   ) { super() }
+  // }
 
 }
 

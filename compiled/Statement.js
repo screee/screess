@@ -8,10 +8,11 @@ var Scope = require("./Scope");
 var assert = require("assert");
 var _ = require("./utilities");
 var Value = require("./values/value");
+// TODO always pass a scope at statment construction time, don't pass into methods after that
 var Statement = (function () {
     function Statement() {
     }
-    Statement.prototype.eachPrimitiveStatement = function (stack, callback) {
+    Statement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
         assert(false, "abstract method");
     };
     Statement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
@@ -30,7 +31,7 @@ var Statement;
             this.keyIdentifier = keyIdentifier;
             this.collectionExpression = collectionExpression;
         }
-        LoopStatement.prototype.eachPrimitiveStatement = function (stack, callback) {
+        LoopStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
             var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
             assert(_.isArray(collection) || _.isObject(collection));
             for (var key in collection) {
@@ -88,35 +89,26 @@ var Statement;
         return PropertyStatement;
     })(Statement);
     Statement.PropertyStatement = PropertyStatement;
-    var IfStatement = (function (_super) {
-        __extends(IfStatement, _super);
-        function IfStatement(expression, scope) {
+    var ConditionalStatement = (function (_super) {
+        __extends(ConditionalStatement, _super);
+        // TODO only accept a condition, true statement, and false statement; chain for "else if"
+        function ConditionalStatement(items) {
             _super.call(this);
-            this.expression = expression;
-            this.scope = scope;
+            this.items = items;
         }
-        return IfStatement;
+        ConditionalStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
+            for (var i in this.items) {
+                var item = this.items[i];
+                assert(item.scope);
+                if (item.condition.evaluateToIntermediate(scope, stack)) {
+                    item.scope.eachPrimitiveStatement(stack, callback);
+                    break;
+                }
+            }
+        };
+        return ConditionalStatement;
     })(Statement);
-    Statement.IfStatement = IfStatement;
-    var ElseIfStatement = (function (_super) {
-        __extends(ElseIfStatement, _super);
-        function ElseIfStatement(expression, scope) {
-            _super.call(this);
-            this.expression = expression;
-            this.scope = scope;
-        }
-        return ElseIfStatement;
-    })(Statement);
-    Statement.ElseIfStatement = ElseIfStatement;
-    var ElseStatement = (function (_super) {
-        __extends(ElseStatement, _super);
-        function ElseStatement(scope) {
-            _super.call(this);
-            this.scope = scope;
-        }
-        return ElseStatement;
-    })(Statement);
-    Statement.ElseStatement = ElseStatement;
+    Statement.ConditionalStatement = ConditionalStatement;
 })(Statement || (Statement = {}));
 module.exports = Statement;
 //# sourceMappingURL=Statement.js.map

@@ -65,23 +65,27 @@ class Scope {
     return hash;
   }
 
+  // TODO deprecate in favor of directly constructing class in parser
   addProperty(name:string, expressions:ExpressionSet):void {
     assert(name != null);
     this.statements.push(new Statement.PropertyStatement(name, expressions));
   }
 
+  // TODO deprecate in favor of directly constructing class in parser
   addClass(name:string):Scope {
     var scope = new Scope(this, name)
     this.statements.push(new Statement.ClassStatement(name, scope));
     return scope;
   }
 
+  // TODO deprecate in favor of directly constructing class in parser
   addLayer(name?:string):Scope {
     var scope = new Scope(this, name)
     this.statements.push(new Statement.LayerStatement(name, scope));
     return scope;
   }
 
+  // TODO deprecate in favor of directly constructing class in parser
   addLoop(valueIdentifier:string, keyIdentifier:string, collectionExpression:Expression):Scope {
     var scope = new Scope(this);
     this.statements.push(new Statement.LoopStatement(
@@ -93,22 +97,8 @@ class Scope {
     return scope;
   }
 
-  addIf(expression:Expression):Scope {
-    var scope = new Scope(this);
-    this.statements.push(new Statement.IfStatement(expression, scope));
-    return scope;
-  }
-
-  addElseIf(expression:Expression):Scope {
-    var scope = new Scope(this);
-    this.statements.push(new Statement.ElseIfStatement(expression, scope));
-    return scope;
-  }
-
-  addElse():Scope {
-    var scope = new Scope(this);
-    this.statements.push(new Statement.ElseStatement(scope));
-    return scope;
+  addStatement(statement:Statement) {
+    this.statements.push(statement);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -206,35 +196,10 @@ class Scope {
       var statement = statements[i];
 
       if (statement instanceof Statement.LoopStatement) {
-        var loopStatement = <Statement.LoopStatement> statement;
-        loopStatement.eachPrimitiveStatement(stack, callback);
+        statement.eachPrimitiveStatement(this, stack, callback);
 
-      } else if (statement instanceof Statement.IfStatement) {
-        var ifStatement = <Statement.IfStatement> statement;
-
-        var done = false;
-
-        if (ifStatement.expression.evaluateToIntermediate(this, stack)) {
-          ifStatement.scope.eachPrimitiveStatement(stack, callback);
-          done = true;
-        }
-
-        while (statements[i + 1] instanceof Statement.ElseIfStatement) {
-          var elseIfStatement = <Statement.ElseIfStatement> statements[++i];
-
-          if (!done && elseIfStatement.expression.evaluateToIntermediate(this, stack)) {
-            elseIfStatement.scope.eachPrimitiveStatement(stack, callback);
-            done = true;
-            break;
-          }
-        }
-
-        if (statements[i + 1] instanceof Statement.ElseStatement) {
-          var elseStatement = <Statement.ElseStatement> statements[++i];
-          if (!done) {
-            elseStatement.scope.eachPrimitiveStatement(stack, callback)
-          }
-        }
+      } else if (statement instanceof Statement.ConditionalStatement) {
+        statement.eachPrimitiveStatement(this, stack, callback);
 
       } else if (statement instanceof Statement.PropertyStatement) {
         var propertyStatement = <Statement.PropertyStatement> statement;
