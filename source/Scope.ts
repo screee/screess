@@ -20,29 +20,11 @@ class Scope {
   static createGlobal():Scope {
     var scope = new Scope()
 
-    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
-      for (var i in values.positional) {
-        var filename = values.positional[i];
-        var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
-
-        scopeIncluded.eachPrimitiveStatement(stack, callback);
-
-        scope.valueMacros = scopeIncluded.valueMacros.concat(scope.valueMacros);
-        scope.propertyMacros = scopeIncluded.propertyMacros.concat(scope.propertyMacros);
-      }
-    });
-
-    // TODO replace with self-hosted core library
-    for (var macroName in Globals.valueMacros) {
-      var fn = Globals.valueMacros[macroName];
-      scope.addValueMacro(macroName, null, fn);
+    var include = (values:ValueSet, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) => {
+      scope.include(values.positional[0], callback, scope, stack);
     }
 
-    // TODO replace with self-hosted core library
-    for (var macroName in Globals.propertyMacros) {
-      var fn = Globals.propertyMacros[macroName];
-      scope.addPropertyMacro(macroName, null, fn);
-    }
+    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, include);
 
     return scope;
   }
@@ -67,6 +49,13 @@ class Scope {
 
   getGlobalScope():Scope {
     return this.isGlobal() ? this : this.parent.getGlobalScope();
+  }
+
+  include(filename:string, callback:(scope:Scope, statement:Statement) => void, scope:Scope, stack:Stack) {
+    var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
+    scopeIncluded.eachPrimitiveStatement(stack, callback);
+    this.valueMacros = scopeIncluded.valueMacros.concat(this.valueMacros);
+    this.propertyMacros = scopeIncluded.propertyMacros.concat(this.propertyMacros);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -275,7 +264,7 @@ class Scope {
           // Property macros may have primitive statements and/or a body function
           macro.getScope(values, stack).eachPrimitiveStatement(stack, callback);
           if (macro.body) macro.body(values, callback, this, stack);
-          stack.propertyMacro.pop()
+          stack.propertyMacro.pop();
         } else {
           callback(this, statement);
         }
@@ -290,13 +279,13 @@ class Scope {
   // Evaluation
 
   evaluate(type:Scope.Type = Scope.Type.GLOBAL, stack:Stack = new Stack()):{} {
-    stack.scope.push(this)
+    stack.scope.push(this);
 
     var layers = [];
     var classes = [];
     var properties = {};
 
-    this.eachPrimitiveStatement(stack, (scope, statement) => {
+    var evaluatePrimitiveStatement = (scope:Scope, statement:Statement) => {
       if (statement instanceof Statement.LayerStatement) {
         var layerStatement = <Statement.LayerStatement> statement;
 
@@ -316,7 +305,13 @@ class Scope {
 
         properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
       }
-    });
+    }
+
+    if (type == Scope.Type.GLOBAL) {
+      this.include("core.sss", evaluatePrimitiveStatement, this, stack);
+    }
+
+    this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
 
     layers = _.sortBy(layers, 'z-index');
     if (layers.length == 0) { layers = undefined }

@@ -62,7 +62,7 @@ class ValueSet {
     for (var i in items) {
       var item = items[i];
 
-      if (item.name) {
+      if (item.name !== undefined) {
         this.named[item.name] = item.value;
       } else {
         this.positional.push(item.value);

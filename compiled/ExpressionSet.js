@@ -1,6 +1,7 @@
 var assert = require('assert');
 var ValueSet = require('./ValueSet');
 var _ = require('./utilities');
+var LiteralExpression = require('./expressions/LiteralExpression');
 var ExpressionSet = (function () {
     function ExpressionSet(items) {
         this.items = items;
@@ -14,6 +15,11 @@ var ExpressionSet = (function () {
                 this.isNamed_ = false;
         }
     }
+    ExpressionSet.fromPositionalValues = function (values) {
+        return new ExpressionSet(_.map(values, function (value) {
+            return { expression: new LiteralExpression(value) };
+        }));
+    };
     ExpressionSet.prototype.isNamed = function () {
         return this.isNamed_;
     };

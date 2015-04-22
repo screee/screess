@@ -4,6 +4,8 @@ import Scope = require("./Scope");
 import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
+import LiteralExpression = require('./expressions/LiteralExpression');
+
 
 interface Item {
   name?:string;
@@ -11,6 +13,12 @@ interface Item {
 }
 
 class ExpressionSet {
+
+  static fromPositionalValues(values:any[]):ExpressionSet {
+    return new ExpressionSet(<Item[]> _.map(values, (value:any):Item  => {
+      return {expression: new LiteralExpression(value)};
+    }));
+  }
 
   static ZERO:ExpressionSet = new ExpressionSet([]);
 

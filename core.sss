@@ -10,4 +10,4 @@ hsva(h, s, v, a) = `ColorValue.hsla(h(), s(), v(), a())`
 hsla(h, s, l, a) = `ColorValue.hsla(h(), s(), l(), a())`
 rgba(r, g, b, a) = `ColorValue.rgba(r(), g(), b(), a())`
 
-function(*) = `new FunctionValue(arguments)`
+function(*) = `FunctionValue.fromValueSet(arguments())`

@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Value = require("./Value");
-var _ = require("../utilities");
+var assert = require("assert");
 var FunctionValue = (function (_super) {
     __extends(FunctionValue, _super);
     function FunctionValue(base, stops) {
@@ -13,15 +13,24 @@ var FunctionValue = (function (_super) {
         this.base = base;
         this.stops = stops;
     }
+    FunctionValue.fromValueSet = function (values) {
+        var stops = [];
+        for (var key in values.named) {
+            if (key == "base")
+                continue;
+            var stop = parseInt(key);
+            assert(stop != NaN, "Malformed stop value");
+            stops.push([stop, values.named[key]]);
+        }
+        assert(stops.length > 0, "Function has no stops");
+        return new FunctionValue(values.named["base"], stops);
+    };
     FunctionValue.prototype.evaluate = function () {
-        var stops = _.map(this.stops, function (stop) {
-            return [stop[0], Value.evaluate(stop[1])];
-        });
         if (this.base) {
-            return { base: Value.evaluate(this.base), stops: stops };
+            return { base: Value.evaluate(this.base), stops: this.stops };
         }
         else {
-            return { stops: stops };
+            return { stops: this.stops };
         }
     };
     return FunctionValue;

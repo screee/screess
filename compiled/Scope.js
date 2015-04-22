@@ -102,23 +102,10 @@ var Scope = (function () {
     }
     Scope.createGlobal = function () {
         var scope = new Scope();
-        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (values, callback, scope, stack) {
-            for (var i in values.positional) {
-                var filename = values.positional[i];
-                var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
-                scopeIncluded.eachPrimitiveStatement(stack, callback);
-                scope.valueMacros = scopeIncluded.valueMacros.concat(scope.valueMacros);
-                scope.propertyMacros = scopeIncluded.propertyMacros.concat(scope.propertyMacros);
-            }
-        });
-        for (var macroName in Globals.valueMacros) {
-            var fn = Globals.valueMacros[macroName];
-            scope.addValueMacro(macroName, null, fn);
-        }
-        for (var macroName in Globals.propertyMacros) {
-            var fn = Globals.propertyMacros[macroName];
-            scope.addPropertyMacro(macroName, null, fn);
-        }
+        var include = function (values, callback, scope, stack) {
+            scope.include(values.positional[0], callback, scope, stack);
+        };
+        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, include);
         return scope;
     };
     Scope.prototype.isGlobal = function () {
@@ -126,6 +113,12 @@ var Scope = (function () {
     };
     Scope.prototype.getGlobalScope = function () {
         return this.isGlobal() ? this : this.parent.getGlobalScope();
+    };
+    Scope.prototype.include = function (filename, callback, scope, stack) {
+        var scopeIncluded = Parser.parse(FS.readFileSync(filename, "utf8"));
+        scopeIncluded.eachPrimitiveStatement(stack, callback);
+        this.valueMacros = scopeIncluded.valueMacros.concat(this.valueMacros);
+        this.propertyMacros = scopeIncluded.propertyMacros.concat(this.propertyMacros);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Construction
@@ -317,7 +310,7 @@ var Scope = (function () {
         var layers = [];
         var classes = [];
         var properties = {};
-        this.eachPrimitiveStatement(stack, function (scope, statement) {
+        var evaluatePrimitiveStatement = function (scope, statement) {
             if (statement instanceof Statement.LayerStatement) {
                 var layerStatement = statement;
                 layers.push(layerStatement.scope.evaluate(1 /* LAYER */, stack));
@@ -334,7 +327,11 @@ var Scope = (function () {
                 }
                 properties[propertyStatement.name] = Value.evaluate(values.positional[0]);
             }
-        });
+        };
+        if (type == 0 /* GLOBAL */) {
+            this.include("core.sss", evaluatePrimitiveStatement, this, stack);
+        }
+        this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
         layers = _.sortBy(layers, 'z-index');
         if (layers.length == 0) {
             layers = undefined;

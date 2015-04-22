@@ -1,3 +1,4 @@
+/// <reference path="../definitions/index.d.ts" />
 var Scope = require('./Scope');
 var _ = require('./utilities');
 // TODO don't return this from the parser?
