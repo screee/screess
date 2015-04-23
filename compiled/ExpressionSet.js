@@ -15,6 +15,11 @@ var ExpressionSet = (function () {
                 this.isNamed_ = false;
         }
     }
+    ExpressionSet.fromPositionalExpressions = function (expressions) {
+        return new ExpressionSet(_.map(expressions, function (expression) {
+            return { expression: expression };
+        }));
+    };
     ExpressionSet.fromPositionalValues = function (values) {
         return new ExpressionSet(_.map(values, function (value) {
             return { expression: new LiteralExpression(value) };
@@ -30,7 +35,12 @@ var ExpressionSet = (function () {
         return _.pluck(this.items, 'expression');
     };
     ExpressionSet.prototype.toValueSet = function (scope, stack) {
-        return ValueSet.fromExpressions(scope, stack, this.items);
+        return new ValueSet(_.map(this.items, function (item) {
+            return {
+                value: item.expression.evaluateToIntermediate(scope, stack),
+                name: item.name
+            };
+        }));
     };
     ExpressionSet.ZERO = new ExpressionSet([]);
     return ExpressionSet;

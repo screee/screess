@@ -1,6 +1,5 @@
 var assert = require('assert');
 var _ = require('./utilities');
-var Expression = require('./expressions/Expression');
 var ValueSet = (function () {
     function ValueSet(items) {
         this.positional = [];
@@ -16,24 +15,6 @@ var ValueSet = (function () {
         }
         this.length = this.positional.length + _.values(this.named).length;
     }
-    // TODO factor into ExpressionSet
-    ValueSet.fromPositionalExpressions = function (scope, stack, expressions) {
-        assert(scope != null && stack != null);
-        return this.fromExpressions(scope, stack, _.map(expressions, function (expression) {
-            return { expression: expression };
-        }));
-    };
-    // TODO factor into ExpressionSet
-    ValueSet.fromExpressions = function (scope, stack, expressions) {
-        assert(scope != null && stack != null, "scope and stack");
-        return this.fromValues(_.map(expressions, function (item) {
-            assert(item.expression instanceof Expression);
-            return {
-                value: item.expression.evaluateToIntermediate(scope, stack),
-                name: item.name
-            };
-        }));
-    };
     ValueSet.fromPositionalValues = function (values) {
         return this.fromValues(_.map(values, function (value) {
             return { value: value };

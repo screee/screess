@@ -19,26 +19,6 @@ interface ValueItem {
 
 class ValueSet {
 
-  // TODO factor into ExpressionSet
-  static fromPositionalExpressions(scope:Scope, stack:Stack, expressions:Expression[]):ValueSet {
-    assert(scope != null && stack != null);
-    return this.fromExpressions(scope, stack, <ExpressionItem[]> _.map(expressions, (expression:Expression):ExpressionItem =>  {
-      return {expression: expression}
-    }));
-  }
-
-  // TODO factor into ExpressionSet
-  static fromExpressions(scope:Scope, stack:Stack, expressions:ExpressionItem[]):ValueSet {
-    assert(scope != null && stack != null, "scope and stack");
-    return this.fromValues(_.map(expressions, (item:ExpressionItem) => {
-      assert(item.expression instanceof Expression);
-      return {
-        value: item.expression.evaluateToIntermediate(scope, stack),
-        name: item.name
-      }
-    }));
-  }
-
   static fromPositionalValues(values:any[]):ValueSet {
     return this.fromValues(<ValueItem[]> _.map(values, (value:any):ValueItem  => {
       return {value: value}

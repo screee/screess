@@ -14,6 +14,12 @@ interface Item {
 
 class ExpressionSet {
 
+  static fromPositionalExpressions(expressions:Expression[]): ExpressionSet {
+    return new ExpressionSet(<Item[]> _.map(expressions, (expression: Expression): Item => {
+      return { expression: expression }
+    }));
+  }
+
   static fromPositionalValues(values:any[]):ExpressionSet {
     return new ExpressionSet(<Item[]> _.map(values, (value:any):Item  => {
       return {expression: new LiteralExpression(value)};
@@ -47,7 +53,12 @@ class ExpressionSet {
   }
 
   toValueSet(scope:Scope, stack:Stack):ValueSet {
-    return ValueSet.fromExpressions(scope, stack, this.items);
+    return new ValueSet(_.map(this.items, (item:Item) => {
+      return {
+        value: item.expression.evaluateToIntermediate(scope, stack),
+        name: item.name
+      }
+    }));
   }
 
 }

@@ -1,5 +1,3 @@
-// TODO put each statement class in its own file
-// TODO always pass a scope at statment construction time, don't pass into methods after that
 var assert = require("assert");
 var Statement = (function () {
     function Statement(scope) {
