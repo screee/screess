@@ -4,7 +4,6 @@ import Stack = require("../Stack");
 import assert = require('assert');
 import _ = require("underscore");
 
-// TODO merge this class with SubscriptExpression
 class PropertyAccessExpression extends Expression {
 
   constructor(public baseExpression:Expression, public propertyExpression:Expression) {

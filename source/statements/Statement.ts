@@ -5,10 +5,10 @@ import _ = require("../utilities");
 
 class Statement {
 
-  constructor(public scope:Scope) {}
+  constructor() {}
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
-    callback(this.scope, this);
+    callback(scope, this);
   }
 
   evaluate(scope:Scope, stack:Stack, layers, classes, properties) {

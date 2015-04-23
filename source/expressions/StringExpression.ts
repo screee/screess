@@ -28,7 +28,7 @@ class StringExpression extends Expression {
       } else if (!skip && input[i] == '{') {
         var expression = '';
         while (input[i + 1] != '}') {
-          assert(i < input.length); // TODO throw string interpolation exception
+          assert(i < input.length);
           expression += input[++i];
         }
         output += parseExpression(expression).evaluate(scope, stack).toString();

@@ -7,16 +7,13 @@ import _ = require("../utilities");
 
 class LoopStatement extends Statement {
   constructor(
-      scope:Scope,
       public body:Scope,
       public valueIdentifier:string,
       public keyIdentifier:string,
       public collectionExpression:Expression
-  ) { super(scope) }
+  ) { super(); }
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
-    assert(scope == this.scope);
-
     var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
     assert(_.isArray(collection) || _.isObject(collection))
 

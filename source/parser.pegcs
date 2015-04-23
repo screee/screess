@@ -38,7 +38,6 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 expressionSetSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
 expressionSetSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
-// TODO simplify heirarchy
 // TODO standardize inclusion of / lack of parens
 // TODO create standard ExpressionSet class
 
@@ -97,13 +96,13 @@ statement =
 
 property =
   name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak
-    { @scope.addStatement(new @PropertyStatement(@scope, name, expressions)) } /
+    { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
 
   name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
-    { @scope.addStatement(new @PropertyStatement(@scope, name, expressions)) } /
+    { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
 
   name:identifier
-    { @scope.addStatement(new @PropertyStatement(@scope, name, @ExpressionSet.ZERO)) }
+    { @scope.addStatement(new @PropertyStatement(name, @ExpressionSet.ZERO)) }
 
 // TODO treat as a statement?
 valueMacroDefinition =
@@ -111,12 +110,12 @@ valueMacroDefinition =
 
 loop =
   "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { @scope.addStatement(new @LoopStatement(@scope, scope, valueIdentifier, keyIdentifier, collection)) } /
+    { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection)) } /
   "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { @scope.addStatement(new @LoopStatement(@scope, scope, valueIdentifier, null, collection)) }
+    { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, null, collection)) }
 
 conditional =
-  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @ConditionalStatement(@scope, @_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
+  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
 
 conditionalIf =
   "if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
@@ -128,10 +127,10 @@ conditionalElse =
   "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
 
 layer =
-  "#" name:identifier? scope:scope { @scope.addStatement(new @LayerStatement(@scope, name, scope)) }
+  "#" name:identifier? scope:scope { @scope.addStatement(new @LayerStatement(name, scope)) }
 
 class =
-  "." name:identifier scope:scope { @scope.addStatement(new @ClassStatement(@scope, name, scope)) }
+  "." name:identifier scope:scope { @scope.addStatement(new @ClassStatement(name, scope)) }
 
 // TODO treat as a statement?
 propertyMacroDefinition =

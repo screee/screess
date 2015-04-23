@@ -9,15 +9,14 @@ var assert = require("assert");
 var _ = require("../utilities");
 var LoopStatement = (function (_super) {
     __extends(LoopStatement, _super);
-    function LoopStatement(scope, body, valueIdentifier, keyIdentifier, collectionExpression) {
-        _super.call(this, scope);
+    function LoopStatement(body, valueIdentifier, keyIdentifier, collectionExpression) {
+        _super.call(this);
         this.body = body;
         this.valueIdentifier = valueIdentifier;
         this.keyIdentifier = keyIdentifier;
         this.collectionExpression = collectionExpression;
     }
     LoopStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
-        assert(scope == this.scope);
         var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
         assert(_.isArray(collection) || _.isObject(collection));
         for (var key in collection) {

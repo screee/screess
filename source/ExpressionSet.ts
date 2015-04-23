@@ -32,7 +32,6 @@ class ExpressionSet {
   private isUnnamed_:boolean = true;
 
   constructor(public items:Item[]) {
-    // TODO maybe check for duplicate properties
     for (var i in items) {
       assert(items[i].expression);
       if (items[i].name) this.isUnnamed_ = false;

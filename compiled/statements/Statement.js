@@ -1,10 +1,9 @@
 var assert = require("assert");
 var Statement = (function () {
-    function Statement(scope) {
-        this.scope = scope;
+    function Statement() {
     }
     Statement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
-        callback(this.scope, this);
+        callback(scope, this);
     };
     Statement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
         assert(false, "abstract method");

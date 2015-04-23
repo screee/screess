@@ -8,12 +8,9 @@ import _ = require("../utilities");
 class ConditionalStatement extends Statement {
 
   // TODO only accept a condition, true statement, and false statement; chain for "else if"
-  constructor(scope:Scope, public items:{condition:Expression; scope:Scope;}[]) {
-    super(scope);
-  }
+  constructor(public items: { condition: Expression; scope: Scope; }[]) { super(); }
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
-    assert(scope == this.scope);
     for (var i in this.items) {
       var item = this.items[i];
       if (item.condition.evaluateToIntermediate(scope, stack)) {
