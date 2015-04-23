@@ -38,9 +38,6 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 expressionSetSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
 expressionSetSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
 
-// TODO standardize inclusion of / lack of parens
-// TODO create standard ExpressionSet class
-
 expressionSetUnnamedWeak =
   head:expression tail:(expressionSetSeperatorWeak expression)* { new @ExpressionSet(@_.map(@rehead(head, tail), (expression) => {expression: expression} ) ) } /
   "(" whitespace* expressions:expressionSetUnnamedStrong whitespace* ")" { expressions }
@@ -83,18 +80,15 @@ statements = whitespace* (statement (statementSeperator statement)* statementSep
 
 statement =
   comment /
-  valueMacroDefinition /
-  layer /
-  class /
-  propertyMacroDefinition /
-  loop /
-  conditional /
-  property
+  valueMacroDefinitionStatement /
+  layerStatement /
+  classStatement /
+  propertyMacroDefinitionStatement /
+  loopStatement /
+  conditionalStatement /
+  propertyStatement
 
-// TODO create Statement classes directally, using default Scope creation in pushScope
-// TODO suffix names with "statement"
-
-property =
+propertyStatement =
   name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak
     { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
 
@@ -104,36 +98,34 @@ property =
   name:identifier
     { @scope.addStatement(new @PropertyStatement(name, @ExpressionSet.ZERO)) }
 
-// TODO treat as a statement?
-valueMacroDefinition =
+valueMacroDefinitionStatement =
   name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expression:expression { @scope.addValueMacro(name, args, expression) }
 
-loop =
+loopStatement =
   "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
     { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection)) } /
   "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
     { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, null, collection)) }
 
-conditional =
-  ifItem:conditionalIf elseIfItems:( whitespace* conditionalElseIf  )* whitespace* elseItem:conditionalElse? { @scope.addStatement(new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
+conditionalStatement =
+  ifItem:conditionalStatementIf elseIfItems:( whitespace* conditionalStatementElseIf  )* whitespace* elseItem:conditionalStatementElse? { @scope.addStatement(new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
 
-conditionalIf =
+conditionalStatementIf =
   "if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
 
-conditionalElseIf =
+conditionalStatementElseIf =
   "else if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
 
-conditionalElse =
+conditionalStatementElse =
   "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
 
-layer =
+layerStatement =
   "#" name:identifier? scope:scope { @scope.addStatement(new @LayerStatement(name, scope)) }
 
-class =
+classStatement =
   "." name:identifier scope:scope { @scope.addStatement(new @ClassStatement(name, scope)) }
 
-// TODO treat as a statement?
-propertyMacroDefinition =
+propertyMacroDefinitionStatement =
   name:identifier args:expressionSetDefinition whitespace* "=" whitespace* scope:scope { @scope.addPropertyMacro(name, args, scope) }
 
 scope =

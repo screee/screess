@@ -1907,19 +1907,19 @@ module.exports = (function() {
 
       s0 = peg$parsecomment();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsevalueMacroDefinition();
+        s0 = peg$parsevalueMacroDefinitionStatement();
         if (s0 === peg$FAILED) {
-          s0 = peg$parselayer();
+          s0 = peg$parselayerStatement();
           if (s0 === peg$FAILED) {
-            s0 = peg$parseclass();
+            s0 = peg$parseclassStatement();
             if (s0 === peg$FAILED) {
-              s0 = peg$parsepropertyMacroDefinition();
+              s0 = peg$parsepropertyMacroDefinitionStatement();
               if (s0 === peg$FAILED) {
-                s0 = peg$parseloop();
+                s0 = peg$parseloopStatement();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parseconditional();
+                  s0 = peg$parseconditionalStatement();
                   if (s0 === peg$FAILED) {
-                    s0 = peg$parseproperty();
+                    s0 = peg$parsepropertyStatement();
                   }
                 }
               }
@@ -1933,7 +1933,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseproperty() {
+    function peg$parsepropertyStatement() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 57 + 19,
@@ -2073,7 +2073,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalueMacroDefinition() {
+    function peg$parsevalueMacroDefinitionStatement() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 57 + 20,
@@ -2157,7 +2157,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseloop() {
+    function peg$parseloopStatement() {
       var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11;
 
       var key    = peg$currPos * 57 + 21,
@@ -2392,7 +2392,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseconditional() {
+    function peg$parseconditionalStatement() {
       var s0, s1, s2, s3, s4, s5;
 
       var key    = peg$currPos * 57 + 22,
@@ -2404,7 +2404,7 @@ module.exports = (function() {
       }
 
       s0 = peg$currPos;
-      s1 = peg$parseconditionalIf();
+      s1 = peg$parseconditionalStatementIf();
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
@@ -2415,7 +2415,7 @@ module.exports = (function() {
           s5 = peg$parsewhitespace();
         }
         if (s4 !== peg$FAILED) {
-          s5 = peg$parseconditionalElseIf();
+          s5 = peg$parseconditionalStatementElseIf();
           if (s5 !== peg$FAILED) {
             s4 = [s4, s5];
             s3 = s4;
@@ -2437,7 +2437,7 @@ module.exports = (function() {
             s5 = peg$parsewhitespace();
           }
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseconditionalElseIf();
+            s5 = peg$parseconditionalStatementElseIf();
             if (s5 !== peg$FAILED) {
               s4 = [s4, s5];
               s3 = s4;
@@ -2458,7 +2458,7 @@ module.exports = (function() {
             s4 = peg$parsewhitespace();
           }
           if (s3 !== peg$FAILED) {
-            s4 = peg$parseconditionalElse();
+            s4 = peg$parseconditionalStatementElse();
             if (s4 === peg$FAILED) {
               s4 = peg$c18;
             }
@@ -2488,7 +2488,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseconditionalIf() {
+    function peg$parseconditionalStatementIf() {
       var s0, s1, s2, s3, s4, s5;
 
       var key    = peg$currPos * 57 + 23,
@@ -2559,7 +2559,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseconditionalElseIf() {
+    function peg$parseconditionalStatementElseIf() {
       var s0, s1, s2, s3, s4, s5;
 
       var key    = peg$currPos * 57 + 24,
@@ -2630,7 +2630,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseconditionalElse() {
+    function peg$parseconditionalStatementElse() {
       var s0, s1, s2, s3;
 
       var key    = peg$currPos * 57 + 25,
@@ -2680,7 +2680,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselayer() {
+    function peg$parselayerStatement() {
       var s0, s1, s2, s3;
 
       var key    = peg$currPos * 57 + 26,
@@ -2728,7 +2728,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parseclass() {
+    function peg$parseclassStatement() {
       var s0, s1, s2, s3;
 
       var key    = peg$currPos * 57 + 27,
@@ -2773,7 +2773,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsepropertyMacroDefinition() {
+    function peg$parsepropertyMacroDefinitionStatement() {
       var s0, s1, s2, s3, s4, s5, s6;
 
       var key    = peg$currPos * 57 + 28,
