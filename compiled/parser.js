@@ -140,11 +140,11 @@ module.exports = (function() {
         peg$c46 = ";",
         peg$c47 = { type: "literal", value: ";", description: "\";\"" },
         peg$c48 = function(name, expressions) {return (function() {
-          return this.scope.addStatement(new this.Statement.PropertyStatement(this.scope, name, expressions));
+          return this.scope.addStatement(new this.PropertyStatement(this.scope, name, expressions));
         }).apply(__initializer);
         },
         peg$c49 = function(name) {return (function() {
-          return this.scope.addStatement(new this.Statement.PropertyStatement(this.scope, name, this.ExpressionSet.ZERO));
+          return this.scope.addStatement(new this.PropertyStatement(this.scope, name, this.ExpressionSet.ZERO));
         }).apply(__initializer);
         },
         peg$c50 = function(name, args, expression) {return (function() {
@@ -156,15 +156,15 @@ module.exports = (function() {
         peg$c53 = "in",
         peg$c54 = { type: "literal", value: "in", description: "\"in\"" },
         peg$c55 = function(keyIdentifier, valueIdentifier, collection, scope) {return (function() {
-          return this.scope.addStatement(new this.Statement.LoopStatement(this.scope, scope, valueIdentifier, keyIdentifier, collection));
+          return this.scope.addStatement(new this.LoopStatement(this.scope, scope, valueIdentifier, keyIdentifier, collection));
         }).apply(__initializer);
         },
         peg$c56 = function(valueIdentifier, collection, scope) {return (function() {
-          return this.scope.addStatement(new this.Statement.LoopStatement(this.scope, scope, valueIdentifier, null, collection));
+          return this.scope.addStatement(new this.LoopStatement(this.scope, scope, valueIdentifier, null, collection));
         }).apply(__initializer);
         },
         peg$c57 = function(ifItem, elseIfItems, elseItem) {return (function() {
-          return this.scope.addStatement(new this.Statement.ConditionalStatement(this.scope, this._.compact(this.rehead(ifItem, elseIfItems).concat([elseItem]))));
+          return this.scope.addStatement(new this.ConditionalStatement(this.scope, this._.compact(this.rehead(ifItem, elseIfItems).concat([elseItem]))));
         }).apply(__initializer);
         },
         peg$c58 = "if",
@@ -190,13 +190,13 @@ module.exports = (function() {
         peg$c66 = "#",
         peg$c67 = { type: "literal", value: "#", description: "\"#\"" },
         peg$c68 = function(name, scope) {return (function() {
-          return this.scope.addStatement(new this.Statement.LayerStatement(this.scope, name, scope));
+          return this.scope.addStatement(new this.LayerStatement(this.scope, name, scope));
         }).apply(__initializer);
         },
         peg$c69 = ".",
         peg$c70 = { type: "literal", value: ".", description: "\".\"" },
         peg$c71 = function(name, scope) {return (function() {
-          return this.scope.addStatement(new this.Statement.ClassStatement(this.scope, name, scope));
+          return this.scope.addStatement(new this.ClassStatement(this.scope, name, scope));
         }).apply(__initializer);
         },
         peg$c72 = function(name, args, scope) {return (function() {

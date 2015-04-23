@@ -9,7 +9,7 @@ import ExpressionSet = require('./ExpressionSet');
 import ValueMacro = require('./macros/ValueMacro');
 import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
-import Statement = require('./Statement');
+import Statement = require('./statements/Statement');
 import FS = require("fs");
 var Parser = require("./parser");
 var Globals = require('./globals');
@@ -170,20 +170,7 @@ class Scope {
     assert(stack != null);
 
     for (var i=0; i < statements.length; i++) {
-      var statement = statements[i];
-
-      if (statement instanceof Statement.LoopStatement) {
-        statement.eachPrimitiveStatement(this, stack, callback);
-
-      } else if (statement instanceof Statement.ConditionalStatement) {
-        statement.eachPrimitiveStatement(this, stack, callback);
-
-      } else if (statement instanceof Statement.PropertyStatement) {
-        statement.eachPrimitiveStatement(this, stack, callback);
-
-      } else {
-        callback(this, statement);
-      }
+      statements[i].eachPrimitiveStatement(this, stack, callback);
     }
   }
 

@@ -5,7 +5,7 @@ import ValueSet = require("../ValueSet");
 import ValueSetDefinition = require("../ValueSetDefinition");
 import Stack = require("../Stack");
 import _ = require("../utilities");
-import Statement = require("../Statement");
+import Statement = require("../statements/Statement");
 
 class PropertyMacro {
 

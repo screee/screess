@@ -5,7 +5,6 @@ var assert = require("assert");
 var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
 var _ = require("./utilities");
-var Statement = require('./Statement');
 var FS = require("fs");
 var Parser = require("./parser");
 var Globals = require('./globals');
@@ -217,19 +216,7 @@ var Scope = (function () {
         var statements = this.statements;
         assert(stack != null);
         for (var i = 0; i < statements.length; i++) {
-            var statement = statements[i];
-            if (statement instanceof Statement.LoopStatement) {
-                statement.eachPrimitiveStatement(this, stack, callback);
-            }
-            else if (statement instanceof Statement.ConditionalStatement) {
-                statement.eachPrimitiveStatement(this, stack, callback);
-            }
-            else if (statement instanceof Statement.PropertyStatement) {
-                statement.eachPrimitiveStatement(this, stack, callback);
-            }
-            else {
-                callback(this, statement);
-            }
+            statements[i].eachPrimitiveStatement(this, stack, callback);
         }
     };
     //////////////////////////////////////////////////////////////////////////////
