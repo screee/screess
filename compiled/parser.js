@@ -293,9 +293,9 @@ module.exports = (function() {
           for (_i = 0, _len = accesses.length; _i < _len; _i++) {
             access = accesses[_i];
             if (access[0] === ".") {
-              output = new this.DotExpression(output, access[1]);
+              output = new this.PropertyAccessExpression(output, new this.LiteralExpression(access[1]));
             } else if (access[0] === "[") {
-              output = new this.SubscriptExpression(output, access[1]);
+              output = new this.PropertyAccessExpression(output, access[1]);
             }
           }
           return output;
