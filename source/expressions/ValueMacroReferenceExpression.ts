@@ -14,6 +14,7 @@ class ValueMacroReferenceExpression extends Expression {
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
+    assert(scope instanceof Scope);
     var values = this.expressions.toValueSet(scope, stack);
 
     var macro = scope.getValueMacro(this.name, values, stack);

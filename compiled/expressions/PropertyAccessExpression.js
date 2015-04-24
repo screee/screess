@@ -19,8 +19,7 @@ var PropertyAccessExpression = (function (_super) {
     PropertyAccessExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var base = this.baseExpression.evaluateToIntermediate(scope, stack);
         var property = this.propertyExpression.evaluateToIntermediate(scope, stack);
-        assert(_.isString(property) || _.isNumber(property));
-        assert(base[property] !== undefined);
+        assert(_.isString(property) || _.isNumber(property), "Property is of invalid type (" + property + ")");
         return base[property];
     };
     return PropertyAccessExpression;

@@ -36,7 +36,7 @@ class ArithmeticOperatorExpression extends Expression {
       }));
 
     } else {
-      assert(false);
+      assert(false, "Can't perform arithmetic on '" + left + "' and '" + right + "'");
     }
 
   }

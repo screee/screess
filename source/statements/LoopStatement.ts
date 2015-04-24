@@ -14,7 +14,7 @@ class LoopStatement extends Statement {
   ) { super(); }
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
-    var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
+    var collection = this.collectionExpression.evaluateToIntermediate(scope, stack);
     assert(_.isArray(collection) || _.isObject(collection))
 
     for (var key in collection) {

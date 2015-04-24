@@ -2,13 +2,16 @@ identity (value) = value
 
 range(start, stop, step) = `_.range(start(), stop(), step())`
 
-rgb(r, g, b) = rgba(r, g, b, 1)
-hsl(h, s, l) = hsla(h, s, l, 1)
-hsv(h, s, v) = hsva(h, s, v, 1)
+hsva(hue, saturation, value, alpha = 1) = `ColorValue.hsla(hue(), saturation(), value(), alpha())`
+hsla(hue, saturation, lightness, alpha = 1) = `ColorValue.hsla(hue(), saturation(), lightness(), alpha())`
+rgba(red, green, blue, alpha = 1) = `ColorValue.rgba(red(), green(), blue(), alpha())`
 
-hsva(h, s, v, a) = `ColorValue.hsla(h(), s(), v(), a())`
-hsla(h, s, l, a) = `ColorValue.hsla(h(), s(), l(), a())`
-rgba(r, g, b, a) = `ColorValue.rgba(r(), g(), b(), a())`
+color-mix(a, b, ratio = 0.5) = rgba(
+  red:   a.red * ratio + b.red * (1 - ratio)
+  green: a.green * ratio + b.green * (1 - ratio)
+  blue:  a.blue * ratio + b.blue * (1 - ratio)
+  alpha: a.alpha * ratio + b.alpha * (1 - ratio)
+)
 
 function(*) = `FunctionValue.fromValueSet(arguments())`
 
@@ -35,5 +38,20 @@ source(url, layer) = {
 source(type, url, layer) = {
   source-type: type
   source-url: url
-  source-type: type
+  source-layer: layer
+}
+
+hillshade(highlight-color = #fff, shadow-color = #000, opacity = 0.5) = {
+
+  values = [94 90 89 78 67 56]
+
+  for value in values {
+    # {
+      type: fill
+      source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
+      filter: value == @value
+      fill-color: color-mix(highlight-color, shadow-color, value)
+    }
+  }
+
 }

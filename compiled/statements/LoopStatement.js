@@ -17,7 +17,7 @@ var LoopStatement = (function (_super) {
         this.collectionExpression = collectionExpression;
     }
     LoopStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
-        var collection = this.collectionExpression.evaluateToIntermediate(this, stack);
+        var collection = this.collectionExpression.evaluateToIntermediate(scope, stack);
         assert(_.isArray(collection) || _.isObject(collection));
         for (var key in collection) {
             var value = collection[key];

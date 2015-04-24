@@ -5,6 +5,8 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Statement = require("./Statement");
+var assert = require("assert");
+var ExpressionSet = require("../ExpressionSet");
 var Value = require("../values/Value");
 var PropertyStatement = (function (_super) {
     __extends(PropertyStatement, _super);
@@ -12,6 +14,7 @@ var PropertyStatement = (function (_super) {
         _super.call(this);
         this.name = name;
         this.expressions = expressions;
+        assert(expressions instanceof ExpressionSet);
     }
     PropertyStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
         var values = this.expressions.toValueSet(scope, stack);

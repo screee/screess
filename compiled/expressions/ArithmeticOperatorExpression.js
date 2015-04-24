@@ -48,7 +48,7 @@ var ArithmeticOperatorExpression = (function (_super) {
             }));
         }
         else {
-            assert(false);
+            assert(false, "" + left + " " + right);
         }
     };
     return ArithmeticOperatorExpression;

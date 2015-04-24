@@ -10,6 +10,7 @@ class PropertyStatement extends Statement {
 
   constructor(public name:string, public expressions:ExpressionSet) {
     super();
+    assert(expressions instanceof ExpressionSet);
   }
 
   evaluate(scope:Scope, stack:Stack, layers, classes, properties) {
