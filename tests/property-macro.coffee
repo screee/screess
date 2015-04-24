@@ -18,12 +18,20 @@ describe "property macros", ->
 
   describe "arguments", ->
 
-    it "should accept no arguments", ->
+    it "should accept no arguments without parens", ->
       stylesheet = parse """
         property = { background-color: "bar" }
         #layer { type: 'background'; property }
       """
       assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
+    it "should accept no arguments with parenthesis", ->
+      stylesheet = parse """
+        property = { background-color: "bar" }
+        #layer { type: 'background'; property() }
+      """
+      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+
 
     it "should accept property-style arguments", ->
       stylesheet = parse """

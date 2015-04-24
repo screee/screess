@@ -52,7 +52,7 @@ expressionSetNamedStrongItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }
 
 expressionSetMixedStrong =
-  head:expressionSetMixedStrongItem tail:(expressionSetSeperatorStrong expressionSetMixedStrongItem)* { new @ExpressionSet(@rehead(head, tail) ) } /
+  head:expressionSetMixedStrongItem tail:(expressionSetSeperatorStrong expressionSetMixedStrongItem)* { new @ExpressionSet(@rehead(head, tail) ) }
 
 expressionSetMixedStrongItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
@@ -91,11 +91,9 @@ statement =
 propertyStatement =
   name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak
     { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
-
   name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
     { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
-
-  name:identifier
+  name:identifier (whitespace* "(" whitespace* ")")?
     { @scope.addStatement(new @PropertyStatement(name, @ExpressionSet.ZERO)) }
 
 valueMacroDefinitionStatement =
@@ -237,7 +235,7 @@ literalExpression =
 
 valueMacroReferenceExpression =
   name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @ValueMacroReferenceExpression(name, expressions) } /
-  name:identifier { new @ValueMacroReferenceExpression(name, @ExpressionSet.ZERO) }
+  name:identifier (whitespace* "(" whitespace* ")")? { new @ValueMacroReferenceExpression(name, @ExpressionSet.ZERO) }
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) } /

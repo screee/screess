@@ -39,12 +39,22 @@ describe "value macro", ->
 
   describe "argument evaluation", ->
 
-    it "should evaluate without arguments", ->
+    it "should evaluate without arguments and without parens", ->
       stylesheet = parse """
         foo = 17
         #layer {
           type: 'background'
           scree-test-meta: foo
+        }
+      """
+      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
+
+    it "should evaluate without arguments and with parens", ->
+      stylesheet = parse """
+        foo = 17
+        #layer {
+          type: 'background'
+          scree-test-meta: foo()
         }
       """
       assert.equal stylesheet.layers[0]['scree-test-meta'], 17
