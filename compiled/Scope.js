@@ -10,7 +10,6 @@ var Parser = require("./parser");
 var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
-    // TODO deprecate "name" parameter
     function Scope(parent, name, statements) {
         var _this = this;
         if (parent === void 0) { parent = null; }
@@ -43,11 +42,9 @@ var Scope = (function () {
                 var layoutProperties = {};
                 var source = {};
                 var type = properties['type'] || 'raster';
-                // TODO actually parse the version from the global scope, don't hardcode 7
-                var version = 7;
+                var version = _this.getVersion();
                 for (var name in properties) {
                     var value = Value.evaluate(properties[name]);
-                    // TODO remove scree test props
                     if (name == 'z-index') {
                         metaProperties['z-index'] = value;
                     }
@@ -57,13 +54,13 @@ var Scope = (function () {
                     else if (_.startsWith(name, "source-")) {
                         source[name.substr("source-".length)] = value;
                     }
-                    else if (getPropertyType(version, 1 /* LAYER */, name) == 0 /* PAINT */) {
+                    else if (getPropertyType(version, name) == 0 /* PAINT */) {
                         paintProperties[name] = value;
                     }
-                    else if (getPropertyType(version, 1 /* LAYER */, name) == 1 /* LAYOUT */) {
+                    else if (getPropertyType(version, name) == 1 /* LAYOUT */) {
                         layoutProperties[name] = value;
                     }
-                    else if (getPropertyType(version, 1 /* LAYER */, name) == 2 /* META */) {
+                    else if (getPropertyType(version, name) == 2 /* META */) {
                         metaProperties[name] = value;
                     }
                     else {
@@ -80,19 +77,17 @@ var Scope = (function () {
                 var classes = _.objectMap(_classes, function (scope) {
                     return ["paint." + scope.name, scope];
                 });
-                // TODO ensure layer has a source and type
-                // TODO remove this _.objectCompact call -- some falsey values are important.
-                return _.objectCompact(_.extend({
+                return _.extend({
                     id: _this.name || _.uniqueId('scope'),
                     layers: layers,
                     paint: paintProperties,
                     layout: layoutProperties
-                }, metaProperties, classes));
+                }, metaProperties, classes);
             },
             // CLASS
             2: function (stack, properties, layers, classes) {
-                // TODO assert there are no child layers or classes
-                // TODO ensure all properties are paint properties, not layout properties
+                assert(layers.length == 0);
+                assert(classes.length == 0);
                 return properties;
             }
         };
@@ -219,6 +214,9 @@ var Scope = (function () {
             statements[i].eachPrimitiveStatement(this, stack, callback);
         }
     };
+    Scope.prototype.getVersion = function () {
+        return this.getGlobalScope().version || 7;
+    };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
     // Move these into individual files
@@ -229,13 +227,15 @@ var Scope = (function () {
         var layers = [];
         var classes = [];
         var properties = {};
-        var evaluatePrimitiveStatement = function (scope, statement) {
-            statement.evaluate(scope, stack, layers, classes, properties);
-        };
         if (type == 0 /* GLOBAL */) {
-            this.includeScope(Scope.getCoreLibrary(), stack, evaluatePrimitiveStatement);
+            this.version = parseInt(properties["version"], 10) || 7;
+            this.includeScope(Scope.getCoreLibrary(), stack, function (scope, statement) {
+                statement.evaluate(scope, stack, layers, classes, properties);
+            });
         }
-        this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
+        this.eachPrimitiveStatement(stack, function (scope, statement) {
+            statement.evaluate(scope, stack, layers, classes, properties);
+        });
         layers = _.sortBy(layers, 'z-index');
         if (layers.length == 0) {
             layers = undefined;
@@ -262,8 +262,7 @@ var PropertyType;
     PropertyType[PropertyType["LAYOUT"] = 1] = "LAYOUT";
     PropertyType[PropertyType["META"] = 2] = "META";
 })(PropertyType || (PropertyType = {}));
-function getPropertyType(version, scopeType, name) {
-    assert(scopeType == 1 /* LAYER */);
+function getPropertyType(version, name) {
     if (name == 'scree-test-paint')
         return 0 /* PAINT */;
     else if (name == 'scree-test-layout')

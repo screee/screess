@@ -36,10 +36,10 @@ class Scope {
   }
 
   public sources:{};
+  public version:number;
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
 
-  // TODO deprecate "name" parameter
   constructor(
       public parent:Scope = null,
       public name:string = null,
@@ -174,6 +174,10 @@ class Scope {
     }
   }
 
+  getVersion():number {
+    return this.getGlobalScope().version || 7;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
@@ -185,20 +189,23 @@ class Scope {
     var classes = [];
     var properties = {};
 
-    var evaluatePrimitiveStatement = (scope:Scope, statement:Statement) => {
-      statement.evaluate(scope, stack, layers, classes, properties);
-    }
-
     if (type == Scope.Type.GLOBAL) {
-      this.includeScope(Scope.getCoreLibrary(), stack, evaluatePrimitiveStatement);
+      this.version = parseInt(properties["version"], 10) || 7;
+
+      this.includeScope(Scope.getCoreLibrary(), stack, (scope: Scope, statement: Statement) => {
+        statement.evaluate(scope, stack, layers, classes, properties);
+      });
     }
 
-    this.eachPrimitiveStatement(stack, evaluatePrimitiveStatement);
+    this.eachPrimitiveStatement(stack, (scope: Scope, statement: Statement) => {
+      statement.evaluate(scope, stack, layers, classes, properties);
+    });
 
     layers = _.sortBy(layers, 'z-index');
     if (layers.length == 0) { layers = undefined }
 
     var output = this.formatScope[type](stack, properties, layers, classes);
+
     stack.scope.pop();
 
     return output;
@@ -238,13 +245,11 @@ class Scope {
 
       var type = properties['type'] || 'raster';
 
-      // TODO actually parse the version from the global scope, don't hardcode 7
-      var version = 7;
+      var version = this.getVersion();
 
       for (var name in properties) {
         var value = Value.evaluate(properties[name]);
 
-        // TODO remove scree test props
         if (name == 'z-index') {
           metaProperties['z-index'] = value;
 
@@ -254,13 +259,13 @@ class Scope {
         } else if (_.startsWith(name, "source-")) {
           source[name.substr("source-".length)] = value;
 
-        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.PAINT) {
+        } else if (getPropertyType(version, name) == PropertyType.PAINT) {
           paintProperties[name] = value;
 
-        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.LAYOUT) {
+        } else if (getPropertyType(version, name) == PropertyType.LAYOUT) {
           layoutProperties[name] = value;
 
-        } else if (getPropertyType(version, Scope.Type.LAYER, name) == PropertyType.META) {
+        } else if (getPropertyType(version, name) == PropertyType.META) {
           metaProperties[name] = value;
 
         } else {
@@ -281,10 +286,7 @@ class Scope {
         return ["paint." + scope.name, scope]
       });
 
-      // TODO ensure layer has a source and type
-
-      // TODO remove this _.objectCompact call -- some falsey values are important.
-      return _.objectCompact(_.extend(
+      return _.extend(
         {
           id: this.name || _.uniqueId('scope'),
           layers: layers,
@@ -293,13 +295,13 @@ class Scope {
         },
         metaProperties,
         classes
-      ));
+      );
     },
 
     // CLASS
     2: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
-      // TODO assert there are no child layers or classes
-      // TODO ensure all properties are paint properties, not layout properties
+      assert(layers.length == 0);
+      assert(classes.length == 0);
 
       return properties;
     }
@@ -314,9 +316,7 @@ module Scope {
 
 enum PropertyType { PAINT, LAYOUT, META }
 
-function getPropertyType(version:number, scopeType: Scope.Type, name: string): PropertyType {
-  assert(scopeType == Scope.Type.LAYER);
-
+function getPropertyType(version: number, name: string): PropertyType {
   if (name == 'scree-test-paint') return PropertyType.PAINT;
   else if (name == 'scree-test-layout') return PropertyType.LAYOUT;
   else if (name == 'scree-test-meta') return PropertyType.META;
