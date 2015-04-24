@@ -37,6 +37,12 @@ class ColorValue extends Value {
   ) {
     super();
 
+    assert(this.red >= 0 && this.red < 256);
+    assert(this.blue >= 0 && this.blue < 256);
+    assert(this.green >= 0 && this.green < 256);
+
+    assert(this.alpha >= 0 && this.alpha <= 1);
+
     var hsv = _.rgb2hsv(red, green, blue);
     var hsl = _.rgb2hsv(red, green, blue);
 

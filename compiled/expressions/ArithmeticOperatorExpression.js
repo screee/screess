@@ -48,7 +48,7 @@ var ArithmeticOperatorExpression = (function (_super) {
             }));
         }
         else {
-            assert(false, "" + left + " " + right);
+            assert(false, "Can't perform arithmetic on '" + left + "' and '" + right + "'");
         }
     };
     return ArithmeticOperatorExpression;

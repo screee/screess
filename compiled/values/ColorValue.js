@@ -5,6 +5,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Value = require("./Value");
+var assert = require("assert");
 var _ = require('../utilities');
 var ColorValue = (function (_super) {
     __extends(ColorValue, _super);
@@ -14,6 +15,10 @@ var ColorValue = (function (_super) {
         this.green = green;
         this.blue = blue;
         this.alpha = alpha;
+        assert(this.red >= 0 && this.red < 256);
+        assert(this.blue >= 0 && this.blue < 256);
+        assert(this.green >= 0 && this.green < 256);
+        assert(this.alpha >= 0 && this.alpha <= 1);
         var hsv = _.rgb2hsv(red, green, blue);
         var hsl = _.rgb2hsv(red, green, blue);
         this.hue = hsv[0];

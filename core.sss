@@ -41,16 +41,17 @@ source(type, url, layer) = {
   source-layer: layer
 }
 
-hillshade(highlight-color = #fff, shadow-color = #000, opacity = 0.5) = {
+hillshade(color = #000, max-opacity = 0.15) = {
 
-  values = [94 90 89 78 67 56]
+  levels = [94 90 89 78 67 56]
 
-  for value in values {
+  for level in levels {
     # {
       type: fill
       source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
-      filter: value == @value
-      fill-color: color-mix(highlight-color, shadow-color, value)
+      filter: level == @level
+      fill-color: color
+      fill-opacity: max-opacity * level / 100
     }
   }
 
