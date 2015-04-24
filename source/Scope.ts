@@ -12,12 +12,12 @@ import _ = require("./utilities")
 import Statement = require('./statements/Statement');
 import FS = require("fs");
 var Parser = require("./parser");
-var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 
 class Scope {
 
   private static coreLibrary:Scope = null;
+
   static getCoreLibrary():Scope {
     if (!this.coreLibrary) {
       this.coreLibrary = Parser.parse(FS.readFileSync("core.sss", "utf8"));
