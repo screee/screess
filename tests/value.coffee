@@ -74,6 +74,9 @@ describe "value", ->
     it "should allow filters to be members", ->
       assert.deepEqual parseValue("[filter: @class == 'footway']"), {filter: ["==", "class", "footway"]}
 
+    it "should allow keys to be language keywords", ->
+      assert.deepEqual parseValue("[out: 0 in: 1]"), {out: 0, in: 1}
+
   describe "number", ->
 
     it "should parse an integer", ->

@@ -89,7 +89,7 @@ statement =
   propertyStatement
 
 propertyStatement =
-  name:identifier ":" whitespace* expressions:expressionSetUnnamedWeak
+  name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak
     { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
   name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
     { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
@@ -174,7 +174,7 @@ comparisonOperatorExpression =
   whitespace* left:arithmeticExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticExpression { new @ComparisonOperatorExpression(left, operator, right) }
 
 setOperatorExpression =
-  whitespace* left:arithmeticExpression whitespace* operator:("in" / "!in") whitespace* right:arithmeticExpression { new @SetOperatorExpression(left, operator, right) }
+  whitespace* left:arithmeticExpression whitespace+ operator:("in" / "!in") whitespace+ right:arithmeticExpression { new @SetOperatorExpression(left, operator, right) }
 
 /////////////////////////////////////////////
 //     Arithmetic Operator Expression      //
