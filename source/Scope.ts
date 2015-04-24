@@ -20,7 +20,7 @@ class Scope {
 
   static getCoreLibrary():Scope {
     if (!this.coreLibrary) {
-      this.coreLibrary = Parser.parse(FS.readFileSync("core.sss", "utf8"));
+      this.coreLibrary = Parser.parse(FS.readFileSync(__dirname + "/../core.sss", "utf8"));
     }
     return this.coreLibrary;
   }
@@ -71,6 +71,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Construction
 
+  // TODO this belongs somewhere else, semantically. Maybe on the Stack object, renamed to "context"?
   addSource(source:{}):string {
     var hash = _.hash(JSON.stringify(source)).toString();
     this.getGlobalScope().sources[hash] = source;
@@ -256,7 +257,7 @@ class Scope {
         } else if (name == "source-tile-size") {
           source["tileSize"] = value;
 
-        } else if (_.startsWith(name, "source-")) {
+        } else if (_.startsWith(name, "source-") && name != "source-layer") {
           source[name.substr("source-".length)] = value;
 
         } else if (getPropertyType(version, name) == PropertyType.PAINT) {
@@ -273,7 +274,10 @@ class Scope {
         }
       }
 
-      metaProperties["source"] = stack.getGlobalScope().addSource(source);
+      if (!_.isEmpty(source)) {
+        metaProperties["source"] = stack.getGlobalScope().addSource(source);
+      }
+
 
       if (layers) {
         if (metaProperties['type']) {

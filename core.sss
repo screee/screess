@@ -11,3 +11,29 @@ hsla(h, s, l, a) = `ColorValue.hsla(h(), s(), l(), a())`
 rgba(r, g, b, a) = `ColorValue.rgba(r(), g(), b(), a())`
 
 function(*) = `FunctionValue.fromValueSet(arguments())`
+
+background = "background"
+fill = "fill"
+line = "line"
+symbol = "symbol"
+raster = "raster"
+vector = "vector"
+raster = "raster"
+point = "point"
+line = "line"
+bevel = "bevel"
+round = "round"
+miter = "miter"
+butt = "butt"
+round = "round"
+square = "square"
+
+source(url, layer) = {
+  source: vector url layer
+}
+
+source(type, url, layer) = {
+  source-type: type
+  source-url: url
+  source-type: type
+}

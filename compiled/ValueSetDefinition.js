@@ -1,6 +1,5 @@
 var assert = require('assert');
 var ValueSetDefinition = (function () {
-    // TODO remove scope argument
     function ValueSetDefinition(definitions, scope, isWildcard_) {
         if (isWildcard_ === void 0) { isWildcard_ = false; }
         this.definitions = definitions;

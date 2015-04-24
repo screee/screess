@@ -5,7 +5,7 @@ import Fs = require('fs');
 import Path = require('path');
 import ChildProcess = require('child_process')
 import assert = require('assert');
-var Parser = require('../source/parser');
+var Parser = require('./parser');
 var Package = require('../package.json');
 var Linter = require('mapbox-gl-style-lint')
 

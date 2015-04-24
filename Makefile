@@ -1,7 +1,7 @@
 clean:
 	rm -r compiled/*
 
-build: build-pegjs build-ts-source build-coffee-source
+build: build-pegjs build-ts-source cli
 
 build-pegjs:
 	pegjs \
@@ -11,20 +11,17 @@ build-pegjs:
 			source/parser.pegcs \
 			compiled/parser.js
 
-build-coffee-source:
-	coffee \
-		--compile \
-		--output compiled \
-		--map \
-		source
-
-build-ts-source: build-pegjs build-coffee-source
+build-ts-source: build-pegjs
 	tsc \
 		--sourceMap \
 		--target ES5 \
 		--module commonjs \
 		--outDir ./compiled \
 		source/*.ts source/**/*.ts
+
+cli: build-ts-source
+	echo "#!/usr/bin/env node" > compiled/screess
+	cat compiled/CLI.js >> compiled/screess
 
 test: build
 	mocha --compilers coffee:coffee-script/register tests

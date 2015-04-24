@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /// <reference path="../definitions/index.d.ts" />
 var CLI = require('commander');
 var Fs = require('fs');
