@@ -12,7 +12,6 @@ var LayerStatement = (function (_super) {
         _super.call(this);
         this.name = name;
         this.body = body;
-        // TODO deprecate names on scopes in general
         this.body.name = name;
     }
     LayerStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {

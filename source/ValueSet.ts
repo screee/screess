@@ -6,26 +6,20 @@ import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
 
-interface ExpressionItem {
-  name?:string;
-  expression:Expression;
-}
-
-interface ValueItem {
+interface Item {
   name?:string;
   value:any;
 }
 
-
 class ValueSet {
 
   static fromPositionalValues(values:any[]):ValueSet {
-    return this.fromValues(<ValueItem[]> _.map(values, (value:any):ValueItem  => {
+    return this.fromValues(<Item[]> _.map(values, (value:any):Item  => {
       return {value: value}
     }));
   }
 
-  static fromValues(values:ValueItem[]):ValueSet {
+  static fromValues(values:Item[]):ValueSet {
     return new ValueSet(values);
   }
 
@@ -35,7 +29,7 @@ class ValueSet {
   public positional:any[];
   public named:{[s:string]:any};
 
-  constructor(items:ValueItem[]) {
+  constructor(items:Item[]) {
     this.positional = [];
     this.named = {};
 
@@ -52,10 +46,8 @@ class ValueSet {
     this.length = this.positional.length + _.values(this.named).length;
   }
 
-  // TODO move to ValueSetDefinition class
   matches(argDefinition:ValueSetDefinition):boolean {
-    // TODO remove below line and replace with "assert(argDefinition);"
-    if (!argDefinition) return true;
+    assert(argDefinition != null);
 
     if (argDefinition.isWildcard()) return true;
 

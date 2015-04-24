@@ -7,7 +7,6 @@ var Stack = require('./Stack');
 var _ = require("./utilities");
 var FS = require("fs");
 var Parser = require("./parser");
-var Globals = require('./globals');
 var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
     function Scope(parent, name, statements) {

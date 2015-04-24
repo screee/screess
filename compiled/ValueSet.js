@@ -23,11 +23,8 @@ var ValueSet = (function () {
     ValueSet.fromValues = function (values) {
         return new ValueSet(values);
     };
-    // TODO move to ValueSetDefinition class
     ValueSet.prototype.matches = function (argDefinition) {
-        // TODO remove below line and replace with "assert(argDefinition);"
-        if (!argDefinition)
-            return true;
+        assert(argDefinition != null);
         if (argDefinition.isWildcard())
             return true;
         var indicies = _.times(argDefinition.length, function () {

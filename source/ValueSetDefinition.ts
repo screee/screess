@@ -17,7 +17,6 @@ class ValueSetDefinition {
   public named:{[name:string]: ValueDefinition};
   public length:number;
 
-  // TODO remove scope argument
   constructor(public definitions:ValueDefinition[], public scope:Scope, public isWildcard_ = false) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);

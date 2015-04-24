@@ -7,7 +7,6 @@ var __extends = this.__extends || function (d, b) {
 var Statement = require("./Statement");
 var ConditionalStatement = (function (_super) {
     __extends(ConditionalStatement, _super);
-    // TODO only accept a condition, true statement, and false statement; chain for "else if"
     function ConditionalStatement(items) {
         _super.call(this);
         this.items = items;

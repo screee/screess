@@ -7,7 +7,6 @@ import _ = require("../utilities");
 
 class ConditionalStatement extends Statement {
 
-  // TODO only accept a condition, true statement, and false statement; chain for "else if"
   constructor(public items: { condition: Expression; scope: Scope; }[]) { super(); }
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {

@@ -8,7 +8,6 @@ class LayerStatement extends Statement {
 
   constructor(public name:string, public body:Scope) {
     super();
-    // TODO deprecate names on scopes in general
     this.body.name = name;
   }
 
