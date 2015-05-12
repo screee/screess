@@ -86,15 +86,18 @@ statement =
   propertyMacroDefinitionStatement /
   loopStatement /
   conditionalStatement /
+  propertyMacroStatement /
   propertyStatement
+
+propertyMacroStatement =
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
+    { @scope.addStatement(new @PropertyMacroStatement(name, expressions)) } /
+  name:identifier whitespace* "(" whitespace* ")"
+    { @scope.addStatement(new @PropertyMacroStatement(name, @ExpressionSet.ZERO)) }
 
 propertyStatement =
   name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak
-    { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
-    { @scope.addStatement(new @PropertyStatement(name, expressions)) } /
-  name:identifier (whitespace* "(" whitespace* ")")?
-    { @scope.addStatement(new @PropertyStatement(name, @ExpressionSet.ZERO)) }
+    { @scope.addStatement(new @PropertyStatement(name, expressions)) }
 
 valueMacroDefinitionStatement =
   name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expression:expression { @scope.addValueMacro(name, args, expression) }

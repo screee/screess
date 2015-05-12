@@ -41,7 +41,7 @@ source(type, url, layer) = {
   source-layer: layer
 }
 
-hillshade(color = #000, max-opacity = 0.15) = {
+hillshade(color = #000, opacity = 0.15) = {
 
   levels = [94 90 89 78 67 56]
 
@@ -51,7 +51,7 @@ hillshade(color = #000, max-opacity = 0.15) = {
       source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
       filter: level == @level
       fill-color: color
-      fill-opacity: max-opacity * level / 100
+      fill-opacity: opacity * level / 100
     }
   }
 
@@ -81,27 +81,28 @@ landuse(*) = {
   colors = [
     agriculture: null // Various types of crop and farmland
     cemetery   : null // Cemeteries and graveyards
-    glacier    : null // Glaciers or permanent ice/snow
-    grass      : null // Grasslands, meadows, fields, lawns, etc
+    glacier    : #fff // Glaciers or permanent ice/snow
+    grass      : #b3dda4 // Grasslands, meadows, fields, lawns, etc
     hospital   : null // Hospital grounds
     industrial : null // Currently includes only airports
     park       : null // City parks, village greens, playgrounds, national parks, nature reserves, etc
     pitch      : null // Sports fields & courts of all types
-    rock       : null // Bare rock, scree, quarries
-    sand       : null // Sand, beaches, dunes
+    rock       : #c7c7c7 // Bare rock, scree, quarries
+    sand       : #cfce9a // Sand, beaches, dunes
     school     : null // Primary, secondary, post-secondary school grounds
-    scrub      : null // Bushes, scrub, heaths
-    wood       : null // Woods and forestry areas
+    scrub      : #75bb5c // Bushes, scrub, heaths
+    wood       : #75bb5c // Woods and forestry areas
   ]
 
   scree-test-meta: `_.extend(colors(), arguments().named)`
 
-  for name color in colors {
+  for class color in colors {
     if color != null {
       # {
         source: "mapbox://mapbox.mapbox-streets-v5" "landuse"
         type: fill
         fill-color: color
+        filter: @class == class
       }
     }
   }

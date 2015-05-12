@@ -7,80 +7,66 @@ describe "property macros", ->
 
   it "should shadow property macros in enclosing scopes", ->
     stylesheet = parse """
-      foo(value) = { background-color: value }
+      foo(value) = { scree-test-meta: value }
       #layer {
-        foo = { foo: 17 }
+        foo = { foo(17) }
         type: 'background'
-        foo
+        foo()
       }
     """
-    assert.equal stylesheet.layers[0].paint['background-color'], 17
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   describe "arguments", ->
 
     it "should accept no arguments without parens", ->
       stylesheet = parse """
-        property = { background-color: "bar" }
-        #layer { type: 'background'; property }
+        property = { scree-test-meta: "bar" }
+        #layer { type: 'background'; property() }
       """
-      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+      assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
     it "should accept no arguments with parenthesis", ->
       stylesheet = parse """
-        property = { background-color: "bar" }
+        property = { scree-test-meta: "bar" }
         #layer { type: 'background'; property() }
       """
-      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+      assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
 
     it "should accept property-style arguments", ->
       stylesheet = parse """
-        foo(one, two) = { background-color: two }
-        #layer { type: 'background'; foo: "baz" "bar" }
-      """
-      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
-
-    it "should accept function-style arguments", ->
-      stylesheet = parse """
-        foo(one, two) = { background-color: two }
+        foo(one, two) = { scree-test-meta: two }
         #layer { type: 'background'; foo("baz" "bar") }
       """
-      assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+      assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
   it "should apply value macros", ->
     stylesheet = parse """
-      foo(value) = { background-color: identity(value) }
-      #layer { type: 'background'; foo: "bar" }
+      foo(value) = { scree-test-meta: identity(value) }
+      #layer { type: 'background'; foo("bar") }
     """
-    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+    assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
   it "should apply other property macros", ->
     stylesheet = parse """
-      inner(value) = { background-color: value }
-      outer(value) = { inner: value }
-      #layer { type: 'background'; outer: "bar" }
+      inner(value) = { scree-test-meta: value }
+      outer(value) = { inner(value) }
+      #layer { type: 'background'; outer("bar") }
     """
-    assert.equal stylesheet.layers[0].paint['background-color'], "bar"
+    assert.equal stylesheet.layers[0]['scree-test-meta'], "bar"
 
-  it "should respect default arguments in property-style invocation", ->
+  it "should respect default arguments", ->
     stylesheet = parse """
-      foo(one, two = #fff) = { background-color: two }
-      #layer {type: 'background'; foo: 0}
-    """
-    assert.equal stylesheet.layers[0].paint['background-color'], '#ffffff'
-
-  it "should respect default arguments in function-style invocation", ->
-    stylesheet = parse """
-      foo(one, two = #fff) = { background-color: two }
+      foo(one, two = #fff) = { scree-test-meta: two }
       #layer {type: 'background'; foo(0)}
     """
-    assert.equal stylesheet.layers[0].paint['background-color'], '#ffffff'
+    assert.equal stylesheet.layers[0]['scree-test-meta'], '#ffffff'
 
 
   it "should select a property macro by the number of arguments supplied", ->
     stylesheet = parse """
-      foo = { background-color: 0 }
-      foo(value) = { background-color: value }
-      #layer { type: 'background'; foo: 17 }
+      foo = { scree-test-meta: 0 }
+      foo(value) = { scree-test-meta: value }
+      #layer { type: 'background'; foo(17) }
     """
-    assert.equal stylesheet.layers[0].paint['background-color'], 17
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17

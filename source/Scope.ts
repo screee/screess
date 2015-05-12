@@ -175,6 +175,7 @@ class Scope {
     }
   }
 
+  // TODO actually do a seperate pass over each primitive statement to extract this
   getVersion():number {
     return this.getGlobalScope().version || 7;
   }

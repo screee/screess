@@ -78,17 +78,17 @@ describe "whitespace", ->
     """
     assert.deepEqual stylesheet.layers[0]['scree-test-meta'], [1, 2]
 
-  it "should allow for a property's values to span multiple lines within parenthesis", ->
+  it "should allow for a property macro's values to span multiple lines within parenthesis", ->
     stylesheet = parse """
-      type-second(one, two) = { type: two }
+      macro(one, two) = { scree-test-meta: two }
       #layer {
-        type-second: (
+        macro(
           'fill'
           'background'
         )
       }
     """
-    assert.deepEqual stylesheet.layers[0].type, 'background'
+    assert.deepEqual stylesheet.layers[0]['scree-test-meta'], 'background'
 
   describe 'comments', ->
     it "should be ignored at the end of a line", ->

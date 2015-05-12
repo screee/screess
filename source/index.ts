@@ -16,6 +16,7 @@ export import ConditionalStatement = require("./statements/ConditionalStatement"
 export import LayerStatement = require("./statements/LayerStatement");
 export import LoopStatement = require("./statements/LoopStatement");
 export import PropertyStatement = require("./statements/PropertyStatement");
+export import PropertyMacroStatement = require("./statements/PropertyMacroStatement");
 
 export import Expression = require("./expressions/Expression");
 export import ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression");

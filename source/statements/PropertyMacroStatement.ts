@@ -6,7 +6,7 @@ import ExpressionSet = require("../ExpressionSet");
 import Value = require("../values/Value");
 import _ = require("../utilities");
 
-class PropertyStatement extends Statement {
+class PropertyMacroStatement extends Statement {
 
   constructor(public name:string, public expressions:ExpressionSet) {
     super();
@@ -23,8 +23,10 @@ class PropertyStatement extends Statement {
   }
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
-    callback(scope, this);
+    var values = this.expressions.toValueSet(scope, stack);
+    var macro = scope.getPropertyMacro(this.name, values, stack)
+    macro.evaluate(values, stack, callback);
   }
 }
 
-export = PropertyStatement
+export = PropertyMacroStatement

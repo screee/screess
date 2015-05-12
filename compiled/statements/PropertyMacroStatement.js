@@ -8,25 +8,27 @@ var Statement = require("./Statement");
 var assert = require("assert");
 var ExpressionSet = require("../ExpressionSet");
 var Value = require("../values/Value");
-var PropertyStatement = (function (_super) {
-    __extends(PropertyStatement, _super);
-    function PropertyStatement(name, expressions) {
+var PropertyMacroStatement = (function (_super) {
+    __extends(PropertyMacroStatement, _super);
+    function PropertyMacroStatement(name, expressions) {
         _super.call(this);
         this.name = name;
         this.expressions = expressions;
         assert(expressions instanceof ExpressionSet);
     }
-    PropertyStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
+    PropertyMacroStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
         var values = this.expressions.toValueSet(scope, stack);
         if (values.length != 1 || values.positional.length != 1) {
             throw new Error("Cannot apply " + values.length + " args to primitive property " + this.name);
         }
         properties[this.name] = Value.evaluate(values.positional[0]);
     };
-    PropertyStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
-        callback(scope, this);
+    PropertyMacroStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
+        var values = this.expressions.toValueSet(scope, stack);
+        var macro = scope.getPropertyMacro(this.name, values, stack);
+        macro.evaluate(values, stack, callback);
     };
-    return PropertyStatement;
+    return PropertyMacroStatement;
 })(Statement);
-module.exports = PropertyStatement;
-//# sourceMappingURL=PropertyStatement.js.map
+module.exports = PropertyMacroStatement;
+//# sourceMappingURL=PropertyMacroStatement.js.map

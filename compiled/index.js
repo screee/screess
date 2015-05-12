@@ -14,6 +14,7 @@ exports.ConditionalStatement = require("./statements/ConditionalStatement");
 exports.LayerStatement = require("./statements/LayerStatement");
 exports.LoopStatement = require("./statements/LoopStatement");
 exports.PropertyStatement = require("./statements/PropertyStatement");
+exports.PropertyMacroStatement = require("./statements/PropertyMacroStatement");
 exports.Expression = require("./expressions/Expression");
 exports.ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression");
 exports.ArrayExpression = require("./expressions/ArrayExpression");
