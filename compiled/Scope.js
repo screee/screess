@@ -6,8 +6,9 @@ var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
 var _ = require("./utilities");
 var FS = require("fs");
+var getPropertyType = require("./getPropertyType");
+var PropertyType = require("./PropertyType");
 var Parser = require("./parser");
-var MBGLStyleSpec = require('mapbox-gl-style-spec');
 var Scope = (function () {
     function Scope(parent, name, statements) {
         var _this = this;
@@ -216,6 +217,7 @@ var Scope = (function () {
             statements[i].eachPrimitiveStatement(this, stack, callback);
         }
     };
+    // TODO actually do a seperate pass over each primitive statement to extract this
     Scope.prototype.getVersion = function () {
         return this.getGlobalScope().version || 7;
     };
@@ -258,36 +260,5 @@ var Scope;
     })(Scope.Type || (Scope.Type = {}));
     var Type = Scope.Type;
 })(Scope || (Scope = {}));
-var PropertyType;
-(function (PropertyType) {
-    PropertyType[PropertyType["PAINT"] = 0] = "PAINT";
-    PropertyType[PropertyType["LAYOUT"] = 1] = "LAYOUT";
-    PropertyType[PropertyType["META"] = 2] = "META";
-})(PropertyType || (PropertyType = {}));
-function getPropertyType(version, name) {
-    if (name == 'scree-test-paint')
-        return 0 /* PAINT */;
-    else if (name == 'scree-test-layout')
-        return 1 /* LAYOUT */;
-    else if (name == 'scree-test-meta')
-        return 2 /* META */;
-    else {
-        var spec = MBGLStyleSpec["v" + version];
-        for (var i in spec["layout"]) {
-            for (var name_ in spec[spec["layout"][i]]) {
-                if (name == name_)
-                    return 1 /* LAYOUT */;
-            }
-        }
-        for (var i in spec["paint"]) {
-            for (var name_ in spec[spec["paint"][i]]) {
-                if (name == name_)
-                    return 0 /* PAINT */;
-            }
-        }
-        assert(spec["layer"][name]);
-        return 2 /* META */;
-    }
-}
 module.exports = Scope;
 //# sourceMappingURL=Scope.js.map
