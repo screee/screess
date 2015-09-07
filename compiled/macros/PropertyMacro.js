@@ -2,20 +2,23 @@ var Scope = require('../Scope');
 var _ = require("../utilities");
 var PropertyMacro = (function () {
     // TODO drop bodyFunction parameter
-    function PropertyMacro(parentScope, name, argDefinition, bodyScope, bodyFunction) {
-        if (bodyScope === void 0) { bodyScope = null; }
-        if (bodyFunction === void 0) { bodyFunction = null; }
+    function PropertyMacro(parentScope, name, argDefinition, body) {
         this.parentScope = parentScope;
         this.name = name;
         this.argDefinition = argDefinition;
-        this.bodyScope = bodyScope;
-        this.bodyFunction = bodyFunction;
+        this.body = body;
         this.argLengthMin = _.count(this.argDefinition.definitions, function (argDefinition) {
             return !argDefinition.expression;
         });
         this.argLengthMax = this.argDefinition.length;
-        if (!this.bodyScope)
+        if (body instanceof Scope) {
+            this.bodyScope = body;
+            this.bodyFunction = null;
+        }
+        else if (body) {
+            this.bodyFunction = body;
             this.bodyScope = new Scope(this.parentScope);
+        }
     }
     PropertyMacro.prototype.matches = function (name, argValues) {
         return name == this.name && argValues.matches(this.argDefinition);

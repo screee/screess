@@ -17,6 +17,8 @@ import ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitio
 import PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
 var Parser = require("./parser");
 
+type BodyFunction = (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void
+
 class Scope {
 
   private static coreLibrary:Scope = null;
@@ -32,7 +34,7 @@ class Scope {
   static createGlobal():Scope {
     var scope = new Scope()
 
-    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, null, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
+    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
       macro.parentScope.includeFile(values.positional[0], stack, callback);
     });
 
@@ -97,7 +99,6 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Macro Construction
 
-  // Merge with addValueMacros, introspect arguments
   addLiteralValueMacros(macros:{[name:string]:any}):void {
     for (var identifier in macros) {
       var value = macros[identifier];
@@ -105,23 +106,19 @@ class Scope {
     }
   }
 
-  // Merge with addValueMacro, introspect arguments
   addLiteralValueMacro(identifier:string, value:any) {
     this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
   }
 
-  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Function);
-  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Expression);
-  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:any) {
-    var ValueMacro = require("./macros/ValueMacro");
-    var macro = new ValueMacro(this, name, argDefinition, body);
+  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Function|Expression) {
+    var ValueMacro_ = require("./macros/ValueMacro");
+    var macro = new ValueMacro_(this, name, argDefinition, body);
     this.valueMacros.unshift(macro);
   }
 
-  // TODO merge bodyFunction parameter
-  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, bodyScope:Scope = null, bodyFunction:(macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void = null):void {
-    var PropertyMacro = require("./macros/PropertyMacro");
-    var macro = new PropertyMacro(this, name, argDefinition, bodyScope, bodyFunction);
+  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:Scope|BodyFunction):void {
+    var PropertyMacro_ = require("./macros/PropertyMacro");
+    var macro = new PropertyMacro_(this, name, argDefinition, body);
     this.propertyMacros.unshift(macro);
   }
 

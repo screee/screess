@@ -108,7 +108,7 @@ var Scope = (function () {
     };
     Scope.createGlobal = function () {
         var scope = new Scope();
-        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, null, function (macro, values, stack, callback) {
+        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (macro, values, stack, callback) {
             macro.parentScope.includeFile(values.positional[0], stack, callback);
         });
         return scope;
@@ -146,28 +146,23 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Macro Construction
-    // Merge with addValueMacros, introspect arguments
     Scope.prototype.addLiteralValueMacros = function (macros) {
         for (var identifier in macros) {
             var value = macros[identifier];
             this.addLiteralValueMacro(identifier, value);
         }
     };
-    // Merge with addValueMacro, introspect arguments
     Scope.prototype.addLiteralValueMacro = function (identifier, value) {
         this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
-        var ValueMacro = require("./macros/ValueMacro");
-        var macro = new ValueMacro(this, name, argDefinition, body);
+        var ValueMacro_ = require("./macros/ValueMacro");
+        var macro = new ValueMacro_(this, name, argDefinition, body);
         this.valueMacros.unshift(macro);
     };
-    // TODO merge bodyFunction parameter
-    Scope.prototype.addPropertyMacro = function (name, argDefinition, bodyScope, bodyFunction) {
-        if (bodyScope === void 0) { bodyScope = null; }
-        if (bodyFunction === void 0) { bodyFunction = null; }
-        var PropertyMacro = require("./macros/PropertyMacro");
-        var macro = new PropertyMacro(this, name, argDefinition, bodyScope, bodyFunction);
+    Scope.prototype.addPropertyMacro = function (name, argDefinition, body) {
+        var PropertyMacro_ = require("./macros/PropertyMacro");
+        var macro = new PropertyMacro_(this, name, argDefinition, body);
         this.propertyMacros.unshift(macro);
     };
     //////////////////////////////////////////////////////////////////////////////
