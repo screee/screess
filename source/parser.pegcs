@@ -10,7 +10,7 @@
     assert(scope.parent == @scope, "Next scope must be child of current scope")
     @scope = scope
 
-  @popScope = =>
+  @popScope = (statements) =>
     scopeOld = @scope
     scopeNew = @scope.parent
     @scope = scopeNew
@@ -19,8 +19,6 @@
   @rehead = (head, body) => [head].concat(@_.pluck(body, 1))
 }
 
-global = ({ @globalScope = @scope = @Scope.createGlobal() }) statementSet { @globalScope }
-
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
 comment = "//" [^\n\r]* { null }
@@ -28,6 +26,80 @@ comment = "//" [^\n\r]* { null }
 whitespaceWeak = " " / "\t" { null }
 whitespaceStrong = comment? "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Scope                                     //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+global = ({ @globalScope = @scope = @Scope.createGlobal() }) statements:statementSet { @globalScope.addStatements(statements); @globalScope }
+
+scope = ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @scope.addStatements(body); @popScope(body) }
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                               StatementSet                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+statementSetSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
+
+statementSet = whitespace* statements:(head:statement tail:(statementSetSeperator statement)* statementSetSeperator? whitespace* { @rehead(head, tail) })? comment? whitespace* { @_.compact(statements) || [] }
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Statement                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+statement =
+  comment /
+  valueMacroDefinitionStatement /
+  layerStatement /
+  classStatement /
+  propertyMacroDefinitionStatement /
+  loopStatement /
+  conditionalStatement /
+  propertyMacroStatement /
+  propertyStatement
+
+propertyMacroStatement =
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @PropertyMacroStatement(name, expressions) } /
+  name:identifier whitespace* "(" whitespace* ")" { new @PropertyMacroStatement(name, @ExpressionSet.ZERO) }
+
+propertyStatement =
+  name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak { new @PropertyStatement(name, expressions) }
+
+valueMacroDefinitionStatement =
+  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { new @ValueMacroDefinitionStatement(name, args, body) }
+
+loopStatement =
+  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
+    { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
+  "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
+    { new @LoopStatement(scope, valueIdentifier, null, collection) }
+
+conditionalStatement =
+  ifItem:conditionalStatementIf elseIfItems:( whitespace* conditionalStatementElseIf  )* whitespace* elseItem:conditionalStatementElse? { new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem]))) }
+
+conditionalStatementIf =
+  "if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
+
+conditionalStatementElseIf =
+  "else if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
+
+conditionalStatementElse =
+  "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
+
+layerStatement =
+  "#" name:identifier? body:scope { new @LayerStatement(name, body) }
+
+classStatement =
+  "." name:identifier body:scope { new @ClassStatement(name, body) }
+
+propertyMacroDefinitionStatement =
+  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* body:scope { new @PropertyMacroDefinitionStatement(name, args, body) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -67,82 +139,6 @@ expressionSetDefinition =
 expressionSetDefinitionItem =
   name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
   name:identifier { name: name }
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                               StatementSet                                 //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-statementSetSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
-
-statementSet = whitespace* (statement (statementSetSeperator statement)* statementSetSeperator? whitespace*)? comment? whitespace*
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                 Statement                                  //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-statement =
-  comment /
-  valueMacroDefinitionStatement /
-  layerStatement /
-  classStatement /
-  propertyMacroDefinitionStatement /
-  loopStatement /
-  conditionalStatement /
-  propertyMacroStatement /
-  propertyStatement
-
-propertyMacroStatement =
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")"
-    { @scope.addStatement(new @PropertyMacroStatement(name, expressions)) } /
-  name:identifier whitespace* "(" whitespace* ")"
-    { @scope.addStatement(new @PropertyMacroStatement(name, @ExpressionSet.ZERO)) }
-
-propertyStatement =
-  name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak
-    { @scope.addStatement(new @PropertyStatement(name, expressions)) }
-
-valueMacroDefinitionStatement =
-  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { @scope.addStatement(new @ValueMacroDefinitionStatement(name, args, body)) }
-
-loopStatement =
-  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection)) } /
-  "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { @scope.addStatement(new @LoopStatement(scope, valueIdentifier, null, collection)) }
-
-conditionalStatement =
-  ifItem:conditionalStatementIf elseIfItems:( whitespace* conditionalStatementElseIf  )* whitespace* elseItem:conditionalStatementElse? { @scope.addStatement(new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem])))) }
-
-conditionalStatementIf =
-  "if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
-
-conditionalStatementElseIf =
-  "else if" whitespace+ condition:expression whitespace* scope:scope { {condition: condition, scope: scope} }
-
-conditionalStatementElse =
-  "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
-
-layerStatement =
-  "#" name:identifier? scope:scope { @scope.addStatement(new @LayerStatement(name, scope)) }
-
-classStatement =
-  "." name:identifier scope:scope { @scope.addStatement(new @ClassStatement(name, scope)) }
-
-propertyMacroDefinitionStatement =
-  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* body:scope { @scope.addStatement(new @PropertyMacroDefinitionStatement(name, args, body)) }
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                  Scope                                     //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-scope =
-  ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

@@ -13,14 +13,11 @@ var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionSt
 var PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
 var Parser = require("./parser");
 var Scope = (function () {
-    function Scope(parent, name, statements) {
+    function Scope(parent) {
         var _this = this;
-        if (parent === void 0) { parent = null; }
-        if (name === void 0) { name = null; }
-        if (statements === void 0) { statements = []; }
         this.parent = parent;
-        this.name = name;
-        this.statements = statements;
+        this.statements = [];
+        this.name = null;
         this.formatScope = {
             // GLOBAL
             0: function (stack, properties, layers, classes) {
@@ -108,10 +105,11 @@ var Scope = (function () {
         return this.coreLibrary;
     };
     Scope.createGlobal = function () {
-        var scope = new Scope();
+        var scope = new Scope(null);
         scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (macro, values, stack, callback) {
             macro.parentScope.includeFile(values.positional[0], stack, callback);
         });
+        scope.name = "[global]";
         return scope;
     };
     Scope.prototype.isGlobal = function () {
@@ -143,6 +141,11 @@ var Scope = (function () {
         }
         else if (statement instanceof PropertyMacroDefinitionStatement) {
             this.addPropertyMacro(statement.name, statement.argDefinition, statement.body);
+        }
+    };
+    Scope.prototype.addStatements = function (statements) {
+        for (var i = 0; i < statements.length; i++) {
+            this.addStatement(statements[i]);
         }
     };
     //////////////////////////////////////////////////////////////////////////////

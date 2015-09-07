@@ -33,11 +33,13 @@ class Scope {
   }
 
   static createGlobal():Scope {
-    var scope = new Scope()
+    var scope = new Scope(null)
 
     scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
       macro.parentScope.includeFile(values.positional[0], stack, callback);
     });
+
+    scope.name = "[global]";
 
     return scope;
   }
@@ -46,12 +48,10 @@ class Scope {
   public version:number;
   public valueMacros:ValueMacro[];
   public propertyMacros:PropertyMacro[];
+  public statements:Statement[] = []
+  public name:string = null
 
-  constructor(
-      public parent:Scope = null,
-      public name:string = null,
-      public statements:Statement[] = []
-  ) {
+  constructor(public parent:Scope) {
     this.valueMacros = [];
     this.propertyMacros = [];
     this.sources = {};
@@ -92,6 +92,12 @@ class Scope {
       this.addValueMacro(statement.name, statement.argDefinition, statement.body);
     } else if (statement instanceof PropertyMacroDefinitionStatement) {
       this.addPropertyMacro(statement.name, statement.argDefinition, statement.body);
+    }
+  }
+
+  addStatements(statements:Statement[]) {
+    for (var i = 0; i < statements.length; i++) {
+      this.addStatement(statements[i]);
     }
   }
 
@@ -180,7 +186,7 @@ class Scope {
     var statements = this.statements;
     assert(stack != null);
 
-    for (var i=0; i < statements.length; i++) {
+    for (var i = 0; i < statements.length; i++) {
       statements[i].eachPrimitiveStatement(this, stack, callback);
     }
   }
