@@ -7,10 +7,10 @@ var ValueSetDefinition = require('./ValueSetDefinition');
 var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
 var MacroDefinitionStatement = require('./statements/MacroDefinitionStatement');
-var evaluateGlobalScope = require('./scopes/global');
-var evaluateLayerScope = require('./scopes/layer');
-var evaluateClassScope = require('./scopes/class');
-var evaluateObjectScope = require('./scopes/object');
+var formatGlobalScope = require('./scopes/global');
+var formatLayerScope = require('./scopes/layer');
+var formatClassScope = require('./scopes/class');
+var formatObjectScope = require('./scopes/object');
 var Parser = require("./parser");
 var Scope = (function () {
     function Scope(parent) {
@@ -23,7 +23,7 @@ var Scope = (function () {
     Scope.createFromFile = function (file) {
         return Parser.parse(FS.readFileSync(file, "utf8"));
     };
-    Scope.getCoreLibrary = function () {
+    Scope.createCoreLibrary = function () {
         if (!this.coreLibrary) {
             this.coreLibrary = this.createFromFile(Path.join(__dirname, "../core.sss"));
         }
@@ -149,7 +149,6 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
-    // TODO factor out Mapbox specific stuff into macros?
     Scope.prototype.evaluate = function (type, stack) {
         if (type === void 0) { type = 0 /* GLOBAL */; }
         if (stack === void 0) { stack = new Stack(); }
@@ -159,29 +158,29 @@ var Scope = (function () {
         var properties = {};
         if (type == 0 /* GLOBAL */) {
             this.version = parseInt(properties["version"], 10) || 7;
-            this.macros = this.macros.concat(Scope.getCoreLibrary().macros);
+            this.macros = this.macros.concat(Scope.createCoreLibrary().macros);
         }
         this.eachPrimitiveStatement(stack, function (scope, statement) {
             statement.evaluate(scope, stack, layers, classes, properties);
         });
         layers = _.sortBy(layers, 'z-index');
-        var evaluator;
+        var formater;
         if (type == 0 /* GLOBAL */) {
-            evaluator = evaluateGlobalScope;
+            formater = formatGlobalScope;
         }
         else if (type == 1 /* LAYER */) {
-            evaluator = evaluateLayerScope;
+            formater = formatLayerScope;
         }
         else if (type == 2 /* CLASS */) {
-            evaluator = evaluateClassScope;
+            formater = formatClassScope;
         }
         else if (type == 3 /* OBJECT */) {
-            evaluator = evaluateObjectScope;
+            formater = formatObjectScope;
         }
         else {
             assert(false);
         }
-        var output = evaluator.call(this, stack, properties, layers, classes);
+        var output = formater.call(this, stack, properties, layers, classes);
         stack.scope.pop();
         return output;
     };

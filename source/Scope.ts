@@ -12,10 +12,10 @@ import Macro = require('./Macro');
 import Statement = require('./statements/Statement');
 import MacroDefinitionStatement = require('./statements/MacroDefinitionStatement');
 import PropertyStatement = require('./statements/PropertyStatement');
-import evaluateGlobalScope = require('./scopes/global');
-import evaluateLayerScope = require('./scopes/layer');
-import evaluateClassScope = require('./scopes/class');
-import evaluateObjectScope = require('./scopes/object');
+import formatGlobalScope = require('./scopes/global');
+import formatLayerScope = require('./scopes/layer');
+import formatClassScope = require('./scopes/class');
+import formatObjectScope = require('./scopes/object');
 var Parser = require("./parser");
 
 class Scope {
@@ -26,7 +26,7 @@ class Scope {
     return Parser.parse(FS.readFileSync(file, "utf8"));
   }
 
-  static getCoreLibrary():Scope {
+  static createCoreLibrary():Scope {
     if (!this.coreLibrary) {
       this.coreLibrary = this.createFromFile(Path.join(__dirname, "../core.sss"));
     }
@@ -182,7 +182,6 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
-  // TODO factor out Mapbox specific stuff into macros?
   evaluate(type:Scope.Type = Scope.Type.GLOBAL, stack:Stack = new Stack()):{} {
     stack.scope.push(this);
 
@@ -192,8 +191,7 @@ class Scope {
 
     if (type == Scope.Type.GLOBAL) {
       this.version = parseInt(properties["version"], 10) || 7;
-
-      this.macros = this.macros.concat(Scope.getCoreLibrary().macros);
+      this.macros = this.macros.concat(Scope.createCoreLibrary().macros);
     }
 
     this.eachPrimitiveStatement(stack, (scope: Scope, statement: Statement) => {
@@ -202,20 +200,20 @@ class Scope {
 
     layers = _.sortBy(layers, 'z-index');
 
-    var evaluator;
+    var formater;
     if (type == Scope.Type.GLOBAL) {
-      evaluator = evaluateGlobalScope;
+      formater = formatGlobalScope;
     } else if (type == Scope.Type.LAYER) {
-      evaluator = evaluateLayerScope;
+      formater = formatLayerScope;
     } else if (type == Scope.Type.CLASS) {
-      evaluator = evaluateClassScope;
+      formater = formatClassScope;
     } else if (type == Scope.Type.OBJECT) {
-      evaluator = evaluateObjectScope;
+      formater = formatObjectScope;
     } else {
       assert(false);
     }
 
-    var output = evaluator.call(this, stack, properties, layers, classes)
+    var output = formater.call(this, stack, properties, layers, classes)
 
     stack.scope.pop();
 
