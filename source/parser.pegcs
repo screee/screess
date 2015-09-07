@@ -58,15 +58,9 @@ statement =
   valueMacroDefinitionStatement /
   layerStatement /
   classStatement /
-  propertyMacroDefinitionStatement /
   loopStatement /
   conditionalStatement /
-  propertyMacroStatement /
   propertyStatement
-
-propertyMacroStatement =
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @PropertyMacroStatement(name, expressions) } /
-  name:identifier whitespace* "(" whitespace* ")" { new @PropertyMacroStatement(name, @ExpressionSet.ZERO) }
 
 propertyStatement =
   name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak { new @PropertyStatement(name, expressions) }
@@ -96,9 +90,6 @@ layerStatement =
 classStatement =
   "." name:identifier whitespace* body:scope { new @ClassStatement(name, body) }
 
-propertyMacroDefinitionStatement =
-  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* body:scope { new @PropertyMacroDefinitionStatement(name, args, body) }
-
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                              Expression Sets                               //
@@ -127,7 +118,6 @@ expressionSetMixedStrong =
 expressionSetMixedStrongItem =
   name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
   expression:expression { { expression: expression } }
-
 
 expressionSetDefinition =
   "(" whitespace* "*" whitespace* ")" { @ValueSetDefinition.WILDCARD } /

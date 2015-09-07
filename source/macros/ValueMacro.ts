@@ -7,6 +7,7 @@ import assert = require('assert')
 import Stack = require('../Stack')
 import _ = require("../utilities")
 
+// TODO strongly type function args
 class ValueMacro {
 
   public body:Function;
@@ -28,6 +29,7 @@ class ValueMacro {
       }
     } else if (_.isFunction(body)) {
       this.body = body;
+
     } else {
       assert(false);
     }

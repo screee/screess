@@ -31,80 +31,80 @@ butt = "butt"
 round = "round"
 square = "square"
 
-source(url, layer) = {
-  source: vector url layer
-}
-
-source(type, url, layer) = {
-  source-type: type
-  source-url: url
-  source-layer: layer
-}
-
-hillshade(color = #000, opacity = 0.15) = {
-
-  levels = [94 90 89 78 67 56]
-
-  for level in levels {
-    # {
-      type: fill
-      source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
-      filter: level == @level
-      fill-color: color
-      fill-opacity: opacity * level / 100
-    }
-  }
-
-}
-
-contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index = 5) = {
-  # {
-    source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
-    type: line
-    line-opacity: opacity
-    line-width: minor-width
-    line-color: color
-  }
-
-  # {
-    source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
-    type: line
-    line-opacity: opacity
-    line-width: major-width
-    line-color: color
-    filter: @index == index
-  }
-}
-
-landuse(*) = {
-
-  colors = [
-    agriculture: null // Various types of crop and farmland
-    cemetery   : null // Cemeteries and graveyards
-    glacier    : #fff // Glaciers or permanent ice/snow
-    grass      : #b3dda4 // Grasslands, meadows, fields, lawns, etc
-    hospital   : null // Hospital grounds
-    industrial : null // Currently includes only airports
-    park       : null // City parks, village greens, playgrounds, national parks, nature reserves, etc
-    pitch      : null // Sports fields & courts of all types
-    rock       : #c7c7c7 // Bare rock, scree, quarries
-    sand       : #cfce9a // Sand, beaches, dunes
-    school     : null // Primary, secondary, post-secondary school grounds
-    scrub      : #75bb5c // Bushes, scrub, heaths
-    wood       : #75bb5c // Woods and forestry areas
-  ]
-
-  scree-test-meta: `_.extend(colors(), arguments().named)`
-
-  for class color in colors {
-    if color != null {
-      # {
-        source: "mapbox://mapbox.mapbox-streets-v5" "landuse"
-        type: fill
-        fill-color: color
-        filter: @class == class
-      }
-    }
-  }
-
-}
+// source(url, layer) = {
+//   source: vector url layer
+// }
+//
+// source(type, url, layer) = {
+//   source-type: type
+//   source-url: url
+//   source-layer: layer
+// }
+//
+// hillshade(color = #000, opacity = 0.15) = {
+//
+//   levels = [94 90 89 78 67 56]
+//
+//   for level in levels {
+//     # {
+//       type: fill
+//       source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
+//       filter: level == @level
+//       fill-color: color
+//       fill-opacity: opacity * level / 100
+//     }
+//   }
+//
+// }
+//
+// contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index = 5) = {
+//   # {
+//     source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
+//     type: line
+//     line-opacity: opacity
+//     line-width: minor-width
+//     line-color: color
+//   }
+//
+//   # {
+//     source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
+//     type: line
+//     line-opacity: opacity
+//     line-width: major-width
+//     line-color: color
+//     filter: @index == index
+//   }
+// }
+//
+// landuse(*) = {
+//
+//   colors = [
+//     agriculture: null // Various types of crop and farmland
+//     cemetery   : null // Cemeteries and graveyards
+//     glacier    : #fff // Glaciers or permanent ice/snow
+//     grass      : #b3dda4 // Grasslands, meadows, fields, lawns, etc
+//     hospital   : null // Hospital grounds
+//     industrial : null // Currently includes only airports
+//     park       : null // City parks, village greens, playgrounds, national parks, nature reserves, etc
+//     pitch      : null // Sports fields & courts of all types
+//     rock       : #c7c7c7 // Bare rock, scree, quarries
+//     sand       : #cfce9a // Sand, beaches, dunes
+//     school     : null // Primary, secondary, post-secondary school grounds
+//     scrub      : #75bb5c // Bushes, scrub, heaths
+//     wood       : #75bb5c // Woods and forestry areas
+//   ]
+//
+//   scree-test-meta: `_.extend(colors(), arguments().named)`
+//
+//   for class color in colors {
+//     if color != null {
+//       # {
+//         source: "mapbox://mapbox.mapbox-streets-v5" "landuse"
+//         type: fill
+//         fill-color: color
+//         filter: @class == class
+//       }
+//     }
+//   }
+//
+// }

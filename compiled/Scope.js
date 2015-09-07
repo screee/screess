@@ -7,7 +7,6 @@ var ValueSetDefinition = require('./ValueSetDefinition');
 var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
 var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
-var PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
 var evaluateGlobalScope = require('./scopes/global');
 var evaluateLayerScope = require('./scopes/layer');
 var evaluateClassScope = require('./scopes/class');
@@ -19,37 +18,37 @@ var Scope = (function () {
         this.statements = [];
         this.name = null;
         this.valueMacros = [];
-        this.propertyMacros = [];
         this.sources = {};
     }
+    Scope.createFromFile = function (file) {
+        return Parser.parse(FS.readFileSync(file, "utf8"));
+    };
     Scope.getCoreLibrary = function () {
         if (!this.coreLibrary) {
-            // TODO use path.join
-            this.coreLibrary = Parser.parse(FS.readFileSync(Path.join(__dirname, "../core.sss"), "utf8"));
+            this.coreLibrary = this.createFromFile(Path.join(__dirname, "../core.sss"));
         }
         return this.coreLibrary;
     };
     Scope.createGlobal = function () {
         var scope = new Scope(null);
         scope.name = "[global]";
-        scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (macro, values, stack, callback) {
-            macro.parentScope.includeFile(values.positional[0], stack, callback);
+        // TODO rename to something else
+        scope.addValueMacro("include", ValueSetDefinition.WILDCARD, function (args, stack) {
+            var file = args.positional[0];
+            stack.getScope().includeScope(Scope.createFromFile(file));
         });
         return scope;
     };
+    // TODO rename isGlobalScope
     Scope.prototype.isGlobal = function () {
         return !this.parent;
     };
     Scope.prototype.getGlobalScope = function () {
         return this.isGlobal() ? this : this.parent.getGlobalScope();
     };
-    Scope.prototype.includeFile = function (filename, stack, callback) {
-        this.includeScope(Parser.parse(FS.readFileSync(filename, "utf8")), stack, callback);
-    };
     Scope.prototype.includeScope = function (scope, stack, callback) {
         scope.eachPrimitiveStatement(stack, callback);
         this.valueMacros = scope.valueMacros.concat(this.valueMacros);
-        this.propertyMacros = scope.propertyMacros.concat(this.propertyMacros);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Construction
@@ -63,9 +62,6 @@ var Scope = (function () {
         this.statements.push(statement);
         if (statement instanceof ValueMacroDefinitionStatement) {
             this.addValueMacro(statement.name, statement.argDefinition, statement.body);
-        }
-        else if (statement instanceof PropertyMacroDefinitionStatement) {
-            this.addPropertyMacro(statement.name, statement.argDefinition, statement.body);
         }
     };
     Scope.prototype.addStatements = function (statements) {
@@ -88,11 +84,6 @@ var Scope = (function () {
         var ValueMacro_ = require("./macros/ValueMacro");
         var macro = new ValueMacro_(this, name, argDefinition, body);
         this.valueMacros.unshift(macro);
-    };
-    Scope.prototype.addPropertyMacro = function (name, argDefinition, body) {
-        var PropertyMacro_ = require("./macros/PropertyMacro");
-        var macro = new PropertyMacro_(this, name, argDefinition, body);
-        this.propertyMacros.unshift(macro);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation Helpers
@@ -135,15 +126,6 @@ var Scope = (function () {
                     return macro.evaluateToIntermediate(args, stack);
             }];
         });
-    };
-    Scope.prototype.getPropertyMacro = function (name, values, stack) {
-        for (var i in this.propertyMacros) {
-            var macro = this.propertyMacros[i];
-            if (macro.matches(name, values) && !_.contains(stack.propertyMacro, macro)) {
-                return macro;
-            }
-        }
-        return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
     };
     // Properties, layers, classes
     Scope.prototype.eachPrimitiveStatement = function (stack, callback) {

@@ -2,6 +2,7 @@ var Expression = require('../expressions/Expression');
 var Scope = require('../Scope');
 var assert = require('assert');
 var _ = require("../utilities");
+// TODO strongly type function args
 var ValueMacro = (function () {
     function ValueMacro(parentScope, name, argDefinition, body) {
         this.parentScope = parentScope;

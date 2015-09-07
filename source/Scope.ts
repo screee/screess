@@ -9,26 +9,25 @@ import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
 import ValueMacro = require('./macros/ValueMacro');
-import PropertyMacro = require('./macros/PropertyMacro');
 import Statement = require('./statements/Statement');
 import ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
-import PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
 import evaluateGlobalScope = require('./scopes/global');
 import evaluateLayerScope = require('./scopes/layer');
 import evaluateClassScope = require('./scopes/class');
 import evaluateObjectScope = require('./scopes/object');
 var Parser = require("./parser");
 
-type PropertyMacroBodyFunction = (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void
-
 class Scope {
 
   private static coreLibrary:Scope = null;
 
+  static createFromFile(file) {
+    return Parser.parse(FS.readFileSync(file, "utf8"));
+  }
+
   static getCoreLibrary():Scope {
     if (!this.coreLibrary) {
-      // TODO use path.join
-      this.coreLibrary = Parser.parse(FS.readFileSync(Path.join(__dirname, "../core.sss"), "utf8"));
+      this.coreLibrary = this.createFromFile(Path.join(__dirname, "../core.sss"));
     }
     return this.coreLibrary;
   }
@@ -37,8 +36,10 @@ class Scope {
     var scope = new Scope(null)
     scope.name = "[global]";
 
-    scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
-      macro.parentScope.includeFile(values.positional[0], stack, callback);
+    // TODO rename to something else
+    scope.addValueMacro("include", ValueSetDefinition.WILDCARD, (args:ValueSet, stack:Stack) => {
+      var file = args.positional[0];
+      stack.getScope().includeScope(Scope.createFromFile(file));
     });
 
     return scope;
@@ -47,16 +48,15 @@ class Scope {
   public sources:{};
   public version:number;
   public valueMacros:ValueMacro[];
-  public propertyMacros:PropertyMacro[];
   public statements:Statement[] = []
   public name:string = null
 
   constructor(public parent:Scope) {
     this.valueMacros = [];
-    this.propertyMacros = [];
     this.sources = {};
   }
 
+  // TODO rename isGlobalScope
   isGlobal():boolean {
     return !this.parent
   }
@@ -65,14 +65,9 @@ class Scope {
     return this.isGlobal() ? this : this.parent.getGlobalScope();
   }
 
-  includeFile(filename:string, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
-    this.includeScope(Parser.parse(FS.readFileSync(filename, "utf8")), stack, callback);
-  }
-
   includeScope(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
     scope.eachPrimitiveStatement(stack, callback);
     this.valueMacros = scope.valueMacros.concat(this.valueMacros);
-    this.propertyMacros = scope.propertyMacros.concat(this.propertyMacros);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -90,8 +85,6 @@ class Scope {
 
     if (statement instanceof ValueMacroDefinitionStatement) {
       this.addValueMacro(statement.name, statement.argDefinition, statement.body);
-    } else if (statement instanceof PropertyMacroDefinitionStatement) {
-      this.addPropertyMacro(statement.name, statement.argDefinition, statement.body);
     }
   }
 
@@ -119,12 +112,6 @@ class Scope {
     var ValueMacro_ = require("./macros/ValueMacro");
     var macro = new ValueMacro_(this, name, argDefinition, body);
     this.valueMacros.unshift(macro);
-  }
-
-  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:Scope|PropertyMacroBodyFunction):void {
-    var PropertyMacro_ = require("./macros/PropertyMacro");
-    var macro = new PropertyMacro_(this, name, argDefinition, body);
-    this.propertyMacros.unshift(macro);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -168,17 +155,6 @@ class Scope {
       }];
     });
 
-  }
-
-  getPropertyMacro(name:string, values:ValueSet, stack:Stack):PropertyMacro {
-    for (var i in this.propertyMacros) {
-      var macro = this.propertyMacros[i];
-      if (macro.matches(name, values) && !_.contains(stack.propertyMacro, macro)) {
-        return macro;
-      }
-    }
-
-    return this.parent ? this.parent.getPropertyMacro(name, values, stack) : null;
   }
 
   // Properties, layers, classes
