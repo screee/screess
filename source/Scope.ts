@@ -220,7 +220,6 @@ class Scope {
     });
 
     layers = _.sortBy(layers, 'z-index');
-    if (layers.length == 0) { layers = undefined }
 
     var evaluator;
     if (type == Scope.Type.GLOBAL) {

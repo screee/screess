@@ -6,14 +6,16 @@ parse = (source) -> Parser.parse(source).evaluate()
 describe "value", ->
 
   parseValue = (value, context = {}) ->
+    preface = "value-macro = 'foo'; property-macro = { foo: 'bar' }";
+
     if context.filterLvalue
-      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: #{value} == 1 }"
+      stylesheet = parse "#{preface}; #layer { type: 'background'; scree-test-meta: #{value} == 1 }"
       stylesheet.layers[0]['scree-test-meta'][1]
     else if context.filterRvalue
-      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: @test == #{value} }"
+      stylesheet = parse "#{preface}; #layer { type: 'background'; scree-test-meta: @test == #{value} }"
       stylesheet.layers[0]['scree-test-meta'][2]
     else
-      stylesheet = parse "macro = 'foo'; #layer { type: 'background'; scree-test-meta: #{value} }"
+      stylesheet = parse "#{preface}; #layer { type: 'background'; scree-test-meta: #{value} }"
       stylesheet.layers[0]['scree-test-meta']
 
   describe "javascript", ->
@@ -53,17 +55,14 @@ describe "value", ->
 
   describe "map", ->
 
-    it "should parse with comma seperators", ->
-      assert.deepEqual parseValue("[one:1,two:2 , three:3]"), {one: 1, two: 2, three: 3}
-
-    it "should parse with space seperators", ->
-      assert.deepEqual parseValue("[one:1 two:2 three:3]"), {one: 1, two: 2, three: 3}
+    it "should parse", ->
+      assert.deepEqual parseValue("[one:1; two:2; three:3]"), {one: 1, two: 2, three: 3}
 
     it "should allow property access by dot notation", ->
-      assert.deepEqual parseValue("[one:1 two:2 three:3].three"), 3
+      assert.deepEqual parseValue("[one:1; two:2; three:3].three"), 3
 
     it "should allow property access by subscript notation", ->
-      assert.deepEqual parseValue('[one:1 two:2 three:3]["three"]'), 3
+      assert.deepEqual parseValue('[one:1; two:2; three:3]["three"]'), 3
 
     it "should allow maps inside maps", ->
       assert.deepEqual parseValue("[one:[two:[three: [four: 4]]]]"), {one: {two: {three: {four: 4}}}}
@@ -75,7 +74,10 @@ describe "value", ->
       assert.deepEqual parseValue("[filter: @class == 'footway']"), {filter: ["==", "class", "footway"]}
 
     it "should allow keys to be language keywords", ->
-      assert.deepEqual parseValue("[out: 0 in: 1]"), {out: 0, in: 1}
+      assert.deepEqual parseValue("[out: 0; in: 1]"), {out: 0, in: 1}
+
+    it "should allow property macros", ->
+      assert.deepEqual parseValue("[ property-macro() ]"), { foo: 'bar' }
 
   describe "number", ->
 
@@ -125,7 +127,7 @@ describe "value", ->
       assert.equal parseValue('"test {7} test"'), "test 7 test"
 
     it "should parse with macro value references interpolated", ->
-      assert.equal parseValue('"test {macro} test"'), "test foo test"
+      assert.equal parseValue('"test {value-macro} test"'), "test foo test"
 
     it "should parse with attribute reference values", ->
       assert.equal parseValue('"test @foo test"'), "test {foo} test"
@@ -246,5 +248,3 @@ describe "arithmetic operators", ->
       #test { scree-test-meta: 2 * (2 + 2); }
     """
     assert.equal stylesheet.layers[0]['scree-test-meta'], 8
-
-

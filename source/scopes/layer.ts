@@ -46,12 +46,14 @@ function evaluateLayerScope(stack:Stack, properties:{}, layers:Scope[], _classes
     metaProperties["source"] = stack.getGlobalScope().addSource(source);
   }
 
-
-  if (layers) {
+  if (layers.length) {
     if (metaProperties['type']) {
       assert.equal(metaProperties['type'], 'raster');
+    } else {
+      metaProperties['type'] = 'raster';
     }
-    metaProperties['type'] = 'raster'
+  } else {
+    layers = undefined;
   }
 
   var classes = _.objectMap(_classes, (scope) => {

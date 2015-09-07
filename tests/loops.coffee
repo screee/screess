@@ -18,7 +18,7 @@ describe "loops", ->
 
   it "should iterate over an object's values to create layers", ->
     stylesheet = parse """
-      for value in [zero:0 , one:1, two:2] {
+      for value in [ zero:0; one:1; two:2 ] {
         # { scree-test-meta: value }
       }
     """
@@ -28,7 +28,7 @@ describe "loops", ->
 
   it "should iterate over an object's keys and values to create layers", ->
     stylesheet = parse """
-      for key value in [zero:0 , one:1, two:2] {
+      for key value in [zero:0; one:1; two:2] {
         # { scree-test-meta: [key, value] }
       }
     """

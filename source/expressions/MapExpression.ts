@@ -8,17 +8,12 @@ import _ = require("../utilities");
 
 class MapExpression extends Expression {
 
-  constructor(public expressions:ExpressionSet) {
+  constructor(public body:Scope) {
     super();
-    assert(expressions.isNamed());
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    var output = _.objectMap(this.expressions.items, (item) => {
-      return [item.name, item.expression.evaluateToIntermediate(scope, stack)]
-    });
-
-    return output;
+    return this.body.evaluate(Scope.Type.OBJECT, stack);
   }
 
 }

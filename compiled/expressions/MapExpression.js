@@ -5,20 +5,15 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var assert = require("assert");
-var _ = require("../utilities");
+var Scope = require("../Scope");
 var MapExpression = (function (_super) {
     __extends(MapExpression, _super);
-    function MapExpression(expressions) {
+    function MapExpression(body) {
         _super.call(this);
-        this.expressions = expressions;
-        assert(expressions.isNamed());
+        this.body = body;
     }
     MapExpression.prototype.evaluateToIntermediate = function (scope, stack) {
-        var output = _.objectMap(this.expressions.items, function (item) {
-            return [item.name, item.expression.evaluateToIntermediate(scope, stack)];
-        });
-        return output;
+        return this.body.evaluate(3 /* OBJECT */, stack);
     };
     return MapExpression;
 })(Expression);

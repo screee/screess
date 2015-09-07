@@ -37,11 +37,16 @@ function evaluateLayerScope(stack, properties, layers, _classes) {
     if (!_.isEmpty(source)) {
         metaProperties["source"] = stack.getGlobalScope().addSource(source);
     }
-    if (layers) {
+    if (layers.length) {
         if (metaProperties['type']) {
             assert.equal(metaProperties['type'], 'raster');
         }
-        metaProperties['type'] = 'raster';
+        else {
+            metaProperties['type'] = 'raster';
+        }
+    }
+    else {
+        layers = undefined;
     }
     var classes = _.objectMap(_classes, function (scope) {
         return ["paint." + scope.name, scope];

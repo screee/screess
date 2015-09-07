@@ -35,7 +35,7 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 
 global = ({ @globalScope = @scope = @Scope.createGlobal() }) statements:statementSet { @globalScope.addStatements(statements); @globalScope }
 
-scope = ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @scope.addStatements(body); @popScope(body) }
+scope = ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @scope.addStatements(body); @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -256,7 +256,7 @@ arrayExpression =
   "[" whitespace* expressions:expressionSetUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
 
 mapExpression =
-  "[" whitespace* expressions:expressionSetNamedStrong whitespace* "]" { new @MapExpression(expressions) }
+  ({ @pushScope() }) "[" body:statementSet "]" { @scope.addStatements(body); new @MapExpression(@popScope()) }
 
 javaScriptExpression =
   "`" body:[^\`]* "`" { new @JavaScriptExpression(body.join("")) }

@@ -177,9 +177,6 @@ var Scope = (function () {
             statement.evaluate(scope, stack, layers, classes, properties);
         });
         layers = _.sortBy(layers, 'z-index');
-        if (layers.length == 0) {
-            layers = undefined;
-        }
         var evaluator;
         if (type == 0 /* GLOBAL */) {
             evaluator = evaluateGlobalScope;
