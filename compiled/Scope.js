@@ -6,6 +6,7 @@ var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
 var _ = require("./utilities");
 var FS = require("fs");
+var Path = require("path");
 var getPropertyType = require("./getPropertyType");
 var PropertyType = require("./PropertyType");
 var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
@@ -102,7 +103,7 @@ var Scope = (function () {
     Scope.getCoreLibrary = function () {
         if (!this.coreLibrary) {
             // TODO use path.join
-            this.coreLibrary = Parser.parse(FS.readFileSync(__dirname + "/../core.sss", "utf8"));
+            this.coreLibrary = Parser.parse(FS.readFileSync(Path.join(__dirname, "../core.sss"), "utf8"));
         }
         return this.coreLibrary;
     };

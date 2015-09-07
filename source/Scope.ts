@@ -11,6 +11,7 @@ import PropertyMacro = require('./macros/PropertyMacro');
 import _ = require("./utilities")
 import Statement = require('./statements/Statement');
 import FS = require("fs");
+import Path = require("path");
 import getPropertyType = require("./getPropertyType");
 import PropertyType = require("./PropertyType");
 import ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
@@ -26,7 +27,7 @@ class Scope {
   static getCoreLibrary():Scope {
     if (!this.coreLibrary) {
       // TODO use path.join
-      this.coreLibrary = Parser.parse(FS.readFileSync(__dirname + "/../core.sss", "utf8"));
+      this.coreLibrary = Parser.parse(FS.readFileSync(Path.join(__dirname, "../core.sss"), "utf8"));
     }
     return this.coreLibrary;
   }
@@ -40,8 +41,6 @@ class Scope {
 
     return scope;
   }
-
-  // TODO make addLayer an implicit macro
 
   public sources:{};
   public version:number;
