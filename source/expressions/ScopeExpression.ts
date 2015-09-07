@@ -5,6 +5,7 @@ import Scope = require("../Scope");
 import Stack = require("../Stack");
 import assert = require("assert");
 import _ = require("../utilities");
+import ScopeValue = require('../values/ScopeValue');
 
 class ScopeExpression extends Expression {
 
@@ -13,7 +14,7 @@ class ScopeExpression extends Expression {
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    return this.body.evaluate(Scope.Type.OBJECT, stack);
+    return new ScopeValue(this.body.clone(scope));
   }
 
 }

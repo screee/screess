@@ -1,5 +1,6 @@
 var assert = require('assert');
 var ValueSet = require('./ValueSet');
+var Scope = require("./Scope");
 var _ = require('./utilities');
 var LiteralExpression = require('./expressions/LiteralExpression');
 var ExpressionSet = (function () {
@@ -35,6 +36,7 @@ var ExpressionSet = (function () {
         return _.pluck(this.items, 'expression');
     };
     ExpressionSet.prototype.toValueSet = function (scope, stack) {
+        assert(scope instanceof Scope);
         return new ValueSet(_.map(this.items, function (item) {
             return {
                 value: item.expression.evaluateToIntermediate(scope, stack),

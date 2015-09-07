@@ -52,6 +52,7 @@ class ExpressionSet {
   }
 
   toValueSet(scope:Scope, stack:Stack):ValueSet {
+    assert(scope instanceof Scope);
     return new ValueSet(_.map(this.items, (item:Item) => {
       return {
         value: item.expression.evaluateToIntermediate(scope, stack),
@@ -63,5 +64,3 @@ class ExpressionSet {
 }
 
 export = ExpressionSet;
-
-

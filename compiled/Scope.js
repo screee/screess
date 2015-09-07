@@ -15,10 +15,10 @@ var Parser = require("./parser");
 var Scope = (function () {
     function Scope(parent) {
         this.parent = parent;
+        this.sources = {};
+        this.macros = [];
         this.statements = [];
         this.name = null;
-        this.macros = [];
-        this.sources = {};
     }
     Scope.createFromFile = function (file) {
         return Parser.parse(FS.readFileSync(file, "utf8"));
@@ -30,25 +30,33 @@ var Scope = (function () {
         return this.coreLibrary;
     };
     Scope.createGlobal = function () {
-        var scope = new Scope(null);
-        scope.name = "[global]";
-        // TODO rename to something else
-        scope.addMacro("include", ValueSetDefinition.WILDCARD, function (args, stack) {
-            var file = args.positional[0];
-            stack.getScope().includeScope(Scope.createFromFile(file));
+        var globalScope = new Scope(null);
+        globalScope.name = "[global]";
+        globalScope.addMacro("include", ValueSetDefinition.WILDCARD, function (args, stack) {
+            var file = args['arguments']['positional'][0];
+            var ScopeValue = require('./values/ScopeValue');
+            var includeeScope = Scope.createFromFile(file);
+            var includerScope = stack.getScope();
+            includerScope.macros = includeeScope.macros.concat(includerScope.macros);
+            return new ScopeValue(includeeScope);
         });
-        return scope;
+        return globalScope;
     };
-    // TODO rename isGlobalScope
-    Scope.prototype.isGlobal = function () {
+    Scope.prototype.clone = function (parent) {
+        if (parent === void 0) { parent = this.parent; }
+        var that = new Scope(parent);
+        that.macros = _.clone(this.macros);
+        that.sources = _.clone(this.sources);
+        that.statements = _.clone(this.statements);
+        that.name = _.clone(this.name);
+        that.version = this.version;
+        return that;
+    };
+    Scope.prototype.isGlobalScope = function () {
         return !this.parent;
     };
     Scope.prototype.getGlobalScope = function () {
-        return this.isGlobal() ? this : this.parent.getGlobalScope();
-    };
-    Scope.prototype.includeScope = function (scope, stack, callback) {
-        scope.eachPrimitiveStatement(stack, callback);
-        this.macros = scope.macros.concat(this.macros);
+        return this.isGlobalScope() ? this : this.parent.getGlobalScope();
     };
     //////////////////////////////////////////////////////////////////////////////
     // Construction
@@ -141,7 +149,7 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation
-    // Move these into individual files
+    // TODO factor out Mapbox specific stuff into macros?
     Scope.prototype.evaluate = function (type, stack) {
         if (type === void 0) { type = 0 /* GLOBAL */; }
         if (stack === void 0) { stack = new Stack(); }
@@ -151,9 +159,7 @@ var Scope = (function () {
         var properties = {};
         if (type == 0 /* GLOBAL */) {
             this.version = parseInt(properties["version"], 10) || 7;
-            this.includeScope(Scope.getCoreLibrary(), stack, function (scope, statement) {
-                statement.evaluate(scope, stack, layers, classes, properties);
-            });
+            this.macros = this.macros.concat(Scope.getCoreLibrary().macros);
         }
         this.eachPrimitiveStatement(stack, function (scope, statement) {
             statement.evaluate(scope, stack, layers, classes, properties);

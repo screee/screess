@@ -18,5 +18,3 @@ describe "conditional operators", ->
   it "should parse null coalescing operator", ->
     value = parseValue "null ?? 1 ?? 2"
     assert.equal(value, 1)
-
-

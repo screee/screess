@@ -16,12 +16,19 @@ var PropertyStatement = (function (_super) {
         this.expressions = expressions;
         assert(expressions instanceof ExpressionSet);
     }
+    PropertyStatement.prototype.evaluateValueToIntermediate = function (scope, stack) {
+        var values = this.expressions.toValueSet(scope, stack);
+        if (values.length != 1 || values.positional.length != 1) {
+            throw new Error("Cannot apply " + values.length + " args to primitive property " + this.name);
+        }
+        return values.positional[0];
+    };
     PropertyStatement.prototype.evaluate = function (scope, stack, layers, classes, properties) {
         var values = this.expressions.toValueSet(scope, stack);
         if (values.length != 1 || values.positional.length != 1) {
             throw new Error("Cannot apply " + values.length + " args to primitive property " + this.name);
         }
-        properties[this.name] = Value.evaluate(values.positional[0]);
+        properties[this.name] = Value.evaluate(this.evaluateValueToIntermediate(scope, stack));
     };
     PropertyStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
         callback(scope, this);

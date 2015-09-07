@@ -3,6 +3,7 @@ import Scope = require("../Scope");
 import Stack = require("../Stack");
 import assert = require('assert');
 import _ = require("underscore");
+import ScopeValue = require('../values/ScopeValue');
 
 class PropertyAccessExpression extends Expression {
 
@@ -15,6 +16,10 @@ class PropertyAccessExpression extends Expression {
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var base = this.baseExpression.evaluateToIntermediate(scope, stack);
     var property = this.propertyExpression.evaluateToIntermediate(scope, stack);
+
+    if (base instanceof ScopeValue) {
+      base = base.toObject();
+    }
 
     assert(_.isString(property) || _.isNumber(property), "Property is of invalid type (" + property + ")");
 

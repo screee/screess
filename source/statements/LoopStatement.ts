@@ -4,6 +4,7 @@ import Statement = require("./Statement");
 import assert = require("assert");
 import Expression = require("../expressions/Expression");
 import _ = require("../utilities");
+import ScopeValue = require('../values/ScopeValue');
 
 class LoopStatement extends Statement {
   constructor(
@@ -15,6 +16,7 @@ class LoopStatement extends Statement {
 
   eachPrimitiveStatement(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
     var collection = this.collectionExpression.evaluateToIntermediate(scope, stack);
+    if (collection instanceof ScopeValue) { collection = collection.toObject(stack); }
     assert(_.isArray(collection) || _.isObject(collection))
 
     for (var key in collection) {

@@ -7,6 +7,7 @@ var __extends = this.__extends || function (d, b) {
 var Expression = require("./Expression");
 var assert = require('assert');
 var _ = require("underscore");
+var ScopeValue = require('../values/ScopeValue');
 var PropertyAccessExpression = (function (_super) {
     __extends(PropertyAccessExpression, _super);
     function PropertyAccessExpression(baseExpression, propertyExpression) {
@@ -19,6 +20,9 @@ var PropertyAccessExpression = (function (_super) {
     PropertyAccessExpression.prototype.evaluateToIntermediate = function (scope, stack) {
         var base = this.baseExpression.evaluateToIntermediate(scope, stack);
         var property = this.propertyExpression.evaluateToIntermediate(scope, stack);
+        if (base instanceof ScopeValue) {
+            base = base.toObject();
+        }
         assert(_.isString(property) || _.isNumber(property), "Property is of invalid type (" + property + ")");
         return base[property];
     };

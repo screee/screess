@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var Expression = require("./Expression");
-var Scope = require("../Scope");
+var ScopeValue = require('../values/ScopeValue');
 var ScopeExpression = (function (_super) {
     __extends(ScopeExpression, _super);
     function ScopeExpression(body) {
@@ -13,7 +13,7 @@ var ScopeExpression = (function (_super) {
         this.body = body;
     }
     ScopeExpression.prototype.evaluateToIntermediate = function (scope, stack) {
-        return this.body.evaluate(3 /* OBJECT */, stack);
+        return new ScopeValue(this.body.clone(scope));
     };
     return ScopeExpression;
 })(Expression);

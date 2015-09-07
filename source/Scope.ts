@@ -8,9 +8,10 @@ import ValueSetDefinition = require('./ValueSetDefinition')
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
-import Macro = require('./macros/Macro');
+import Macro = require('./Macro');
 import Statement = require('./statements/Statement');
 import MacroDefinitionStatement = require('./statements/MacroDefinitionStatement');
+import PropertyStatement = require('./statements/PropertyStatement');
 import evaluateGlobalScope = require('./scopes/global');
 import evaluateLayerScope = require('./scopes/layer');
 import evaluateClassScope = require('./scopes/class');
@@ -33,41 +34,47 @@ class Scope {
   }
 
   static createGlobal():Scope {
-    var scope = new Scope(null)
-    scope.name = "[global]";
+    var globalScope = new Scope(null)
+    globalScope.name = "[global]";
 
-    // TODO rename to something else
-    scope.addMacro("include", ValueSetDefinition.WILDCARD, (args:ValueSet, stack:Stack) => {
-      var file = args.positional[0];
-      stack.getScope().includeScope(Scope.createFromFile(file));
+    globalScope.addMacro("include", ValueSetDefinition.WILDCARD, (args:{}, stack:Stack) => {
+      var file:string = args['arguments']['positional'][0];
+      var ScopeValue = require('./values/ScopeValue');
+      var includeeScope:Scope = Scope.createFromFile(file);
+
+      var includerScope = stack.getScope();
+
+      includerScope.macros = includeeScope.macros.concat(includerScope.macros);
+      return new ScopeValue(includeeScope);
     });
 
-    return scope;
+    return globalScope;
   }
 
-  public sources:{};
+  public sources:{} = {};
   public version:number;
-  public macros:Macro[];
-  public statements:Statement[] = []
-  public name:string = null
+  public macros:Macro[] = [];
+  public statements:Statement[] = [];
+  public name:string = null;
 
-  constructor(public parent:Scope) {
-    this.macros = [];
-    this.sources = {};
+  constructor(public parent:Scope) {}
+
+  clone(parent:Scope = this.parent):Scope {
+    var that = new Scope(parent);
+    that.macros = _.clone(this.macros);
+    that.sources = _.clone(this.sources);
+    that.statements = _.clone(this.statements);
+    that.name = _.clone(this.name);
+    that.version = this.version;
+    return that;
   }
 
-  // TODO rename isGlobalScope
-  isGlobal():boolean {
+  isGlobalScope():boolean {
     return !this.parent
   }
 
   getGlobalScope():Scope {
-    return this.isGlobal() ? this : this.parent.getGlobalScope();
-  }
-
-  includeScope(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
-    scope.eachPrimitiveStatement(stack, callback);
-    this.macros = scope.macros.concat(this.macros);
+    return this.isGlobalScope() ? this : this.parent.getGlobalScope();
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -175,7 +182,7 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation
 
-  // Move these into individual files
+  // TODO factor out Mapbox specific stuff into macros?
   evaluate(type:Scope.Type = Scope.Type.GLOBAL, stack:Stack = new Stack()):{} {
     stack.scope.push(this);
 
@@ -186,9 +193,7 @@ class Scope {
     if (type == Scope.Type.GLOBAL) {
       this.version = parseInt(properties["version"], 10) || 7;
 
-      this.includeScope(Scope.getCoreLibrary(), stack, (scope: Scope, statement: Statement) => {
-        statement.evaluate(scope, stack, layers, classes, properties);
-      });
+      this.macros = this.macros.concat(Scope.getCoreLibrary().macros);
     }
 
     this.eachPrimitiveStatement(stack, (scope: Scope, statement: Statement) => {

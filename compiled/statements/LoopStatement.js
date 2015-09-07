@@ -7,6 +7,7 @@ var __extends = this.__extends || function (d, b) {
 var Statement = require("./Statement");
 var assert = require("assert");
 var _ = require("../utilities");
+var ScopeValue = require('../values/ScopeValue');
 var LoopStatement = (function (_super) {
     __extends(LoopStatement, _super);
     function LoopStatement(body, valueIdentifier, keyIdentifier, collectionExpression) {
@@ -18,6 +19,9 @@ var LoopStatement = (function (_super) {
     }
     LoopStatement.prototype.eachPrimitiveStatement = function (scope, stack, callback) {
         var collection = this.collectionExpression.evaluateToIntermediate(scope, stack);
+        if (collection instanceof ScopeValue) {
+            collection = collection.toObject(stack);
+        }
         assert(_.isArray(collection) || _.isObject(collection));
         for (var key in collection) {
             var value = collection[key];
