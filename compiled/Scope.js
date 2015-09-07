@@ -1,98 +1,23 @@
-var Value = require("./values/value");
-var ValueSet = require("./ValueSet");
-var ValueSetDefinition = require('./ValueSetDefinition');
-var assert = require("assert");
-var LiteralExpression = require('./expressions/LiteralExpression');
-var Stack = require('./Stack');
-var _ = require("./utilities");
 var FS = require("fs");
 var Path = require("path");
-var getPropertyType = require("./getPropertyType");
-var PropertyType = require("./PropertyType");
+var assert = require("assert");
+var _ = require("./utilities");
+var ValueSet = require("./ValueSet");
+var ValueSetDefinition = require('./ValueSetDefinition');
+var LiteralExpression = require('./expressions/LiteralExpression');
+var Stack = require('./Stack');
 var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
 var PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
+var evaluateGlobalScope = require('./scopes/global');
+var evaluateLayerScope = require('./scopes/layer');
+var evaluateClassScope = require('./scopes/class');
+var evaluateObjectScope = require('./scopes/object');
 var Parser = require("./parser");
 var Scope = (function () {
     function Scope(parent) {
-        var _this = this;
         this.parent = parent;
         this.statements = [];
         this.name = null;
-        this.formatScope = {
-            // GLOBAL
-            0: function (stack, properties, layers, classes) {
-                var sources = _this.sources;
-                var transition = {
-                    duration: properties["transition-delay"],
-                    delay: properties["transition-duration"]
-                };
-                delete properties["transition-delay"];
-                delete properties["transition-duration"];
-                stack.scope.pop();
-                return _.extend(properties, {
-                    layers: layers,
-                    sources: sources,
-                    transition: transition
-                });
-            },
-            // LAYER
-            1: function (stack, properties, layers, _classes) {
-                var metaProperties = { 'z-index': 0 };
-                var paintProperties = {};
-                var layoutProperties = {};
-                var source = {};
-                var type = properties['type'] || 'raster';
-                var version = _this.getVersion();
-                for (var name in properties) {
-                    var value = Value.evaluate(properties[name]);
-                    if (name == 'z-index') {
-                        metaProperties['z-index'] = value;
-                    }
-                    else if (name == "source-tile-size") {
-                        source["tileSize"] = value;
-                    }
-                    else if (_.startsWith(name, "source-") && name != "source-layer") {
-                        source[name.substr("source-".length)] = value;
-                    }
-                    else if (getPropertyType(version, name) == 0 /* PAINT */) {
-                        paintProperties[name] = value;
-                    }
-                    else if (getPropertyType(version, name) == 1 /* LAYOUT */) {
-                        layoutProperties[name] = value;
-                    }
-                    else if (getPropertyType(version, name) == 2 /* META */) {
-                        metaProperties[name] = value;
-                    }
-                    else {
-                        assert(false, "Property name '" + name + "' is unknown");
-                    }
-                }
-                if (!_.isEmpty(source)) {
-                    metaProperties["source"] = stack.getGlobalScope().addSource(source);
-                }
-                if (layers) {
-                    if (metaProperties['type']) {
-                        assert.equal(metaProperties['type'], 'raster');
-                    }
-                    metaProperties['type'] = 'raster';
-                }
-                var classes = _.objectMap(_classes, function (scope) {
-                    return ["paint." + scope.name, scope];
-                });
-                return _.extend({
-                    id: _this.name || _.uniqueId('scope'),
-                    layers: layers,
-                    paint: paintProperties,
-                    layout: layoutProperties
-                }, metaProperties, classes);
-            },
-            // CLASS
-            2: function (stack, properties, layers, classes) {
-                assert(layers.length == 0);
-                assert(classes.length == 0);
-                return properties;
-            }
-        };
         this.valueMacros = [];
         this.propertyMacros = [];
         this.sources = {};
@@ -106,10 +31,10 @@ var Scope = (function () {
     };
     Scope.createGlobal = function () {
         var scope = new Scope(null);
+        scope.name = "[global]";
         scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, function (macro, values, stack, callback) {
             macro.parentScope.includeFile(values.positional[0], stack, callback);
         });
-        scope.name = "[global]";
         return scope;
     };
     Scope.prototype.isGlobal = function () {
@@ -255,7 +180,23 @@ var Scope = (function () {
         if (layers.length == 0) {
             layers = undefined;
         }
-        var output = this.formatScope[type](stack, properties, layers, classes);
+        var evaluator;
+        if (type == 0 /* GLOBAL */) {
+            evaluator = evaluateGlobalScope;
+        }
+        else if (type == 1 /* LAYER */) {
+            evaluator = evaluateLayerScope;
+        }
+        else if (type == 2 /* CLASS */) {
+            evaluator = evaluateClassScope;
+        }
+        else if (type == 3 /* OBJECT */) {
+            evaluator = evaluateObjectScope;
+        }
+        else {
+            assert(false);
+        }
+        var output = evaluator.call(this, stack, properties, layers, classes);
         stack.scope.pop();
         return output;
     };
@@ -268,6 +209,7 @@ var Scope;
         Type[Type["GLOBAL"] = 0] = "GLOBAL";
         Type[Type["LAYER"] = 1] = "LAYER";
         Type[Type["CLASS"] = 2] = "CLASS";
+        Type[Type["OBJECT"] = 3] = "OBJECT";
     })(Scope.Type || (Scope.Type = {}));
     var Type = Scope.Type;
 })(Scope || (Scope = {}));

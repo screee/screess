@@ -1,24 +1,25 @@
-import Value = require("./values/value")
+import FS = require("fs");
+import Path = require("path");
+import assert = require("assert")
+
+import _ = require("./utilities")
 import ValueSet = require("./ValueSet")
 import ValueSetDefinition = require('./ValueSetDefinition')
-import assert = require("assert")
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
-import ExpressionSet = require('./ExpressionSet');
 import ValueMacro = require('./macros/ValueMacro');
 import PropertyMacro = require('./macros/PropertyMacro');
-import _ = require("./utilities")
 import Statement = require('./statements/Statement');
-import FS = require("fs");
-import Path = require("path");
-import getPropertyType = require("./getPropertyType");
-import PropertyType = require("./PropertyType");
 import ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
 import PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
+import evaluateGlobalScope = require('./scopes/global');
+import evaluateLayerScope = require('./scopes/layer');
+import evaluateClassScope = require('./scopes/class');
+import evaluateObjectScope = require('./scopes/object');
 var Parser = require("./parser");
 
-type BodyFunction = (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void
+type PropertyMacroBodyFunction = (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void
 
 class Scope {
 
@@ -34,12 +35,11 @@ class Scope {
 
   static createGlobal():Scope {
     var scope = new Scope(null)
+    scope.name = "[global]";
 
     scope.addPropertyMacro("include", ValueSetDefinition.WILDCARD, (macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => {
       macro.parentScope.includeFile(values.positional[0], stack, callback);
     });
-
-    scope.name = "[global]";
 
     return scope;
   }
@@ -121,7 +121,7 @@ class Scope {
     this.valueMacros.unshift(macro);
   }
 
-  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:Scope|BodyFunction):void {
+  addPropertyMacro(name:string, argDefinition:ValueSetDefinition, body:Scope|PropertyMacroBodyFunction):void {
     var PropertyMacro_ = require("./macros/PropertyMacro");
     var macro = new PropertyMacro_(this, name, argDefinition, body);
     this.propertyMacros.unshift(macro);
@@ -222,117 +222,30 @@ class Scope {
     layers = _.sortBy(layers, 'z-index');
     if (layers.length == 0) { layers = undefined }
 
-    var output = this.formatScope[type](stack, properties, layers, classes);
+    var evaluator;
+    if (type == Scope.Type.GLOBAL) {
+      evaluator = evaluateGlobalScope;
+    } else if (type == Scope.Type.LAYER) {
+      evaluator = evaluateLayerScope;
+    } else if (type == Scope.Type.CLASS) {
+      evaluator = evaluateClassScope;
+    } else if (type == Scope.Type.OBJECT) {
+      evaluator = evaluateObjectScope;
+    } else {
+      assert(false);
+    }
+
+    var output = evaluator.call(this, stack, properties, layers, classes)
 
     stack.scope.pop();
 
     return output;
   }
 
-  private formatScope:{[type:number]: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]) => {}} = {
-
-    // GLOBAL
-    0: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
-      var sources = this.sources;
-
-      var transition = {
-        duration: properties["transition-delay"],
-        delay: properties["transition-duration"]
-      }
-      delete properties["transition-delay"];
-      delete properties["transition-duration"];
-
-      stack.scope.pop();
-
-      return _.extend(
-        properties,
-        {
-          layers: layers,
-          sources: sources,
-          transition: transition
-        }
-      )
-    },
-
-    // LAYER
-    1: (stack:Stack, properties:{}, layers:Scope[], _classes:Scope[]):any => {
-      var metaProperties = { 'z-index': 0 };
-      var paintProperties = {};
-      var layoutProperties = {};
-      var source = {};
-
-      var type = properties['type'] || 'raster';
-
-      var version = this.getVersion();
-
-      for (var name in properties) {
-        var value = Value.evaluate(properties[name]);
-
-        if (name == 'z-index') {
-          metaProperties['z-index'] = value;
-
-        } else if (name == "source-tile-size") {
-          source["tileSize"] = value;
-
-        } else if (_.startsWith(name, "source-") && name != "source-layer") {
-          source[name.substr("source-".length)] = value;
-
-        } else if (getPropertyType(version, name) == PropertyType.PAINT) {
-          paintProperties[name] = value;
-
-        } else if (getPropertyType(version, name) == PropertyType.LAYOUT) {
-          layoutProperties[name] = value;
-
-        } else if (getPropertyType(version, name) == PropertyType.META) {
-          metaProperties[name] = value;
-
-        } else {
-          assert(false, "Property name '" + name + "' is unknown");
-        }
-      }
-
-      if (!_.isEmpty(source)) {
-        metaProperties["source"] = stack.getGlobalScope().addSource(source);
-      }
-
-
-      if (layers) {
-        if (metaProperties['type']) {
-          assert.equal(metaProperties['type'], 'raster');
-        }
-        metaProperties['type'] = 'raster'
-      }
-
-      var classes = _.objectMap(_classes, (scope) => {
-        return ["paint." + scope.name, scope]
-      });
-
-      return _.extend(
-        {
-          id: this.name || _.uniqueId('scope'),
-          layers: layers,
-          paint: paintProperties,
-          layout: layoutProperties
-        },
-        metaProperties,
-        classes
-      );
-    },
-
-    // CLASS
-    2: (stack:Stack, properties:{}, layers:Scope[], classes:Scope[]):any => {
-      assert(layers.length == 0);
-      assert(classes.length == 0);
-
-      return properties;
-    }
-
-  }
-
 }
 
 module Scope {
-  export enum Type { GLOBAL, LAYER, CLASS }
+  export enum Type { GLOBAL, LAYER, CLASS, OBJECT }
 }
 
 export = Scope
