@@ -19,7 +19,7 @@
   @rehead = (head, body) => [head].concat(@_.pluck(body, 1))
 }
 
-global = ({ @globalScope = @scope = @Scope.createGlobal() }) statements { @globalScope }
+global = ({ @globalScope = @scope = @Scope.createGlobal() }) statementSet { @globalScope }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
 
@@ -70,13 +70,19 @@ expressionSetDefinitionItem =
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                                 Statements                                 //
+//                               StatementSet                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
+statementSetSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
 
-statements = whitespace* (statement (statementSeperator statement)* statementSeperator? whitespace*)? comment? whitespace*
+statementSet = whitespace* (statement (statementSetSeperator statement)* statementSetSeperator? whitespace*)? comment? whitespace*
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Statement                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 statement =
   comment /
@@ -100,7 +106,7 @@ propertyStatement =
     { @scope.addStatement(new @PropertyStatement(name, expressions)) }
 
 valueMacroDefinitionStatement =
-  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* expression:expression { @scope.addValueMacro(name, args, expression) }
+  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { @scope.addStatement(new @ValueMacroDefinitionStatement(name, args, body)) }
 
 loopStatement =
   "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
@@ -127,10 +133,16 @@ classStatement =
   "." name:identifier scope:scope { @scope.addStatement(new @ClassStatement(name, scope)) }
 
 propertyMacroDefinitionStatement =
-  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* scope:scope { @scope.addPropertyMacro(name, args, scope) }
+  name:identifier args:expressionSetDefinition whitespace* "=" whitespace* body:scope { @scope.addStatement(new @PropertyMacroDefinitionStatement(name, args, body)) }
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Scope                                     //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 scope =
-  ({ @pushScope() }) whitespace* "{" body:statements "}" { @popScope() }
+  ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -286,4 +298,3 @@ attributeReferenceValue =
 
 colorValue =
   "#" color:[0-9a-fA-F]+ { @ColorValue.hex(color.join("")) }
-

@@ -1,6 +1,7 @@
 var Scope = require('../Scope');
 var _ = require("../utilities");
 var PropertyMacro = (function () {
+    // TODO drop bodyFunction parameter
     function PropertyMacro(parentScope, name, argDefinition, bodyScope, bodyFunction) {
         if (bodyScope === void 0) { bodyScope = null; }
         if (bodyFunction === void 0) { bodyFunction = null; }

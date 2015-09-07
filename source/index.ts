@@ -17,6 +17,8 @@ export import LayerStatement = require("./statements/LayerStatement");
 export import LoopStatement = require("./statements/LoopStatement");
 export import PropertyStatement = require("./statements/PropertyStatement");
 export import PropertyMacroStatement = require("./statements/PropertyMacroStatement");
+export import PropertyMacroDefinitionStatement = require("./statements/PropertyMacroDefinitionStatement");
+export import ValueMacroDefinitionStatement = require("./statements/ValueMacroDefinitionStatement");
 
 export import Expression = require("./expressions/Expression");
 export import ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression");

@@ -11,10 +11,10 @@ class ValueMacro {
 
   public body:Function;
 
-  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Expression);
-  constructor(name:string, argDefinition:ValueSetDefinition, parentScope:Scope, body:Function);
+  constructor(parentScope:Scope, name:string, argDefinition:ValueSetDefinition, body:Expression);
+  constructor(parentScope:Scope, name:string, argDefinition:ValueSetDefinition, body:Function);
 
-  constructor(public name:string, public argDefinition:ValueSetDefinition, public parentScope:Scope, body:any) {
+  constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, body:any) {
     if (body instanceof Expression) {
       this.body = (args, stack) => {
         var scope = new Scope(parentScope)

@@ -8,6 +8,8 @@ var _ = require("./utilities");
 var FS = require("fs");
 var getPropertyType = require("./getPropertyType");
 var PropertyType = require("./PropertyType");
+var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
+var PropertyMacroDefinitionStatement = require('./statements/PropertyMacroDefinitionStatement');
 var Parser = require("./parser");
 var Scope = (function () {
     function Scope(parent, name, statements) {
@@ -99,6 +101,7 @@ var Scope = (function () {
     }
     Scope.getCoreLibrary = function () {
         if (!this.coreLibrary) {
+            // TODO use path.join
             this.coreLibrary = Parser.parse(FS.readFileSync(__dirname + "/../core.sss", "utf8"));
         }
         return this.coreLibrary;
@@ -134,23 +137,32 @@ var Scope = (function () {
     };
     Scope.prototype.addStatement = function (statement) {
         this.statements.push(statement);
+        if (statement instanceof ValueMacroDefinitionStatement) {
+            this.addValueMacro(statement.name, statement.argDefinition, statement.body);
+        }
+        else if (statement instanceof PropertyMacroDefinitionStatement) {
+            this.addPropertyMacro(statement.name, statement.argDefinition, statement.body);
+        }
     };
     //////////////////////////////////////////////////////////////////////////////
     // Macro Construction
+    // Merge with addValueMacros, introspect arguments
     Scope.prototype.addLiteralValueMacros = function (macros) {
         for (var identifier in macros) {
             var value = macros[identifier];
             this.addLiteralValueMacro(identifier, value);
         }
     };
+    // Merge with addValueMacro, introspect arguments
     Scope.prototype.addLiteralValueMacro = function (identifier, value) {
         this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
     };
     Scope.prototype.addValueMacro = function (name, argDefinition, body) {
-        var ValueMacro_ = require("./macros/ValueMacro");
-        var macro = new ValueMacro_(name, argDefinition, this, body);
+        var ValueMacro = require("./macros/ValueMacro");
+        var macro = new ValueMacro(this, name, argDefinition, body);
         this.valueMacros.unshift(macro);
     };
+    // TODO merge bodyFunction parameter
     Scope.prototype.addPropertyMacro = function (name, argDefinition, bodyScope, bodyFunction) {
         if (bodyScope === void 0) { bodyScope = null; }
         if (bodyFunction === void 0) { bodyFunction = null; }

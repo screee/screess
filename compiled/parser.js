@@ -151,8 +151,8 @@ module.exports = (function() {
           return this.scope.addStatement(new this.PropertyStatement(name, expressions));
         }).apply(__initializer);
         },
-        peg$c51 = function(name, args, expression) {return (function() {
-          return this.scope.addValueMacro(name, args, expression);
+        peg$c51 = function(name, args, body) {return (function() {
+          return this.scope.addStatement(new this.ValueMacroDefinitionStatement(name, args, body));
         }).apply(__initializer);
         },
         peg$c52 = "for",
@@ -203,8 +203,8 @@ module.exports = (function() {
           return this.scope.addStatement(new this.ClassStatement(name, scope));
         }).apply(__initializer);
         },
-        peg$c73 = function(name, args, scope) {return (function() {
-          return this.scope.addPropertyMacro(name, args, scope);
+        peg$c73 = function(name, args, body) {return (function() {
+          return this.scope.addStatement(new this.PropertyMacroDefinitionStatement(name, args, body));
         }).apply(__initializer);
         },
         peg$c74 = function() {return (function() {
@@ -581,7 +581,7 @@ module.exports = (function() {
       }
       s1 = s2;
       if (s1 !== peg$FAILED) {
-        s2 = peg$parsestatements();
+        s2 = peg$parsestatementSet();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
           s1 = peg$c3();
@@ -1710,7 +1710,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsestatementSeperator() {
+    function peg$parsestatementSetSeperator() {
       var s0, s1, s2, s3, s4;
 
       var key    = peg$currPos * 58 + 16,
@@ -1768,7 +1768,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsestatements() {
+    function peg$parsestatementSet() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 58 + 17,
@@ -1792,7 +1792,7 @@ module.exports = (function() {
         if (s3 !== peg$FAILED) {
           s4 = [];
           s5 = peg$currPos;
-          s6 = peg$parsestatementSeperator();
+          s6 = peg$parsestatementSetSeperator();
           if (s6 !== peg$FAILED) {
             s7 = peg$parsestatement();
             if (s7 !== peg$FAILED) {
@@ -1809,7 +1809,7 @@ module.exports = (function() {
           while (s5 !== peg$FAILED) {
             s4.push(s5);
             s5 = peg$currPos;
-            s6 = peg$parsestatementSeperator();
+            s6 = peg$parsestatementSetSeperator();
             if (s6 !== peg$FAILED) {
               s7 = peg$parsestatement();
               if (s7 !== peg$FAILED) {
@@ -1825,7 +1825,7 @@ module.exports = (function() {
             }
           }
           if (s4 !== peg$FAILED) {
-            s5 = peg$parsestatementSeperator();
+            s5 = peg$parsestatementSetSeperator();
             if (s5 === peg$FAILED) {
               s5 = peg$c18;
             }
@@ -2960,7 +2960,7 @@ module.exports = (function() {
             if (peg$silentFails === 0) { peg$fail(peg$c76); }
           }
           if (s3 !== peg$FAILED) {
-            s4 = peg$parsestatements();
+            s4 = peg$parsestatementSet();
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 125) {
                 s5 = peg$c77;

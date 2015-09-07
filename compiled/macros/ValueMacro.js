@@ -3,10 +3,10 @@ var Scope = require('../Scope');
 var assert = require('assert');
 var _ = require("../utilities");
 var ValueMacro = (function () {
-    function ValueMacro(name, argDefinition, parentScope, body) {
+    function ValueMacro(parentScope, name, argDefinition, body) {
+        this.parentScope = parentScope;
         this.name = name;
         this.argDefinition = argDefinition;
-        this.parentScope = parentScope;
         if (body instanceof Expression) {
             this.body = function (args, stack) {
                 var scope = new Scope(parentScope);

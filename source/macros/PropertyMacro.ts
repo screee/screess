@@ -13,6 +13,7 @@ class PropertyMacro {
   public argLengthMin:number;
   public argLengthMax:number;
 
+  // TODO drop bodyFunction parameter
   constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, public bodyScope:Scope = null, public bodyFunction:(macro:PropertyMacro, values:ValueSet, stack:Stack, callback:(scope:Scope, statement:Statement) => void) => void = null) {
     this.argLengthMin = _.count(
       this.argDefinition.definitions,
