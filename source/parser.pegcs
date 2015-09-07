@@ -33,9 +33,9 @@ whitespace = whitespaceStrong / whitespaceWeak { null }
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-global = ({ @globalScope = @scope = @Scope.createGlobal() }) statements:statementSet { @globalScope.addStatements(statements); @globalScope }
+global = ({ @globalScope = @scope = @Scope.createGlobal() }) whitespace* statements:statementSet whitespace* { @globalScope.addStatements(statements); @globalScope }
 
-scope = ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @scope.addStatements(body); @popScope() }
+scope = ({ @pushScope() }) "{" whitespace* body:statementSet whitespace* "}" { @scope.addStatements(body); @popScope() }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -45,7 +45,7 @@ scope = ({ @pushScope() }) whitespace* "{" body:statementSet "}" { @scope.addSta
 
 statementSetSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
 
-statementSet = whitespace* statements:(head:statement tail:(statementSetSeperator statement)* statementSetSeperator? whitespace* { @rehead(head, tail) })? comment? whitespace* { @_.compact(statements) || [] }
+statementSet = statements:(head:statement tail:(statementSetSeperator statement)* statementSetSeperator? whitespace* { @rehead(head, tail) })? comment? whitespace* { @_.compact(statements) || [] }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -75,10 +75,8 @@ valueMacroDefinitionStatement =
   name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { new @ValueMacroDefinitionStatement(name, args, body) }
 
 loopStatement =
-  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
-  "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope
-    { new @LoopStatement(scope, valueIdentifier, null, collection) }
+  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
+  "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, null, collection) }
 
 conditionalStatement =
   ifItem:conditionalStatementIf elseIfItems:( whitespace* conditionalStatementElseIf  )* whitespace* elseItem:conditionalStatementElse? { new @ConditionalStatement(@_.compact(@rehead(ifItem, elseIfItems).concat([elseItem]))) }
@@ -93,10 +91,10 @@ conditionalStatementElse =
   "else" whitespace* scope:scope { {condition: new @LiteralExpression(true), scope: scope} }
 
 layerStatement =
-  "#" name:identifier? body:scope { new @LayerStatement(name, body) }
+  "#" name:identifier? whitespace* body:scope { new @LayerStatement(name, body) }
 
 classStatement =
-  "." name:identifier body:scope { new @ClassStatement(name, body) }
+  "." name:identifier whitespace* body:scope { new @ClassStatement(name, body) }
 
 propertyMacroDefinitionStatement =
   name:identifier args:expressionSetDefinition whitespace* "=" whitespace* body:scope { new @PropertyMacroDefinitionStatement(name, args, body) }
@@ -256,7 +254,7 @@ arrayExpression =
   "[" whitespace* expressions:expressionSetUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
 
 mapExpression =
-  ({ @pushScope() }) "[" body:statementSet "]" { @scope.addStatements(body); new @MapExpression(@popScope()) }
+  ({ @pushScope() }) "[" whitespace* body:statementSet whitespace* "]" { @scope.addStatements(body); new @MapExpression(@popScope()) }
 
 javaScriptExpression =
   "`" body:[^\`]* "`" { new @JavaScriptExpression(body.join("")) }
