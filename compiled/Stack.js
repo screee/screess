@@ -1,7 +1,6 @@
 var Stack = (function () {
     function Stack() {
-        this.valueMacro = [];
-        this.propertyMacro = [];
+        this.macros = [];
         this.scope = [];
     }
     Stack.prototype.getGlobalScope = function () {

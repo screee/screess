@@ -55,7 +55,7 @@ statementSet = statements:(head:statement tail:(statementSetSeperator statement)
 
 statement =
   comment /
-  valueMacroDefinitionStatement /
+  macroDefinitionStatement /
   layerStatement /
   classStatement /
   loopStatement /
@@ -65,8 +65,8 @@ statement =
 propertyStatement =
   name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak { new @PropertyStatement(name, expressions) }
 
-valueMacroDefinitionStatement =
-  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { new @ValueMacroDefinitionStatement(name, args, body) }
+macroDefinitionStatement =
+  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { new @MacroDefinitionStatement(name, args, body) }
 
 loopStatement =
   "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
@@ -224,7 +224,7 @@ propertyAccessExpression =
 atomicExpression =
   javaScriptExpression /
   literalExpression /
-  valueMacroReferenceExpression /
+  macroReferenceExpression /
   stringExpression /
   scopeExpression /
   arrayExpression
@@ -232,9 +232,9 @@ atomicExpression =
 literalExpression =
   value:value { new @LiteralExpression(value) }
 
-valueMacroReferenceExpression =
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @ValueMacroReferenceExpression(name, expressions) } /
-  name:identifier (whitespace* "(" whitespace* ")")? { new @ValueMacroReferenceExpression(name, @ExpressionSet.ZERO) }
+macroReferenceExpression =
+  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @MacroReferenceExpression(name, expressions) } /
+  name:identifier (whitespace* "(" whitespace* ")")? { new @MacroReferenceExpression(name, @ExpressionSet.ZERO) }
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) } /

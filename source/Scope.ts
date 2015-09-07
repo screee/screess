@@ -8,9 +8,9 @@ import ValueSetDefinition = require('./ValueSetDefinition')
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
-import ValueMacro = require('./macros/ValueMacro');
+import Macro = require('./macros/Macro');
 import Statement = require('./statements/Statement');
-import ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
+import MacroDefinitionStatement = require('./statements/MacroDefinitionStatement');
 import evaluateGlobalScope = require('./scopes/global');
 import evaluateLayerScope = require('./scopes/layer');
 import evaluateClassScope = require('./scopes/class');
@@ -37,7 +37,7 @@ class Scope {
     scope.name = "[global]";
 
     // TODO rename to something else
-    scope.addValueMacro("include", ValueSetDefinition.WILDCARD, (args:ValueSet, stack:Stack) => {
+    scope.addMacro("include", ValueSetDefinition.WILDCARD, (args:ValueSet, stack:Stack) => {
       var file = args.positional[0];
       stack.getScope().includeScope(Scope.createFromFile(file));
     });
@@ -47,12 +47,12 @@ class Scope {
 
   public sources:{};
   public version:number;
-  public valueMacros:ValueMacro[];
+  public macros:Macro[];
   public statements:Statement[] = []
   public name:string = null
 
   constructor(public parent:Scope) {
-    this.valueMacros = [];
+    this.macros = [];
     this.sources = {};
   }
 
@@ -67,7 +67,7 @@ class Scope {
 
   includeScope(scope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void) {
     scope.eachPrimitiveStatement(stack, callback);
-    this.valueMacros = scope.valueMacros.concat(this.valueMacros);
+    this.macros = scope.macros.concat(this.macros);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -83,8 +83,8 @@ class Scope {
   addStatement(statement:Statement) {
     this.statements.push(statement);
 
-    if (statement instanceof ValueMacroDefinitionStatement) {
-      this.addValueMacro(statement.name, statement.argDefinition, statement.body);
+    if (statement instanceof MacroDefinitionStatement) {
+      this.addMacro(statement.name, statement.argDefinition, statement.body);
     }
   }
 
@@ -97,59 +97,59 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Macro Construction
 
-  addLiteralValueMacros(macros:{[name:string]:any}):void {
+  addLiteralMacros(macros:{[name:string]:any}):void {
     for (var identifier in macros) {
       var value = macros[identifier];
-      this.addLiteralValueMacro(identifier, value);
+      this.addLiteralMacro(identifier, value);
     }
   }
 
-  addLiteralValueMacro(identifier:string, value:any) {
-    this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
+  addLiteralMacro(identifier:string, value:any) {
+    this.addMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
   }
 
-  addValueMacro(name:String, argDefinition:ValueSetDefinition, body:Function|Expression) {
-    var ValueMacro_ = require("./macros/ValueMacro");
-    var macro = new ValueMacro_(this, name, argDefinition, body);
-    this.valueMacros.unshift(macro);
+  addMacro(name:String, argDefinition:ValueSetDefinition, body:Function|Expression) {
+    var Macro_ = require("./macros/Macro");
+    var macro = new Macro_(this, name, argDefinition, body);
+    this.macros.unshift(macro);
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation Helpers
 
-  getValueMacro(name:string, values:ValueSet, stack:Stack):ValueMacro {
-    for (var i in this.valueMacros) {
-      var macro = this.valueMacros[i];
+  getMacro(name:string, values:ValueSet, stack:Stack):Macro {
+    for (var i in this.macros) {
+      var macro = this.macros[i];
 
-      if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
+      if (macro.matches(name, values) && !_.contains(stack.macros, macro)) {
         return macro;
       }
     }
 
     if (this.parent) {
-      return this.parent.getValueMacro(name, values, stack);
+      return this.parent.getMacro(name, values, stack);
     } else {
       return null;
     }
   }
 
-  eachValueMacro(callback:(macro:ValueMacro) => void):void {
-    for (var i in this.valueMacros) {
-      callback(this.valueMacros[i]);
+  eachMacro(callback:(macro:Macro) => void):void {
+    for (var i in this.macros) {
+      callback(this.macros[i]);
     }
-    if (this.parent) this.parent.eachValueMacro(callback);
+    if (this.parent) this.parent.eachMacro(callback);
   }
 
-  getValueMacrosAsFunctions(stack:Stack):{[name:string]:any} {
+  getMacrosAsFunctions(stack:Stack):{[name:string]:any} {
     var names = [];
-    this.eachValueMacro((macro: ValueMacro) => { names.push(macro.name); });
+    this.eachMacro((macro: Macro) => { names.push(macro.name); });
     names = _.uniq(names);
 
     return _.objectMap(names, (name) => {
       var that = this;
       return [name, function() {
         var args = ValueSet.fromPositionalValues(_.toArray(arguments));
-        var macro = that.getValueMacro(name, args, stack);
+        var macro = that.getMacro(name, args, stack);
         if (!macro) return null;
         else return macro.evaluateToIntermediate(args, stack);
       }];

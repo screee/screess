@@ -6,7 +6,7 @@ var ValueSet = require("./ValueSet");
 var ValueSetDefinition = require('./ValueSetDefinition');
 var LiteralExpression = require('./expressions/LiteralExpression');
 var Stack = require('./Stack');
-var ValueMacroDefinitionStatement = require('./statements/ValueMacroDefinitionStatement');
+var MacroDefinitionStatement = require('./statements/MacroDefinitionStatement');
 var evaluateGlobalScope = require('./scopes/global');
 var evaluateLayerScope = require('./scopes/layer');
 var evaluateClassScope = require('./scopes/class');
@@ -17,7 +17,7 @@ var Scope = (function () {
         this.parent = parent;
         this.statements = [];
         this.name = null;
-        this.valueMacros = [];
+        this.macros = [];
         this.sources = {};
     }
     Scope.createFromFile = function (file) {
@@ -33,7 +33,7 @@ var Scope = (function () {
         var scope = new Scope(null);
         scope.name = "[global]";
         // TODO rename to something else
-        scope.addValueMacro("include", ValueSetDefinition.WILDCARD, function (args, stack) {
+        scope.addMacro("include", ValueSetDefinition.WILDCARD, function (args, stack) {
             var file = args.positional[0];
             stack.getScope().includeScope(Scope.createFromFile(file));
         });
@@ -48,7 +48,7 @@ var Scope = (function () {
     };
     Scope.prototype.includeScope = function (scope, stack, callback) {
         scope.eachPrimitiveStatement(stack, callback);
-        this.valueMacros = scope.valueMacros.concat(this.valueMacros);
+        this.macros = scope.macros.concat(this.macros);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Construction
@@ -60,8 +60,8 @@ var Scope = (function () {
     };
     Scope.prototype.addStatement = function (statement) {
         this.statements.push(statement);
-        if (statement instanceof ValueMacroDefinitionStatement) {
-            this.addValueMacro(statement.name, statement.argDefinition, statement.body);
+        if (statement instanceof MacroDefinitionStatement) {
+            this.addMacro(statement.name, statement.argDefinition, statement.body);
         }
     };
     Scope.prototype.addStatements = function (statements) {
@@ -71,47 +71,47 @@ var Scope = (function () {
     };
     //////////////////////////////////////////////////////////////////////////////
     // Macro Construction
-    Scope.prototype.addLiteralValueMacros = function (macros) {
+    Scope.prototype.addLiteralMacros = function (macros) {
         for (var identifier in macros) {
             var value = macros[identifier];
-            this.addLiteralValueMacro(identifier, value);
+            this.addLiteralMacro(identifier, value);
         }
     };
-    Scope.prototype.addLiteralValueMacro = function (identifier, value) {
-        this.addValueMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
+    Scope.prototype.addLiteralMacro = function (identifier, value) {
+        this.addMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
     };
-    Scope.prototype.addValueMacro = function (name, argDefinition, body) {
-        var ValueMacro_ = require("./macros/ValueMacro");
-        var macro = new ValueMacro_(this, name, argDefinition, body);
-        this.valueMacros.unshift(macro);
+    Scope.prototype.addMacro = function (name, argDefinition, body) {
+        var Macro_ = require("./macros/Macro");
+        var macro = new Macro_(this, name, argDefinition, body);
+        this.macros.unshift(macro);
     };
     //////////////////////////////////////////////////////////////////////////////
     // Evaluation Helpers
-    Scope.prototype.getValueMacro = function (name, values, stack) {
-        for (var i in this.valueMacros) {
-            var macro = this.valueMacros[i];
-            if (macro.matches(name, values) && !_.contains(stack.valueMacro, macro)) {
+    Scope.prototype.getMacro = function (name, values, stack) {
+        for (var i in this.macros) {
+            var macro = this.macros[i];
+            if (macro.matches(name, values) && !_.contains(stack.macros, macro)) {
                 return macro;
             }
         }
         if (this.parent) {
-            return this.parent.getValueMacro(name, values, stack);
+            return this.parent.getMacro(name, values, stack);
         }
         else {
             return null;
         }
     };
-    Scope.prototype.eachValueMacro = function (callback) {
-        for (var i in this.valueMacros) {
-            callback(this.valueMacros[i]);
+    Scope.prototype.eachMacro = function (callback) {
+        for (var i in this.macros) {
+            callback(this.macros[i]);
         }
         if (this.parent)
-            this.parent.eachValueMacro(callback);
+            this.parent.eachMacro(callback);
     };
-    Scope.prototype.getValueMacrosAsFunctions = function (stack) {
+    Scope.prototype.getMacrosAsFunctions = function (stack) {
         var _this = this;
         var names = [];
-        this.eachValueMacro(function (macro) {
+        this.eachMacro(function (macro) {
             names.push(macro.name);
         });
         names = _.uniq(names);
@@ -119,7 +119,7 @@ var Scope = (function () {
             var that = _this;
             return [name, function () {
                 var args = ValueSet.fromPositionalValues(_.toArray(arguments));
-                var macro = that.getValueMacro(name, args, stack);
+                var macro = that.getMacro(name, args, stack);
                 if (!macro)
                     return null;
                 else

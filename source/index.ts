@@ -16,7 +16,7 @@ export import ConditionalStatement = require("./statements/ConditionalStatement"
 export import LayerStatement = require("./statements/LayerStatement");
 export import LoopStatement = require("./statements/LoopStatement");
 export import PropertyStatement = require("./statements/PropertyStatement");
-export import ValueMacroDefinitionStatement = require("./statements/ValueMacroDefinitionStatement");
+export import MacroDefinitionStatement = require("./statements/MacroDefinitionStatement");
 
 export import Expression = require("./expressions/Expression");
 export import ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression");
@@ -33,9 +33,9 @@ export import StringExpression = require("./expressions/StringExpression");
 export import PropertyAccessExpression = require("./expressions/PropertyAccessExpression");
 export import TernaryExpression = require("./expressions/TernaryExpression");
 export import TypeCheckOperatorExpression = require("./expressions/TypeCheckOperatorExpression");
-export import ValueMacroReferenceExpression = require("./expressions/ValueMacroReferenceExpression");
+export import MacroReferenceExpression = require("./expressions/MacroReferenceExpression");
 
-export import ValueMacro = require("./macros/ValueMacro");
+export import Macro = require("./macros/Macro");
 
 export import AttributeReferenceValue = require("./values/AttributeReferenceValue");
 export import ColorValue = require("./values/ColorValue");

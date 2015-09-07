@@ -100,7 +100,7 @@ module.exports = (function() {
         peg$c36 = "=",
         peg$c37 = { type: "literal", value: "=", description: "\"=\"" },
         peg$c38 = function(name, args, body) {return (function() {
-          return new this.ValueMacroDefinitionStatement(name, args, body);
+          return new this.MacroDefinitionStatement(name, args, body);
         }).apply(__initializer);
         },
         peg$c39 = "for",
@@ -308,11 +308,11 @@ module.exports = (function() {
         }).apply(__initializer);
         },
         peg$c126 = function(name, expressions) {return (function() {
-          return new this.ValueMacroReferenceExpression(name, expressions);
+          return new this.MacroReferenceExpression(name, expressions);
         }).apply(__initializer);
         },
         peg$c127 = function(name) {return (function() {
-          return new this.ValueMacroReferenceExpression(name, this.ExpressionSet.ZERO);
+          return new this.MacroReferenceExpression(name, this.ExpressionSet.ZERO);
         }).apply(__initializer);
         },
         peg$c128 = "\"",
@@ -1128,7 +1128,7 @@ module.exports = (function() {
 
       s0 = peg$parsecomment();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsevalueMacroDefinitionStatement();
+        s0 = peg$parsemacroDefinitionStatement();
         if (s0 === peg$FAILED) {
           s0 = peg$parselayerStatement();
           if (s0 === peg$FAILED) {
@@ -1218,7 +1218,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalueMacroDefinitionStatement() {
+    function peg$parsemacroDefinitionStatement() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 56 + 11,
@@ -3902,7 +3902,7 @@ module.exports = (function() {
       if (s0 === peg$FAILED) {
         s0 = peg$parseliteralExpression();
         if (s0 === peg$FAILED) {
-          s0 = peg$parsevalueMacroReferenceExpression();
+          s0 = peg$parsemacroReferenceExpression();
           if (s0 === peg$FAILED) {
             s0 = peg$parsestringExpression();
             if (s0 === peg$FAILED) {
@@ -3944,7 +3944,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parsevalueMacroReferenceExpression() {
+    function peg$parsemacroReferenceExpression() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       var key    = peg$currPos * 56 + 44,
