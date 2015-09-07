@@ -6,7 +6,7 @@ import Stack = require("../Stack");
 import assert = require("assert");
 import _ = require("../utilities");
 
-class MapExpression extends Expression {
+class ScopeExpression extends Expression {
 
   constructor(public body:Scope) {
     super();
@@ -18,4 +18,4 @@ class MapExpression extends Expression {
 
 }
 
-export = MapExpression;
+export = ScopeExpression;

@@ -226,7 +226,7 @@ atomicExpression =
   literalExpression /
   valueMacroReferenceExpression /
   stringExpression /
-  mapExpression /
+  scopeExpression /
   arrayExpression
 
 literalExpression =
@@ -243,8 +243,8 @@ stringExpression =
 arrayExpression =
   "[" whitespace* expressions:expressionSetUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
 
-mapExpression =
-  ({ @pushScope() }) "[" whitespace* body:statementSet whitespace* "]" { @scope.addStatements(body); new @MapExpression(@popScope()) }
+scopeExpression =
+  body:scope { new @ScopeExpression(body) }
 
 javaScriptExpression =
   "`" body:[^\`]* "`" { new @JavaScriptExpression(body.join("")) }

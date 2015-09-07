@@ -56,25 +56,25 @@ describe "value", ->
   describe "map", ->
 
     it "should parse", ->
-      assert.deepEqual parseValue("[one:1; two:2; three:3]"), {one: 1, two: 2, three: 3}
+      assert.deepEqual parseValue("{one:1; two:2; three:3}"), {one: 1, two: 2, three: 3}
 
     it "should allow property access by dot notation", ->
-      assert.deepEqual parseValue("[one:1; two:2; three:3].three"), 3
+      assert.deepEqual parseValue("{one:1; two:2; three:3}.three"), 3
 
     it "should allow property access by subscript notation", ->
-      assert.deepEqual parseValue('[one:1; two:2; three:3]["three"]'), 3
+      assert.deepEqual parseValue('{one:1; two:2; three:3}["three"]'), 3
 
     it "should allow maps inside maps", ->
-      assert.deepEqual parseValue("[one:[two:[three: [four: 4]]]]"), {one: {two: {three: {four: 4}}}}
+      assert.deepEqual parseValue("{one:{two:{three: {four: 4}}}}"), {one: {two: {three: {four: 4}}}}
 
     it "shoud allow recursive property accesses", ->
-      assert.deepEqual parseValue('[one:[two:[three: 3]]].one["two"].three'), 3
+      assert.deepEqual parseValue('{one:{two:{three: 3}}}.one["two"].three'), 3
 
     it "should allow filters to be members", ->
-      assert.deepEqual parseValue("[filter: @class == 'footway']"), {filter: ["==", "class", "footway"]}
+      assert.deepEqual parseValue("{filter: @class == 'footway'}"), {filter: ["==", "class", "footway"]}
 
     it "should allow keys to be language keywords", ->
-      assert.deepEqual parseValue("[out: 0; in: 1]"), {out: 0, in: 1}
+      assert.deepEqual parseValue("{out: 0; in: 1}"), {out: 0, in: 1}
 
     # TODO
     # it "should allow property macros", ->
