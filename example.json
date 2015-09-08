@@ -2,10 +2,19 @@
   "version": 8,
   "layers": [
     {
-      "id": "scope31",
+      "id": "scope82",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.141
+        "background-color": "#eedddd"
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "background"
+    },
+    {
+      "id": "scope83",
+      "paint": {
+        "fill-color": "#000000",
+        "fill-opacity": 0.094
       },
       "layout": {},
       "z-index": 0,
@@ -19,10 +28,10 @@
       "source": "680519890"
     },
     {
-      "id": "scope32",
+      "id": "scope84",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.135
+        "fill-color": "#000000",
+        "fill-opacity": 0.09000000000000001
       },
       "layout": {},
       "z-index": 0,
@@ -36,10 +45,10 @@
       "source": "680519890"
     },
     {
-      "id": "scope33",
+      "id": "scope85",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.1335
+        "fill-color": "#000000",
+        "fill-opacity": 0.08900000000000001
       },
       "layout": {},
       "z-index": 0,
@@ -53,10 +62,10 @@
       "source": "680519890"
     },
     {
-      "id": "scope34",
+      "id": "scope86",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.11699999999999999
+        "fill-color": "#000000",
+        "fill-opacity": 0.07800000000000001
       },
       "layout": {},
       "z-index": 0,
@@ -70,10 +79,10 @@
       "source": "680519890"
     },
     {
-      "id": "scope35",
+      "id": "scope87",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.1005
+        "fill-color": "#000000",
+        "fill-opacity": 0.067
       },
       "layout": {},
       "z-index": 0,
@@ -87,10 +96,10 @@
       "source": "680519890"
     },
     {
-      "id": "scope36",
+      "id": "scope88",
       "paint": {
-        "fill-color": "#000",
-        "fill-opacity": 0.084
+        "fill-color": "#000000",
+        "fill-opacity": 0.05600000000000001
       },
       "layout": {},
       "z-index": 0,
@@ -100,6 +109,37 @@
         "==",
         "level",
         56
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope89",
+      "paint": {
+        "line-opacity": 0.2,
+        "line-width": 1,
+        "line-color": "#333333"
+      },
+      "layout": {},
+      "z-index": 0,
+      "source-layer": "contour",
+      "type": "line",
+      "source": "680519890"
+    },
+    {
+      "id": "scope90",
+      "paint": {
+        "line-opacity": 0.2,
+        "line-width": 1.5,
+        "line-color": "#333333"
+      },
+      "layout": {},
+      "z-index": 0,
+      "source-layer": "contour",
+      "type": "line",
+      "filter": [
+        "==",
+        "index",
+        5
       ],
       "source": "680519890"
     }

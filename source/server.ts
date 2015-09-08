@@ -34,6 +34,26 @@ function exported(file:string) {
                 center: [-74.50, 40],
                 zoom: 9
               });
+
+              var styleJSON = '';
+              setInterval(function() {
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4 && request.status == 200) {
+                        var _styleJSON = request.responseText;
+                        if (_styleJSON != styleJSON) {
+                          try {
+                            styleJSON = _styleJSON;
+                            map.setStyle(JSON.parse(styleJSON));
+                          } catch (e) {
+                            console.log('Failed to parse style');
+                          }
+                        }
+                    }
+                }
+                request.open("GET", 'style.json', true);
+                request.send(null);
+              }, 500);
             </script>
           </body>
 

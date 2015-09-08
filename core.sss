@@ -76,31 +76,3 @@ contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index 
   }
 
 }
-
-landuse(
-      agriculture = null,
-      cemetery = null,
-      glacier = null,
-      grass = null,
-      hospital = null,
-      industrial = null,
-      park = null,
-      pitch = null,
-      rock = null,
-      sand = null,
-      school = null,
-      scrub = null,
-      wood = null
-    ) = {
-
-  for class color in arguments {
-    if color != null {
-      # {
-        source("mapbox://mapbox.mapbox-streets-v5" "landuse")
-        type: fill
-        fill-color: color
-        filter: @class == class
-      }
-    }
-  }
-}
