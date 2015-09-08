@@ -5,7 +5,7 @@ import Fs = require('fs');
 import Path = require('path');
 import ChildProcess = require('child_process')
 import assert = require('assert');
-import PreviewApp = require('./server');
+import PreviewServer = require('./server');
 var Parser = require('./parser');
 var Package = require('../package.json');
 var Linter = require('mapbox-gl-style-lint');
@@ -30,8 +30,8 @@ if (CLI['watch']) {
 
 if (CLI['preview']) {
   assert(CLI.args[1], 'You must provide an output filename with --preview');
-  var app = PreviewApp(Path.resolve(CLI.args[1]));
-  var server = app.listen(3000, function () {
+  var server = PreviewServer(Path.resolve(CLI.args[1]));
+  server.listen(3000, function () {
     console.log('Server listening at http://localhost:3000');
   });
 }
@@ -61,7 +61,6 @@ function compile() {
         }
 
         assert(CLI.args[1]);
-        Reload(server, app);
         console.log("Done compilation");
       } catch (e) {
         console.log(e.toString())

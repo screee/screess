@@ -28,8 +28,10 @@ class MacroReferenceStatement extends Statement {
     var scopeValue:ScopeValue = macro.evaluateToIntermediate(values, stack);
     assert(scopeValue instanceof ScopeValue);
 
-    var scope = scopeValue.scope;
+    var scope:Scope = scopeValue.scope;
     assert(scope instanceof Scope);
+
+    scope.addLiteralMacros(values.toObject(macro.argDefinition, stack));
 
     scope.eachPrimitiveStatement(stack, callback);
   }

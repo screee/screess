@@ -2,7 +2,7 @@
   "version": 8,
   "layers": [
     {
-      "id": "scope1",
+      "id": "scope31",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.141
@@ -19,7 +19,7 @@
       "source": "680519890"
     },
     {
-      "id": "scope2",
+      "id": "scope32",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.135
@@ -36,7 +36,7 @@
       "source": "680519890"
     },
     {
-      "id": "scope3",
+      "id": "scope33",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.1335
@@ -53,7 +53,7 @@
       "source": "680519890"
     },
     {
-      "id": "scope4",
+      "id": "scope34",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.11699999999999999
@@ -70,7 +70,7 @@
       "source": "680519890"
     },
     {
-      "id": "scope5",
+      "id": "scope35",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.1005
@@ -87,7 +87,7 @@
       "source": "680519890"
     },
     {
-      "id": "scope6",
+      "id": "scope36",
       "paint": {
         "fill-color": "#000",
         "fill-opacity": 0.084

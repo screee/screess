@@ -14,7 +14,7 @@ class ScopeExpression extends Expression {
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    return new ScopeValue(this.body.clone(scope));
+    return new ScopeValue(this.body);
   }
 
 }

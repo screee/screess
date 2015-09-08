@@ -50,8 +50,8 @@ hillshade(color = #000, opacity = 0.15) = {
       type: fill
       source("mapbox://mapbox.mapbox-terrain-v2" "hillshade")
       filter: level == @level
-      fill-color: '#000'
-      fill-opacity: 0.15 * level / 100
+      fill-color: color
+      fill-opacity: opacity * level / 100
     }
   }
 }

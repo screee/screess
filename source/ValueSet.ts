@@ -83,7 +83,7 @@ class ValueSet {
   toObject(
       argDefinition:ValueSetDefinition,
       stack:Stack
-  ):{[s:string]: any} {
+  ):{[name:string]: any} {
 
     assert(this.matches(argDefinition));
 
@@ -125,5 +125,3 @@ class ValueSet {
 }
 
 export = ValueSet;
-
-

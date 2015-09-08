@@ -63,3 +63,10 @@ describe "property macros", ->
       #layer { type: 'background'; foo(17) }
     """
     assert.equal stylesheet.layers[0]['scree-test-meta'], 17
+
+  it "should be able to contain layers", ->
+    stylesheet = parse """
+      foo(value) = { # { scree-test-meta: value } }
+      foo(17)
+    """
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17

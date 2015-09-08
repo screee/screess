@@ -14,6 +14,8 @@ class Macro {
 
   constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, body:Expression|Function) {
     if (body instanceof Expression) {
+
+      // TODO move this to MacroExpression
       this.body = (args, stack) => {
         var scope = new Scope(parentScope);
         scope.addLiteralMacros(args);

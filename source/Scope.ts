@@ -59,16 +59,6 @@ class Scope {
 
   constructor(public parent:Scope) {}
 
-  clone(parent:Scope = this.parent):Scope {
-    var that = new Scope(parent);
-    that.macros = _.clone(this.macros);
-    that.sources = _.clone(this.sources);
-    that.statements = _.clone(this.statements);
-    that.name = _.clone(this.name);
-    that.version = this.version;
-    return that;
-  }
-
   isGlobalScope():boolean {
     return !this.parent
   }
