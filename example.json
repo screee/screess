@@ -1,0 +1,114 @@
+{
+  "version": 8,
+  "layers": [
+    {
+      "id": "scope1",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.141
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        94
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope2",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.135
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        90
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope3",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.1335
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        89
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope4",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.11699999999999999
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        78
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope5",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.1005
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        67
+      ],
+      "source": "680519890"
+    },
+    {
+      "id": "scope6",
+      "paint": {
+        "fill-color": "#000",
+        "fill-opacity": 0.084
+      },
+      "layout": {},
+      "z-index": 0,
+      "type": "fill",
+      "source-layer": "hillshade",
+      "filter": [
+        "==",
+        "level",
+        56
+      ],
+      "source": "680519890"
+    }
+  ],
+  "sources": {
+    "680519890": {
+      "type": "vector",
+      "url": "mapbox://mapbox.mapbox-terrain-v2"
+    }
+  },
+  "transition": {}
+}

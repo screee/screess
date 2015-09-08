@@ -17,6 +17,7 @@ function evaluateGlobalScope(stack:Stack, properties:{}, layers:Scope[], classes
   return _.extend(
     properties,
     {
+      version: 8,
       layers: layers,
       sources: sources,
       transition: transition

@@ -13,10 +13,12 @@
   },
   "dependencies": {
     "commander": "^2.5.0",
+    "express": "^4.13.3",
     "glob": "^5.0.14",
     "mapbox-gl-style-lint": "^7.3.0",
     "mapbox-gl-style-spec": "^7.4.0",
-    "pegjs": "^0.8.0"
+    "pegjs": "^0.8.0",
+    "reload": "^0.4.0"
   },
   "devDependencies": {
     "coffee-script": "^1.8.0",

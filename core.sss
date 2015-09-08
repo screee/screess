@@ -32,7 +32,7 @@ round = "round"
 square = "square"
 
 source(url, layer) = {
-  source: vector url layer
+  source(vector url layer)
 }
 
 source(type, url, layer) = {
@@ -48,10 +48,10 @@ hillshade(color = #000, opacity = 0.15) = {
   for level in levels {
     # {
       type: fill
-      source: "mapbox://mapbox.mapbox-terrain-v2" "hillshade"
+      source("mapbox://mapbox.mapbox-terrain-v2" "hillshade")
       filter: level == @level
-      fill-color: color
-      fill-opacity: opacity * level / 100
+      fill-color: '#000'
+      fill-opacity: 0.15 * level / 100
     }
   }
 }
@@ -59,7 +59,7 @@ hillshade(color = #000, opacity = 0.15) = {
 contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index = 5) = {
 
   # {
-    source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
+    source("mapbox://mapbox.mapbox-terrain-v2" "contour")
     type: line
     line-opacity: opacity
     line-width: minor-width
@@ -67,7 +67,7 @@ contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index 
   }
 
   # {
-    source: "mapbox://mapbox.mapbox-terrain-v2" "contour"
+    source("mapbox://mapbox.mapbox-terrain-v2" "contour")
     type: line
     line-opacity: opacity
     line-width: major-width
@@ -96,7 +96,7 @@ landuse(
   for class color in arguments {
     if color != null {
       # {
-        source: "mapbox://mapbox.mapbox-streets-v5" "landuse"
+        source("mapbox://mapbox.mapbox-streets-v5" "landuse")
         type: fill
         fill-color: color
         filter: @class == class

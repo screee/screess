@@ -5,15 +5,17 @@ import Fs = require('fs');
 import Path = require('path');
 import ChildProcess = require('child_process')
 import assert = require('assert');
+import PreviewApp = require('./server');
 var Parser = require('./parser');
 var Package = require('../package.json');
-var Linter = require('mapbox-gl-style-lint')
+var Linter = require('mapbox-gl-style-lint');
+var Reload = require('reload');
 
 var ENCODING = "utf8";
 
 CLI.version(Package.version)
 CLI.usage('[<input-screess>=stdin [<output-json>=stdout]]');
-CLI.option('-p, --preview', 'Open the stylesheet in the mapbox-gl-native viewer (OSX Only)');
+CLI.option('-p, --preview', 'Start a webserver to preview changes in GL JS');
 CLI.option('-w, --watch', 'Monitor the source file for changes and automatically recompile');
 CLI.parse(process.argv)
 
@@ -26,16 +28,12 @@ if (CLI['watch']) {
   });
 }
 
-function preview(style:string):void {
-  var command1 =
-    'env ' +
-      'MAPBOX_ACCESS_TOKEN=pk.eyJ1IjoibHVjYXN3b2oiLCJhIjoiNWtUX3JhdyJ9.WtCTtw6n20XV2DwwJHkGqQ ' +
-    'open ' +
-      '--background ' +
-      'mapboxgl://?style=' + Path.resolve(style);
-
-  console.log("Refreshing preview");
-  var child1 = ChildProcess.exec(command1, (error, stdout, stderr) => {});
+if (CLI['preview']) {
+  assert(CLI.args[1], 'You must provide an output filename with --preview');
+  var app = PreviewApp(Path.resolve(CLI.args[1]));
+  var server = app.listen(3000, function () {
+    console.log('Server listening at http://localhost:3000');
+  });
 }
 
 function compile() {
@@ -63,7 +61,7 @@ function compile() {
         }
 
         assert(CLI.args[1]);
-        if (CLI['preview']) preview(CLI.args[1]);
+        Reload(server, app);
         console.log("Done compilation");
       } catch (e) {
         console.log(e.toString())
