@@ -6,7 +6,7 @@ parse = (source) -> Parser.parse(source).evaluate()
 describe "value", ->
 
   parseValue = (value, context = {}) ->
-    preface = "value-macro = 'foo'";
+    preface = "value-macro = 'foo'; property-macro = { foo: 'bar' }";
 
     if context.filterLvalue
       stylesheet = parse "#{preface}; #layer { type: 'background'; scree-test-meta: #{value} == 1 }"
@@ -53,7 +53,7 @@ describe "value", ->
     it "should allow nested arrays", ->
       assert.deepEqual parseValue("[[[[ 1 ]]]]"), [[[[1]]]]
 
-  describe "map", ->
+  describe "scope", ->
 
     it "should parse", ->
       assert.deepEqual parseValue("{one:1; two:2; three:3}"), {one: 1, two: 2, three: 3}
@@ -76,9 +76,8 @@ describe "value", ->
     it "should allow keys to be language keywords", ->
       assert.deepEqual parseValue("{out: 0; in: 1}"), {out: 0, in: 1}
 
-    # TODO
-    # it "should allow property macros", ->
-    #   assert.deepEqual parseValue("[ property-macro() ]"), { foo: 'bar' }
+    it "should allow property macros", ->
+      assert.deepEqual parseValue("{ property-macro() }"), { foo: 'bar' }
 
   describe "number", ->
 
