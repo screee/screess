@@ -2,8 +2,8 @@
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
-  "path": "definitions",
-  "bundle": "definitions/index.d.ts",
+  "path": "typescript_interfaces",
+  "bundle": "typescript_interfaces/index.d.ts",
   "installed": {
     "node/node.d.ts": {
       "commit": "07ae96e580d1ac9817d40717158fcafc875044b3"

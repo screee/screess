@@ -116,7 +116,7 @@ class Scope {
   }
 
   addMacro(name:String, argDefinition:ValueSetDefinition, body:Function|Expression) {
-    var Macro_ = require("./macros/Macro");
+    var Macro_ = require("./Macro");
     var macro = new Macro_(this, name, argDefinition, body);
     this.macros.unshift(macro);
   }

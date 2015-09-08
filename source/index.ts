@@ -1,4 +1,4 @@
-/// <reference path="../definitions/index.d.ts" />
+/// <reference path="../typescript_interfaces/index.d.ts" />
 
 export var parser = require("./parser");
 export import eval = require("./eval");

@@ -1,9 +1,10 @@
-clean:
-	rm -r compiled/*
+all: build-pegjs build-typescript cli
 
-build: build-pegjs build-ts-source cli
+clean:
+	rm -r compiled typescript_interfaces
 
 build-pegjs:
+	mkdir -p compiled
 	pegjs \
 		--plugin pegjs-coffee-plugin \
 		--allowed-start-rules global,expression \
@@ -11,7 +12,12 @@ build-pegjs:
 			source/parser.pegcs \
 			compiled/parser.js
 
-build-ts-source: build-pegjs
+install-typescript-interfaces:
+	mkdir -p typescript_interfaces
+	tsd reinstall
+	tsd rebundle
+
+build-typescript: build-pegjs install-typescript-interfaces
 	tsc \
 		--sourceMap \
 		--target ES5 \
@@ -19,12 +25,14 @@ build-ts-source: build-pegjs
 		--outDir ./compiled \
 		source/*.ts source/**/*.ts
 
-cli: build-ts-source
+cli: build-typescript
 	echo "#!/usr/bin/env node" > compiled/screess
 	cat compiled/CLI.js >> compiled/screess
 
-test: build
-	mocha --compilers coffee:coffee-script/register tests
+.PHONY: test test-debug
 
-test-debug: build
-	mocha --debug-brk --compilers coffee:coffee-script/register tests
+test:
+	mocha --compilers coffee:coffee-script/register test
+
+test-debug:
+	mocha --debug-brk --compilers coffee:coffee-script/register test

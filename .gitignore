@@ -1,2 +1,5 @@
 node_modules
 source/parser.js
+typescript_interfaces
+compiled
+npm-debug.log
