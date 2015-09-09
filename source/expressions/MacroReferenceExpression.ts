@@ -9,20 +9,18 @@ import assert = require("assert");
 
 class MacroReferenceExpression extends Expression {
 
-  constructor(public name:string, public expressions:ExpressionSet) {
+  constructor(public name:string, public argExpressions:ExpressionSet) {
     super();
   }
 
-  evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    assert(scope instanceof Scope);
-    var values = this.expressions.toArguments(scope, stack);
+  evaluateToIntermediate(argsScope:Scope, stack:Stack):any {
+    assert(argsScope instanceof Scope);
+    var args = this.argExpressions.toArguments(argsScope, stack);
 
-    var macro = scope.getMacro(this.name, values, stack);
-    if (!macro) {
-      throw new Error("Could not find macro " + this.name);
-    }
+    var macro = argsScope.getMacro(this.name, args, stack);
+    if (!macro) { throw new Error("Could not find macro " + this.name); }
 
-    return macro.evaluateToIntermediate(values, stack);
+    return macro.evaluateToIntermediate(args, stack);
   }
 }
 

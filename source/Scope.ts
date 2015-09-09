@@ -69,7 +69,7 @@ class Scope {
     this.statements.push(statement);
 
     if (statement instanceof MacroDefinitionStatement) {
-      this.addMacro(statement.name, statement.argumentsDefinition, statement.body);
+      this.addMacro(statement.name, statement.argsDefinition, statement.body);
     }
   }
 
@@ -93,9 +93,9 @@ class Scope {
     this.addMacro(identifier, ArgumentsDefinition.ZERO, new LiteralExpression(value));
   }
 
-  addMacro(name:String, argumentsDefinition:ArgumentsDefinition, body:Function|Expression) {
+  addMacro(name:String, argsDefinition:ArgumentsDefinition, body:Expression) {
     var Macro_ = require("./Macro");
-    var macro = new Macro_(this, name, argumentsDefinition, body);
+    var macro = new Macro_(this, name, argsDefinition, body);
     this.macros.unshift(macro);
   }
 

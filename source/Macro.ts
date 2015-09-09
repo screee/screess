@@ -7,40 +7,25 @@ import assert = require('assert')
 import Stack = require('./Stack')
 import _ = require("./utilities")
 
-// TODO strongly type function args
 class Macro {
 
-  public body:Function;
-
-  constructor(public parentScope:Scope, public name:string, public argumentsDefinition:ArgumentsDefinition, body:Expression|Function) {
-    if (body instanceof Expression) {
-
-      this.body = (args, stack) => {
-        var scope = new Scope(parentScope);
-        scope.addLiteralMacros(args);
-
-        stack.scope.push(scope);
-        var value = body.evaluateToIntermediate(scope, stack);
-        stack.scope.pop();
-
-        return value;
-      }
-    } else if (body instanceof Function) {
-      this.body = body;
-
-    } else {
-      assert(false);
-    }
+  constructor(public scope:Scope, public name:string, public argsDefinition:ArgumentsDefinition, public body:Expression) {
+    assert(this.body instanceof Expression);
   }
 
-  matches(name:string, argValues:Arguments):boolean {
-    return name == this.name && argValues.matches(this.argumentsDefinition);
+  matches(name:string, args:Arguments):boolean {
+    return name == this.name && args.matches(this.argsDefinition);
   }
 
-  evaluateToIntermediate(argValues:Arguments, stack:Stack) {
-    var args = argValues.toObject(this.argumentsDefinition, stack);
-    var values = this.body(args, stack);
-    return values;
+  evaluateToIntermediate(args:Arguments, stack:Stack) {
+    var scope = new Scope(this.scope);
+    scope.addLiteralMacros(args.toObject(this.argsDefinition, stack));
+
+    stack.scope.push(scope);
+    var evaluated = this.body.evaluateToIntermediate(scope, stack);
+    stack.scope.pop();
+
+    return evaluated;
   }
 
 }

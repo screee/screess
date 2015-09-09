@@ -46,32 +46,32 @@ class Arguments {
     this.length = this.positional.length + _.values(this.named).length;
   }
 
-  matches(argumentsDefinition:ArgumentsDefinition):boolean {
-    assert(argumentsDefinition != null);
+  matches(argsDefinition:ArgumentsDefinition):boolean {
+    assert(argsDefinition != null);
 
-    if (argumentsDefinition.isWildcard()) return true;
+    if (argsDefinition.isWildcard()) return true;
 
-    var indicies = _.times(argumentsDefinition.length, () => { return false });
+    var indicies = _.times(argsDefinition.length, () => { return false });
 
     // Mark named arguments
     for (var name in this.named) {
       var value = this.named[name];
-      if (!argumentsDefinition.named[name]) { return false; }
-      indicies[argumentsDefinition.named[name].index] = true
+      if (!argsDefinition.named[name]) { return false; }
+      indicies[argsDefinition.named[name].index] = true
     }
 
     // Mark positional arguments
     var positionalIndex = -1
     for (var i in this.positional) {
       var value = this.positional[i]
-      while (indicies[++positionalIndex] && positionalIndex < argumentsDefinition.definitions.length) {}
-      if (positionalIndex >= argumentsDefinition.definitions.length) { return false  }
+      while (indicies[++positionalIndex] && positionalIndex < argsDefinition.definitions.length) {}
+      if (positionalIndex >= argsDefinition.definitions.length) { return false  }
       indicies[positionalIndex] = true;
     }
 
     // Mark default arguments
-    for (var i in argumentsDefinition.definitions) {
-      var definition = argumentsDefinition.definitions[i];
+    for (var i in argsDefinition.definitions) {
+      var definition = argsDefinition.definitions[i];
       if (definition.expression) {
         indicies[definition.index] = true;
       }
@@ -80,11 +80,11 @@ class Arguments {
     return _.all(indicies);
   }
 
-  toObject(argumentsDefinition:ArgumentsDefinition, stack:Stack):{[name:string]: any} {
+  toObject(argsDefinition:ArgumentsDefinition, stack:Stack):{[name:string]: any} {
 
-    assert(this.matches(argumentsDefinition));
+    assert(this.matches(argsDefinition));
 
-    if (!argumentsDefinition) {
+    if (!argsDefinition) {
       return _.extend(
         _.objectMap(
           this.positional,
@@ -93,7 +93,7 @@ class Arguments {
         this.named
       );
 
-    } else if (argumentsDefinition.isWildcard()) {
+    } else if (argsDefinition.isWildcard()) {
       return {arguments: this}
 
     } else {
@@ -105,13 +105,13 @@ class Arguments {
       }
 
       var positionalIndex = 0
-      for (var i in argumentsDefinition.definitions) {
-        var definition = argumentsDefinition.definitions[i];
+      for (var i in argsDefinition.definitions) {
+        var definition = argsDefinition.definitions[i];
         if (!args[definition.name]) {
           if (positionalIndex < this.positional.length) {
             args[definition.name] = this.positional[positionalIndex++]
           } else {
-            args[definition.name] = definition.expression.evaluateToIntermediate(argumentsDefinition.scope, stack)
+            args[definition.name] = definition.expression.evaluateToIntermediate(argsDefinition.scope, stack)
           }
         }
       }

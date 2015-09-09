@@ -10,7 +10,7 @@ import Expression = require('../expressions/Expression');
 
 class MacroDefinitionStatement extends Statement {
 
-  constructor(public name:string, public argumentsDefinition:ArgumentsDefinition, public body:Expression) {
+  constructor(public name:string, public argsDefinition:ArgumentsDefinition, public body:Expression) {
     super();
   }
 
