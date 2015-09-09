@@ -19,6 +19,7 @@ export import LoopStatement = require("./statements/LoopStatement");
 export import PropertyStatement = require("./statements/PropertyStatement");
 export import MacroDefinitionStatement = require("./statements/MacroDefinitionStatement");
 export import MacroReferenceStatement = require("./statements/MacroReferenceStatement");
+export import JavascriptStatement = require("./statements/JavascriptStatement");
 
 export import Expression = require("./expressions/Expression");
 export import ArithmeticOperatorExpression = require("./expressions/ArithmeticOperatorExpression");

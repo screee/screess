@@ -78,7 +78,8 @@ statement =
   classStatement /
   loopStatement /
   conditionalStatement /
-  propertyStatement
+  propertyStatement /
+  javascriptStatement
 
 propertyStatement =
   name:identifier whitespace* ":" whitespace* expression:expression { new @PropertyStatement(name, expression) }
@@ -111,6 +112,9 @@ layerStatement =
 
 classStatement =
   "." name:identifier whitespace* body:scope { new @ClassStatement(name, body) }
+
+javascriptStatement =
+  "`" body:[^\`]* "`" { new @JavascriptStatement(body.join("")) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

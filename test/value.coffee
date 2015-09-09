@@ -20,7 +20,7 @@ describe "value", ->
 
   describe "javascript", ->
 
-    it "can be embedded", ->
+    it "can be embedded as an expression", ->
       assert.deepEqual parseValue("`'bar'.toUpperCase()`"), 'BAR'
 
     it "can access scope and stack", ->

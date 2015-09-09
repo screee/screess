@@ -4,8 +4,9 @@ import Stack = require("Stack");
 import _ = require('./utilities');
 import ScreeSS = require("./index");
 
-function eval(source:string, scope: Scope, stack: Stack): any {
-  var sandbox = _.extend(
+function eval(source:string, scope:Scope, stack:Stack, sandbox:{} = {}): any {
+  _.extend(
+    sandbox,
     {scope: scope, stack: stack, console: console},
     scope.getMacrosAsFunctions(stack),
     ScreeSS
