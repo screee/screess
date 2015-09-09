@@ -3,8 +3,8 @@ import Path = require("path");
 import assert = require("assert")
 
 import _ = require("./utilities")
-import ValueSet = require("./ValueSet")
-import ValueSetDefinition = require('./ValueSetDefinition')
+import Arguments = require("./Arguments")
+import ArgumentsDefinition = require('./ArgumentsDefinition')
 import LiteralExpression = require('./expressions/LiteralExpression')
 import Stack = require('./Stack')
 import Expression = require('./expressions/Expression');
@@ -37,7 +37,7 @@ class Scope {
     var globalScope = new Scope(null)
     globalScope.name = "[global]";
 
-    globalScope.addMacro("include", ValueSetDefinition.WILDCARD, (args:{}, stack:Stack) => {
+    globalScope.addMacro("include", ArgumentsDefinition.WILDCARD, (args:{}, stack:Stack) => {
       var file:string = args['arguments']['positional'][0];
       var ScopeValue = require('./values/ScopeValue');
       var includeeScope:Scope = Scope.createFromFile(file);
@@ -81,7 +81,7 @@ class Scope {
     this.statements.push(statement);
 
     if (statement instanceof MacroDefinitionStatement) {
-      this.addMacro(statement.name, statement.argDefinition, statement.body);
+      this.addMacro(statement.name, statement.argumentsDefinition, statement.body);
     }
   }
 
@@ -102,19 +102,19 @@ class Scope {
   }
 
   addLiteralMacro(identifier:string, value:any) {
-    this.addMacro(identifier, ValueSetDefinition.ZERO, new LiteralExpression(value));
+    this.addMacro(identifier, ArgumentsDefinition.ZERO, new LiteralExpression(value));
   }
 
-  addMacro(name:String, argDefinition:ValueSetDefinition, body:Function|Expression) {
+  addMacro(name:String, argumentsDefinition:ArgumentsDefinition, body:Function|Expression) {
     var Macro_ = require("./Macro");
-    var macro = new Macro_(this, name, argDefinition, body);
+    var macro = new Macro_(this, name, argumentsDefinition, body);
     this.macros.unshift(macro);
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Evaluation Helpers
 
-  getMacro(name:string, values:ValueSet, stack:Stack):Macro {
+  getMacro(name:string, values:Arguments, stack:Stack):Macro {
     for (var i in this.macros) {
       var macro = this.macros[i];
 
@@ -145,7 +145,7 @@ class Scope {
     return _.objectMap(names, (name) => {
       var that = this;
       return [name, function() {
-        var args = ValueSet.fromPositionalValues(_.toArray(arguments));
+        var args = Arguments.fromPositionalValues(_.toArray(arguments));
         var macro = that.getMacro(name, args, stack);
         if (!macro) return null;
         else return macro.evaluateToIntermediate(args, stack);

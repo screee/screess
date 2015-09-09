@@ -1,6 +1,6 @@
 import Expression = require('./expressions/Expression')
-import ValueSetDefinition = require('./ValueSetDefinition')
-import ValueSet = require('./ValueSet')
+import ArgumentsDefinition = require('./ArgumentsDefinition')
+import Arguments = require('./Arguments')
 import Scope = require('./Scope')
 import LiteralExpression = require('./expressions/LiteralExpression')
 import assert = require('assert')
@@ -12,7 +12,7 @@ class Macro {
 
   public body:Function;
 
-  constructor(public parentScope:Scope, public name:string, public argDefinition:ValueSetDefinition, body:Expression|Function) {
+  constructor(public parentScope:Scope, public name:string, public argumentsDefinition:ArgumentsDefinition, body:Expression|Function) {
     if (body instanceof Expression) {
 
       this.body = (args, stack) => {
@@ -33,12 +33,12 @@ class Macro {
     }
   }
 
-  matches(name:string, argValues:ValueSet):boolean {
-    return name == this.name && argValues.matches(this.argDefinition);
+  matches(name:string, argValues:Arguments):boolean {
+    return name == this.name && argValues.matches(this.argumentsDefinition);
   }
 
-  evaluateToIntermediate(argValues:ValueSet, stack:Stack) {
-    var args = argValues.toObject(this.argDefinition, stack);
+  evaluateToIntermediate(argValues:Arguments, stack:Stack) {
+    var args = argValues.toObject(this.argumentsDefinition, stack);
     var values = this.body(args, stack);
     return values;
   }

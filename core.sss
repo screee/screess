@@ -13,7 +13,7 @@ color-mix(a, b, ratio = 0.5) = rgba(
   alpha: a.alpha * ratio + b.alpha * (1 - ratio)
 )
 
-function(*) = `FunctionValue.fromValueSet(arguments())`
+function(*) = `FunctionValue.fromArguments(arguments())`
 
 background = "background"
 fill = "fill"

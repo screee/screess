@@ -2,11 +2,11 @@ import Value = require("./Value");
 import Stack = require("../Stack")
 import _ = require("../utilities");
 import assert = require("assert");
-import ValueSet = require("../ValueSet");
+import Arguments = require("../Arguments");
 
 class FunctionValue extends Value {
 
-  static fromValueSet(values:ValueSet):FunctionValue {
+  static fromArguments(values:Arguments):FunctionValue {
     var stops = [];
 
     for (var key in values.named) {

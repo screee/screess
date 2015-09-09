@@ -7,7 +7,7 @@ import Value = require("../values/Value");
 import ScopeValue = require("../values/ScopeValue");
 import _ = require("../utilities");
 import Macro = require('../Macro');
-import ValueSet = require('../ValueSet');
+import Arguments = require('../Arguments');
 
 class MacroReferenceStatement extends Statement {
 
@@ -18,7 +18,7 @@ class MacroReferenceStatement extends Statement {
 
   eachPrimitiveStatement(parentScope:Scope, stack:Stack, callback:(scope:Scope, statement:Statement) => void):void {
     assert(parentScope instanceof Scope);
-    var values:ValueSet = this.expressions.toValueSet(parentScope, stack);
+    var values:Arguments = this.expressions.toArguments(parentScope, stack);
 
     var macro = parentScope.getMacro(this.name, values, stack);
     if (!macro) {
@@ -31,7 +31,7 @@ class MacroReferenceStatement extends Statement {
     var scope:Scope = scopeValue.scope;
     assert(scope instanceof Scope);
 
-    scope.addLiteralMacros(values.toObject(macro.argDefinition, stack));
+    scope.addLiteralMacros(values.toObject(macro.argumentsDefinition, stack));
 
     scope.eachPrimitiveStatement(stack, callback);
   }

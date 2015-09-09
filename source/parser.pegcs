@@ -27,25 +27,42 @@ whitespaceWeak = " " / "\t" { null }
 whitespaceStrong = comment? "\n" / "\r" { null }
 whitespace = whitespaceStrong / whitespaceWeak { null }
 
+expressionSeperator = ((whitespace* "," whitespace*) / whitespace+) { null }
+statementSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                                  Scope                                     //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-global = ({ @globalScope = @scope = @Scope.createGlobal() }) whitespace* statements:statementSet whitespace* { @globalScope.addStatements(statements); @globalScope }
+global = ({ @globalScope = @scope = @Scope.createGlobal() }) whitespace* statements:scopeBody whitespace* { @globalScope.addStatements(statements); @globalScope }
 
-scope = ({ @pushScope() }) "{" whitespace* body:statementSet whitespace* "}" { @scope.addStatements(body); @popScope() }
+scope = ({ @pushScope() }) "{" whitespace* body:scopeBody whitespace* "}" { @scope.addStatements(body); @popScope() }
+
+scopeBody = statements:(head:statement tail:(statementSeperator statement)* statementSeperator? whitespace* { @rehead(head, tail) })? comment? whitespace* { @_.compact(statements) || [] }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                               StatementSet                                 //
+//                                 Arguments                                  //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-statementSetSeperator = whitespaceWeak* (";" / whitespaceStrong) whitespace* { null }
+arguments =
+  head:argumentsItem tail:(expressionSeperator argumentsItem)* { new @ExpressionSet(@rehead(head, tail) ) }
 
-statementSet = statements:(head:statement tail:(statementSetSeperator statement)* statementSetSeperator? whitespace* { @rehead(head, tail) })? comment? whitespace* { @_.compact(statements) || [] }
+argumentsItem =
+  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
+  expression:expression { { expression: expression } }
+
+argumentsDefinition =
+  "(" whitespace* "*" whitespace* ")" { @ArgumentsDefinition.WILDCARD } /
+  "(" whitespace* head:argumentsDefinitionItem tail:(expressionSeperator argumentsDefinitionItem)* whitespace* ")" { new @ArgumentsDefinition(@rehead(head, tail), @scope) } /
+  "" { @ArgumentsDefinition.ZERO }
+
+argumentsDefinitionItem =
+  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
+  name:identifier { name: name }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -64,17 +81,17 @@ statement =
   propertyStatement
 
 propertyStatement =
-  name:identifier whitespace* ":" whitespace* expressions:expressionSetUnnamedWeak { new @PropertyStatement(name, expressions) }
+  name:identifier whitespace* ":" whitespace* expression:expression { new @PropertyStatement(name, expression) }
 
 macroDefinitionStatement =
-  name:identifier whitespace* args:expressionSetDefinition whitespace* "=" whitespace* body:expression { new @MacroDefinitionStatement(name, args, body) }
+  name:identifier whitespace* args:argumentsDefinition whitespace* "=" whitespace* body:expression { new @MacroDefinitionStatement(name, args, body) }
 
 macroReferenceStatement =
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @MacroReferenceStatement(name, expressions) } /
+  name:identifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceStatement(name, expressions) } /
   name:identifier whitespace* "(" whitespace* ")" { new @MacroReferenceStatement(name, @ExpressionSet.ZERO) }
 
 loopStatement =
-  "for" whitespace+ keyIdentifier:identifier expressionSetSeperatorStrong valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
+  "for" whitespace+ keyIdentifier:identifier expressionSeperator valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
   "for" whitespace+ valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, null, collection) }
 
 conditionalStatement =
@@ -94,44 +111,6 @@ layerStatement =
 
 classStatement =
   "." name:identifier whitespace* body:scope { new @ClassStatement(name, body) }
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                              Expression Sets                               //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-expressionSetSeperatorWeak = ((whitespaceWeak* "," whitespaceWeak*) / (whitespaceWeak)+) { null }
-expressionSetSeperatorStrong = ((whitespace* "," whitespace*) / whitespace+) { null }
-
-expressionSetUnnamedWeak =
-  head:expression tail:(expressionSetSeperatorWeak expression)* { new @ExpressionSet(@_.map(@rehead(head, tail), (expression) => {expression: expression} ) ) } /
-  "(" whitespace* expressions:expressionSetUnnamedStrong whitespace* ")" { expressions }
-
-expressionSetUnnamedStrong =
-  head:expression tail:(expressionSetSeperatorStrong expression)* { new @ExpressionSet(@_.map(@rehead(head, tail), (expression) => {expression: expression} ) )  }
-
-expressionSetNamedStrong =
-  head:expressionSetNamedStrongItem tail:(expressionSetSeperatorStrong expressionSetNamedStrongItem)* { new @ExpressionSet(@rehead(head, tail)) }
-
-expressionSetNamedStrongItem =
-  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression; name: name, expression: expression }
-
-expressionSetMixedStrong =
-  head:expressionSetMixedStrongItem tail:(expressionSetSeperatorStrong expressionSetMixedStrongItem)* { new @ExpressionSet(@rehead(head, tail) ) }
-
-expressionSetMixedStrongItem =
-  name:(identifier / integer) whitespace* ":" whitespace* expression:expression { name: name, expression: expression } /
-  expression:expression { { expression: expression } }
-
-expressionSetDefinition =
-  "(" whitespace* "*" whitespace* ")" { @ValueSetDefinition.WILDCARD } /
-  "(" whitespace* head:expressionSetDefinitionItem tail:(expressionSetSeperatorStrong expressionSetDefinitionItem)* whitespace* ")" { new @ValueSetDefinition(@rehead(head, tail), @scope) } /
-  "" { @ValueSetDefinition.ZERO }
-
-expressionSetDefinitionItem =
-  name:identifier whitespace* "=" whitespace* expression:expression { name: name, expression: expression } /
-  name:identifier { name: name }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -227,7 +206,7 @@ propertyAccessExpression =
 /////////////////////////////////////////////
 
 atomicExpression =
-  javaScriptExpression /
+  javascriptExpression /
   literalExpression /
   macroReferenceExpression /
   stringExpression /
@@ -238,7 +217,7 @@ literalExpression =
   value:value { new @LiteralExpression(value) }
 
 macroReferenceExpression =
-  name:identifier whitespace* "(" whitespace* expressions:expressionSetMixedStrong whitespace* ")" { new @MacroReferenceExpression(name, expressions) } /
+  name:identifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceExpression(name, expressions) } /
   name:identifier (whitespace* "(" whitespace* ")")? { new @MacroReferenceExpression(name, @ExpressionSet.ZERO) }
 
 stringExpression =
@@ -246,13 +225,13 @@ stringExpression =
   "'" body:[^\']* "'" { new @StringExpression(body.join("")) }
 
 arrayExpression =
-  "[" whitespace* expressions:expressionSetUnnamedStrong whitespace* "]" { new @ArrayExpression(expressions) }
+  "[" whitespace* head:expression tail:(expressionSeperator expression)* whitespace* "]" { new @ArrayExpression(@_.map(@rehead(head, tail))) }
 
 scopeExpression =
   body:scope { new @ScopeExpression(body) }
 
-javaScriptExpression =
-  "`" body:[^\`]* "`" { new @JavaScriptExpression(body.join("")) }
+javascriptExpression =
+  "`" body:[^\`]* "`" { new @JavascriptExpression(body.join("")) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

@@ -1,5 +1,5 @@
 import assert = require('assert');
-import ValueSetDefinition = require('./ValueSetDefinition');
+import ArgumentsDefinition = require('./ArgumentsDefinition');
 import Value = require('./values/Value');
 import Scope = require("./Scope");
 import Stack = require("./Stack");
@@ -11,19 +11,19 @@ interface Item {
   value:any;
 }
 
-class ValueSet {
+class Arguments {
 
-  static fromPositionalValues(values:any[]):ValueSet {
+  static fromPositionalValues(values:any[]):Arguments {
     return this.fromValues(<Item[]> _.map(values, (value:any):Item  => {
       return {value: value}
     }));
   }
 
-  static fromValues(values:Item[]):ValueSet {
-    return new ValueSet(values);
+  static fromValues(values:Item[]):Arguments {
+    return new Arguments(values);
   }
 
-  static ZERO: ValueSet = new ValueSet([]);
+  static ZERO: Arguments = new Arguments([]);
 
   public length:number;
   public positional:any[];
@@ -46,32 +46,32 @@ class ValueSet {
     this.length = this.positional.length + _.values(this.named).length;
   }
 
-  matches(argDefinition:ValueSetDefinition):boolean {
-    assert(argDefinition != null);
+  matches(argumentsDefinition:ArgumentsDefinition):boolean {
+    assert(argumentsDefinition != null);
 
-    if (argDefinition.isWildcard()) return true;
+    if (argumentsDefinition.isWildcard()) return true;
 
-    var indicies = _.times(argDefinition.length, () => { return false });
+    var indicies = _.times(argumentsDefinition.length, () => { return false });
 
     // Mark named arguments
     for (var name in this.named) {
       var value = this.named[name];
-      if (!argDefinition.named[name]) { return false; }
-      indicies[argDefinition.named[name].index] = true
+      if (!argumentsDefinition.named[name]) { return false; }
+      indicies[argumentsDefinition.named[name].index] = true
     }
 
     // Mark positional arguments
     var positionalIndex = -1
     for (var i in this.positional) {
       var value = this.positional[i]
-      while (indicies[++positionalIndex] && positionalIndex < argDefinition.definitions.length) {}
-      if (positionalIndex >= argDefinition.definitions.length) { return false  }
+      while (indicies[++positionalIndex] && positionalIndex < argumentsDefinition.definitions.length) {}
+      if (positionalIndex >= argumentsDefinition.definitions.length) { return false  }
       indicies[positionalIndex] = true;
     }
 
     // Mark default arguments
-    for (var i in argDefinition.definitions) {
-      var definition = argDefinition.definitions[i];
+    for (var i in argumentsDefinition.definitions) {
+      var definition = argumentsDefinition.definitions[i];
       if (definition.expression) {
         indicies[definition.index] = true;
       }
@@ -80,14 +80,11 @@ class ValueSet {
     return _.all(indicies);
   }
 
-  toObject(
-      argDefinition:ValueSetDefinition,
-      stack:Stack
-  ):{[name:string]: any} {
+  toObject(argumentsDefinition:ArgumentsDefinition, stack:Stack):{[name:string]: any} {
 
-    assert(this.matches(argDefinition));
+    assert(this.matches(argumentsDefinition));
 
-    if (!argDefinition) {
+    if (!argumentsDefinition) {
       return _.extend(
         _.objectMap(
           this.positional,
@@ -96,7 +93,7 @@ class ValueSet {
         this.named
       );
 
-    } else if (argDefinition.isWildcard()) {
+    } else if (argumentsDefinition.isWildcard()) {
       return {arguments: this}
 
     } else {
@@ -108,13 +105,13 @@ class ValueSet {
       }
 
       var positionalIndex = 0
-      for (var i in argDefinition.definitions) {
-        var definition = argDefinition.definitions[i];
+      for (var i in argumentsDefinition.definitions) {
+        var definition = argumentsDefinition.definitions[i];
         if (!args[definition.name]) {
           if (positionalIndex < this.positional.length) {
             args[definition.name] = this.positional[positionalIndex++]
           } else {
-            args[definition.name] = definition.expression.evaluateToIntermediate(argDefinition.scope, stack)
+            args[definition.name] = definition.expression.evaluateToIntermediate(argumentsDefinition.scope, stack)
           }
         }
       }
@@ -124,4 +121,4 @@ class ValueSet {
   }
 }
 
-export = ValueSet;
+export = Arguments;

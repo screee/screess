@@ -1,5 +1,5 @@
 import assert = require('assert');
-import ValueSet = require('./ValueSet');
+import Arguments = require('./Arguments');
 import Scope = require("./Scope");
 import Stack = require("./Stack");
 import _ = require('./utilities');
@@ -51,9 +51,9 @@ class ExpressionSet {
     return _.pluck(this.items, 'expression');
   }
 
-  toValueSet(scope:Scope, stack:Stack):ValueSet {
+  toArguments(scope:Scope, stack:Stack):Arguments {
     assert(scope instanceof Scope);
-    return new ValueSet(_.map(this.items, (item:Item) => {
+    return new Arguments(_.map(this.items, (item:Item) => {
       return {
         value: item.expression.evaluateToIntermediate(scope, stack),
         name: item.name

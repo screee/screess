@@ -3,16 +3,15 @@ import LiteralExpression = require("./LiteralExpression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import _ = require("../utilities");
-import ExpressionSet = require("../ExpressionSet");
 
 class ArrayExpression extends Expression {
 
-  constructor(public expressions:ExpressionSet) {
+  constructor(public expressions:Expression[]) {
     super();
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
-    return _.map(this.expressions.toArray(), function(expression: Expression): any {
+    return _.map(this.expressions, function(expression: Expression): any {
       return expression.evaluateToIntermediate(scope, stack);
     });
   }

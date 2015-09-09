@@ -7,7 +7,7 @@ import eval = require("../eval");
 
 var parse = require("../parser").parse;
 
-class JavaScriptExpression extends Expression {
+class JavascriptExpression extends Expression {
 
   constructor(public source:string) {
     super()
@@ -19,4 +19,4 @@ class JavaScriptExpression extends Expression {
 
 }
 
-export = JavaScriptExpression;
+export = JavascriptExpression;

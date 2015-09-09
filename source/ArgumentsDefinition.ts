@@ -9,10 +9,10 @@ interface ValueDefinition {
   expression?: Expression;
 }
 
-class ValueSetDefinition {
+class ArgumentsDefinition {
 
-  static ZERO:ValueSetDefinition = new ValueSetDefinition([], null);
-  static WILDCARD:ValueSetDefinition = new ValueSetDefinition([], null, true);
+  static ZERO:ArgumentsDefinition = new ArgumentsDefinition([], null);
+  static WILDCARD:ArgumentsDefinition = new ArgumentsDefinition([], null, true);
 
   public named:{[name:string]: ValueDefinition};
   public length:number;
@@ -40,4 +40,4 @@ class ValueSetDefinition {
   }
 }
 
-export = ValueSetDefinition;
+export = ArgumentsDefinition;

@@ -5,12 +5,12 @@ import assert = require("assert");
 import ExpressionSet = require("../ExpressionSet");
 import Value = require("../values/Value");
 import _ = require("../utilities");
-import ValueSetDefinition = require('../ValueSetDefinition')
+import ArgumentsDefinition = require('../ArgumentsDefinition')
 import Expression = require('../expressions/Expression');
 
 class MacroDefinitionStatement extends Statement {
 
-  constructor(public name:string, public argDefinition:ValueSetDefinition, public body:Expression) {
+  constructor(public name:string, public argumentsDefinition:ArgumentsDefinition, public body:Expression) {
     super();
   }
 
