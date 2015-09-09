@@ -41,4 +41,5 @@ export import MacroReferenceExpression = require("./expressions/MacroReferenceEx
 export import AttributeReferenceValue = require("./values/AttributeReferenceValue");
 export import ColorValue = require("./values/ColorValue");
 export import FunctionValue = require("./values/FunctionValue");
+export import ScopeValue = require("./values/ScopeValue");
 export import Value = require("./values/Value");

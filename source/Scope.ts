@@ -36,18 +36,6 @@ class Scope {
   static createGlobal():Scope {
     var globalScope = new Scope(null)
     globalScope.name = "[global]";
-
-    globalScope.addMacro("include", ArgumentsDefinition.WILDCARD, (args:{}, stack:Stack) => {
-      var file:string = args['arguments']['positional'][0];
-      var ScopeValue = require('./values/ScopeValue');
-      var includeeScope:Scope = Scope.createFromFile(file);
-
-      var includerScope = stack.getScope();
-
-      includerScope.macros = includeeScope.macros.concat(includerScope.macros);
-      return new ScopeValue(includeeScope);
-    });
-
     return globalScope;
   }
 

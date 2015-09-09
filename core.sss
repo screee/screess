@@ -1,3 +1,10 @@
+include(file) = `
+  var includeeScope = Scope.createFromFile(file());
+  var includerScope = scope.parent;
+  includerScope.macros = includerScope.macros.concat(includeeScope.macros);
+  new ScopeValue(includeeScope);
+`
+
 identity (value) = value
 
 range(start, stop, step) = `_.range(start(), stop(), step())`
