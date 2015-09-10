@@ -6,19 +6,19 @@ import Arguments = require("../Arguments");
 
 class FunctionValue extends Value {
 
-  static fromArguments(values:Arguments):FunctionValue {
+  static fromArguments(args:Arguments):FunctionValue {
     var stops = [];
 
-    for (var key in values.named) {
+    for (var key in args) {
       if (key == "base") continue;
       var stop = parseInt(key);
       assert(stop != NaN, "Malformed stop value");
-      stops.push([stop, values.named[key]]);
+      stops.push([stop, args[key]]);
     }
 
     assert(stops.length > 0, "Function has no stops");
 
-    return new FunctionValue(values.named["base"], stops);
+    return new FunctionValue(args["base"], stops);
   }
 
   constructor(public base:number, public stops:[number, number][]) { super(); }

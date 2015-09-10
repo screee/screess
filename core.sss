@@ -47,39 +47,3 @@ source(type, url, layer) = {
   source-url: url
   source-layer: layer
 }
-
-hillshade(color = #000, opacity = 0.15) = {
-
-  levels = [94 90 89 78 67 56]
-
-  for level in levels {
-    # {
-      type: fill
-      source("mapbox://mapbox.mapbox-terrain-v2" "hillshade")
-      filter: level == @level
-      fill-color: color
-      fill-opacity: opacity * level / 100
-    }
-  }
-}
-
-contours(minor-width = 1, major-width = 1.5, opacity = 0.2, color = #333, index = 5) = {
-
-  # {
-    source("mapbox://mapbox.mapbox-terrain-v2" "contour")
-    type: line
-    line-opacity: opacity
-    line-width: minor-width
-    line-color: color
-  }
-
-  # {
-    source("mapbox://mapbox.mapbox-terrain-v2" "contour")
-    type: line
-    line-opacity: opacity
-    line-width: major-width
-    line-color: color
-    filter: @index == index
-  }
-
-}

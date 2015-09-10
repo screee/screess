@@ -19,7 +19,10 @@ class Macro {
 
   evaluateToIntermediate(args:Arguments, stack:Stack) {
     var scope = new Scope(this.scope);
-    scope.addLiteralMacros(args.toObject(this.argsDefinition, stack));
+
+    var argsObject = args.toObject(this.argsDefinition, stack);
+    scope.addLiteralMacros(argsObject);
+    scope.addLiteralMacros({arguments: argsObject});
 
     stack.scope.push(scope);
     var evaluated = this.body.evaluateToIntermediate(scope, stack);

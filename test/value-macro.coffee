@@ -144,23 +144,14 @@ describe "value macro", ->
       """
       assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
-    it "should match positional arguments with wildcard arguments", ->
+    it "should match with wildcard arguments", ->
       stylesheet = parse """
-        positional(*) = `arguments().positional`
+        named(*) = arguments
         #layer {
-          scree-test-meta: positional(0, 1, 2, 3)
+          scree-test-meta: named('positional', name:'named')
         }
       """
-      assert.deepEqual stylesheet.layers[0]['scree-test-meta'], [0, 1, 2, 3]
-
-    it "should match named arguments with wildcard arguments", ->
-      stylesheet = parse """
-        named(*) = `arguments().named`
-        #layer {
-          scree-test-meta: named(0:"zero", one:1)
-        }
-      """
-      assert.deepEqual stylesheet.layers[0]['scree-test-meta'], {0: "zero", one: 1}
+      assert.deepEqual stylesheet.layers[0]['scree-test-meta'], {0: "positional", name: 'named'}
 
   describe "scope", ->
 

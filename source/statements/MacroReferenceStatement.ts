@@ -31,7 +31,9 @@ class MacroReferenceStatement extends Statement {
     var scope:Scope = scopeValue.scope;
     assert(scope instanceof Scope);
 
-    scope.addLiteralMacros(args.toObject(macro.argsDefinition, stack));
+    var argsObject = args.toObject(macro.argsDefinition, stack)
+    scope.addLiteralMacros(argsObject);
+    scope.addLiteralMacros({arguments: argsObject});
 
     scope.eachPrimitiveStatement(stack, callback);
   }

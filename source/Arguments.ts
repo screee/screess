@@ -84,7 +84,7 @@ class Arguments {
 
     assert(this.matches(argsDefinition));
 
-    if (!argsDefinition) {
+    if (!argsDefinition || argsDefinition.isWildcard()) {
       return _.extend(
         _.objectMap(
           this.positional,
@@ -93,11 +93,8 @@ class Arguments {
         this.named
       );
 
-    } else if (argsDefinition.isWildcard()) {
-      return {arguments: this}
-
     } else {
-      var args:{[s:string]: any} = {}
+      var args:{[s:string]: any} = {};
 
       for (var name in this.named) {
         var value = this.named[name];
@@ -115,9 +112,9 @@ class Arguments {
           }
         }
       }
-
-      return args
     }
+
+    return args;
   }
 }
 
