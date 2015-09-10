@@ -31,8 +31,8 @@ cli: build-typescript
 
 .PHONY: test test-debug
 
-test:
+test: all
 	mocha --compilers coffee:coffee-script/register test
 
-test-debug:
+test-debug: all
 	mocha --debug-brk --compilers coffee:coffee-script/register test
