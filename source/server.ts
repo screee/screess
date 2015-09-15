@@ -46,7 +46,7 @@ function exported(file:string) {
                             styleJSON = _styleJSON;
                             map.setStyle(JSON.parse(styleJSON));
                           } catch (e) {
-                            Arguments('Failed to parse style');
+                            console.log('Failed to parse style');
                           }
                         }
                     }

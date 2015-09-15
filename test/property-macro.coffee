@@ -16,6 +16,13 @@ describe "property macros", ->
     """
     assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
+  it "should allow namespaced identifiers", ->
+    stylesheet = parse """
+      baz::foo = { scree-test-meta: 17 }
+      #layer { baz::foo() }
+    """
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17
+
   describe "arguments", ->
 
     it "should accept no arguments with parenthesis", ->

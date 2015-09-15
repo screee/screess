@@ -20,6 +20,7 @@
 }
 
 identifier = a:[A-Za-z]b:[a-zA-Z0-9-_]* { a + b.join("") }
+namespacedIdentifier = head:identifier tail:( "::" identifier )* { @rehead(head, tail).join("") }
 
 comment = "//" [^\n\r]* { null }
 
@@ -85,11 +86,11 @@ propertyStatement =
   name:identifier whitespace* ":" whitespace* expression:expression { new @PropertyStatement(name, expression) }
 
 macroDefinitionStatement =
-  name:identifier whitespace* args:argumentsDefinition whitespace* "=" whitespace* body:expression { new @MacroDefinitionStatement(name, args, body) }
+  name:namespacedIdentifier whitespace* args:argumentsDefinition whitespace* "=" whitespace* body:expression { new @MacroDefinitionStatement(name, args, body) }
 
 macroReferenceStatement =
-  name:identifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceStatement(name, expressions) } /
-  name:identifier whitespace* "(" whitespace* ")" { new @MacroReferenceStatement(name, @ExpressionSet.ZERO) }
+  name:namespacedIdentifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceStatement(name, expressions) } /
+  name:namespacedIdentifier whitespace* "(" whitespace* ")" { new @MacroReferenceStatement(name, @ExpressionSet.ZERO) }
 
 loopStatement =
   "for" whitespace+ keyIdentifier:identifier expressionSeperator valueIdentifier:identifier whitespace+ "in" whitespace+ collection:expression whitespace* scope:scope { new @LoopStatement(scope, valueIdentifier, keyIdentifier, collection) } /
@@ -221,8 +222,8 @@ literalExpression =
   value:value { new @LiteralExpression(value) }
 
 macroReferenceExpression =
-  name:identifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceExpression(name, expressions) } /
-  name:identifier (whitespace* "(" whitespace* ")")? { new @MacroReferenceExpression(name, @ExpressionSet.ZERO) }
+  name:namespacedIdentifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { new @MacroReferenceExpression(name, expressions) } /
+  name:namespacedIdentifier (whitespace* "(" whitespace* ")")? { new @MacroReferenceExpression(name, @ExpressionSet.ZERO) }
 
 stringExpression =
   "\"" body:[^\"]* "\"" { new @StringExpression(body.join("")) } /

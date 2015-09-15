@@ -13,8 +13,6 @@ function evaluateLayerScope(stack:Stack, properties:{}, layers:Scope[], _classes
 
   var type = properties['type'] || 'raster';
 
-  var version = this.getVersion();
-
   for (var name in properties) {
     var value = Value.evaluate(properties[name]);
 
@@ -27,13 +25,13 @@ function evaluateLayerScope(stack:Stack, properties:{}, layers:Scope[], _classes
     } else if (_.startsWith(name, "source-") && name != "source-layer") {
       source[name.substr("source-".length)] = value;
 
-    } else if (getPropertyType(version, name) == PropertyType.PAINT) {
+    } else if (getPropertyType(name) == PropertyType.PAINT) {
       paintProperties[name] = value;
 
-    } else if (getPropertyType(version, name) == PropertyType.LAYOUT) {
+    } else if (getPropertyType(name) == PropertyType.LAYOUT) {
       layoutProperties[name] = value;
 
-    } else if (getPropertyType(version, name) == PropertyType.META) {
+    } else if (getPropertyType(name) == PropertyType.META) {
       metaProperties[name] = value;
 
     } else {
@@ -73,12 +71,12 @@ function evaluateLayerScope(stack:Stack, properties:{}, layers:Scope[], _classes
 
 enum PropertyType { PAINT, LAYOUT, META }
 
-function getPropertyType(version: number, name: string): PropertyType {
+function getPropertyType(name: string): PropertyType {
   if (name == 'scree-test-paint') return PropertyType.PAINT;
   else if (name == 'scree-test-layout') return PropertyType.LAYOUT;
   else if (name == 'scree-test-meta') return PropertyType.META;
   else {
-    var spec = MBGLStyleSpec["v" + version];
+    var spec = MBGLStyleSpec.latest;
 
     for (var i in spec["layout"]) {
       for (var name_ in spec[spec["layout"][i]]) {

@@ -8,7 +8,7 @@ import assert = require('assert');
 import PreviewServer = require('./server');
 var Parser = require('./parser');
 var Package = require('../package.json');
-var Linter = require('mapbox-gl-style-lint');
+var MapboxGLStyleSpec = require('mapbox-gl-style-spec');
 var Reload = require('reload');
 
 var ENCODING = "utf8";
@@ -52,7 +52,7 @@ function compile() {
     inputStream.on("end", () => {
       try {
         var output = JSON.stringify(Parser.parse(input).evaluate(), null, 2) + "\n";
-        Linter.validate(output);
+        MapboxGLStyleSpec.validate(output);
 
         if (outputStream == process.stdout) {
           outputStream.write(output, ENCODING);
