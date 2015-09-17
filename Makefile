@@ -1,4 +1,6 @@
-all: build-pegjs build-typescript cli
+.PHONY: clean build-pegjs install-typescript-interfaces build-typescript test test-debug
+
+all: build-typescript
 
 clean:
 	rm -r compiled typescript_interfaces
@@ -24,12 +26,6 @@ build-typescript: build-pegjs install-typescript-interfaces
 		--module commonjs \
 		--outDir ./compiled \
 		source/*.ts source/**/*.ts
-
-cli: build-typescript
-	echo "#!/usr/bin/env node" > compiled/screess
-	cat compiled/CLI.js >> compiled/screess
-
-.PHONY: test test-debug
 
 test: all
 	mocha --compilers coffee:coffee-script/register test
