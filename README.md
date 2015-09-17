@@ -2,6 +2,16 @@
 
 ScreeSS is a high level stylesheet language that compiles down to a [Mapbox GL style object](https://www.mapbox.com/mapbox-gl-style-spec/). It features a clean CSS-like syntax and powerful macro system.
 
+## Installation
+
+To install ScreeSS, you must have `node` and `npm` installed on your system.
+
+Installation is via `npm`
+
+```bash
+npm install -g screess
+```
+
 ## Writing a ScreeSS Stylesheet
 
 Create a layer called "water"
@@ -32,7 +42,7 @@ Set the layer's type.
 }
 ```
 
-You can add filters to the layer using a very natural syntax 
+You can add filters to the layer using a natural syntax
 
 ```
 #water {
@@ -41,7 +51,7 @@ You can add filters to the layer using a very natural syntax
     url: "mapbox://mapbox.mapbox-streets-v5"
     layer: "water"
   )
-  type: fill
+  type: "fill"
   filter: is polygon && @area > 1000
 
 }
@@ -102,14 +112,14 @@ Function values are created using the special `function` value macro
 }
 ```
 
-You may create `if` blocks and `for` blocks in your stylesheet to factor out structure. The below example also demonstrates using map objects and unnamed layers. 
+You may create `if` blocks and `for` blocks in your stylesheet to factor out structure. The below example also demonstrates using map objects and unnamed layers.
 
 ```
-lake-types = [
-  small:  [area-min: 0     area-max: 1000  color: #2491dd]
-  medium: [area-min: 1000  area-max: 10000 color: #1d73b0]
-  large:  [area-min: 10000 area-max: null  color: #196499]
-]
+lake-types = {
+  small:  {area-min: 0     area-max: 1000  color: #2491dd}
+  medium: {area-min: 1000  area-max: 10000 color: #1d73b0}
+  large:  {area-min: 10000 area-max: null  color: #196499}
+}
 
 for lake-type in lake-types {
   # {
@@ -211,7 +221,7 @@ Built-in macros include
 
 Sets of properties may be reused by assigning them to a property macro
 ```
-fill-water(depth) {
+fill-water(depth) = {
   color = darken(#2491dd, depth)
   fill-color: color
   fill-antialias: true
@@ -226,27 +236,6 @@ fill-water(depth) {
   )
   type: fill
   filter: is polygon && @area > 1000
-  fill-water: 0
-}
-```
-
-You may have argument-less property macros
-```
-fill-water {
-  color = #2491dd
-  fill-color: color
-  fill-antialias: true
-  fill-outline-color: darken(color, 0.1)
-}
-
-#water {
-  source: source(
-    type: vector
-    url: "mapbox://mapbox.mapbox-streets-v5"
-    layer: "water"
-  )
-  type: fill
-  filter: is polygon && @area > 1000
-  fill-water
+  fill-water(0)
 }
 ```
