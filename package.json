@@ -1,5 +1,5 @@
 {
-  "version": "0.1.6",
+  "version": "0.2.0",
   "name": "screess",
   "description": "A stylesheet language that compiles down to a MapBox GL stylesheet",
   "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
