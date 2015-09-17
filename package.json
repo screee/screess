@@ -1,7 +1,7 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "name": "screess",
-  "description": "A stylesheet language that compiles down to a MapBox GL stylesheet",
+  "description": "A stylesheet language that compiles down to a Mapbox GL stylesheet",
   "author": "Lucas Wojciechowski <lucas@lucaswoj.com>",
   "main": "compiled/node/index",
   "bin": {
