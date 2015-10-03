@@ -5,14 +5,14 @@ parse = (source) -> Parser.parse(source).evaluate()
 
 describe "value macro", ->
 
-    it "should allow namespaced identifiers", ->
-      stylesheet = parse """
-        baz::foo = 17
-        #layer {
-          scree-test-meta: baz::foo()
-        }
-      """
-      assert.equal stylesheet.layers[0]['scree-test-meta'], 17
+  it "should allow namespaced identifiers", ->
+    stylesheet = parse """
+      baz::foo = 17
+      #layer {
+        scree-test-meta: baz::foo()
+      }
+    """
+    assert.equal stylesheet.layers[0]['scree-test-meta'], 17
 
   describe "shadowing", ->
 

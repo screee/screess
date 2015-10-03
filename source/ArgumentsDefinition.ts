@@ -12,12 +12,12 @@ interface ValueDefinition {
 class ArgumentsDefinition {
 
   static ZERO:ArgumentsDefinition = new ArgumentsDefinition([], null);
-  static WILDCARD:ArgumentsDefinition = new ArgumentsDefinition([], null, true);
+  static WILDCARD:ArgumentsDefinition = new ArgumentsDefinition([], null);
 
   public named:{[name:string]: ValueDefinition};
   public length:number;
 
-  constructor(public definitions:ValueDefinition[], public scope:Scope, public isWildcard_ = false) {
+  constructor(public definitions:ValueDefinition[], public scope:Scope) {
     if (this.definitions.length > 0) {
       assert(this.scope != null);
     }
@@ -36,8 +36,10 @@ class ArgumentsDefinition {
   }
 
   public isWildcard():boolean {
-    return this.isWildcard_;
+    return false;
   }
 }
+
+ArgumentsDefinition.WILDCARD.isWildcard = function() { return true };
 
 export = ArgumentsDefinition;

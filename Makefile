@@ -8,10 +8,9 @@ clean:
 build-pegjs:
 	mkdir -p compiled
 	pegjs \
-		--plugin pegjs-coffee-plugin \
 		--allowed-start-rules global,expression \
 		--cache \
-			source/parser.pegcs \
+			source/parser.pegjs \
 			compiled/parser.js
 
 install-typescript-interfaces:
