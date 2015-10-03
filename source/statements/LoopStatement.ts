@@ -5,6 +5,7 @@ import assert = require("assert");
 import Expression = require("../expressions/Expression");
 import _ = require("../utilities");
 import ScopeValue = require('../values/ScopeValue');
+import SourceLocation = require('../SourceLocation');
 
 class LoopStatement extends Statement {
   constructor(
@@ -21,8 +22,8 @@ class LoopStatement extends Statement {
 
     for (var key in collection) {
       var value = collection[key];
-      this.body.addLiteralMacro(this.valueIdentifier, value);
-      if (this.keyIdentifier) { this.body.addLiteralMacro(this.keyIdentifier, key); }
+      this.body.addLiteralMacro(this.valueIdentifier, value, SourceLocation.UNKNOWN);
+      if (this.keyIdentifier) { this.body.addLiteralMacro(this.keyIdentifier, key, SourceLocation.UNKNOWN); }
       this.body.eachPrimitiveStatement(stack, callback)
     }
 

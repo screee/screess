@@ -1,13 +1,10 @@
 import Expression = require("./Expression");
+import SourceLocation = require("../SourceLocation");
 
 class LiteralExpression extends Expression {
 
-  static literalExpression(value) {
-    return new LiteralExpression(value)
-  }
-
-  constructor(public value) {
-    super()
+  constructor(public value, location:SourceLocation) {
+    super(location)
   }
 
   evaluateToIntermediate():any {

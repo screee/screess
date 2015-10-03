@@ -4,10 +4,11 @@ import Stack = require("../Stack");
 import _ = require("../utilities");
 var parse = require("../parser").parse;
 var assert = require("assert");
+import SourceLocation = require("../SourceLocation");
 
 class StringExpression extends Expression {
 
-  constructor(public body:string) { super() }
+  constructor(public body:string, location:SourceLocation) { super(location) }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
 

@@ -3,11 +3,12 @@ import LiteralExpression = require("./LiteralExpression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import _ = require("../utilities");
+import SourceLocation = require("../SourceLocation");
 
 class ArrayExpression extends Expression {
 
-  constructor(public expressions:Expression[]) {
-    super();
+  constructor(public expressions:Expression[], location:SourceLocation) {
+    super(location);
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {

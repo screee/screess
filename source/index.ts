@@ -10,6 +10,7 @@ export import ExpressionSet = require("./ExpressionSet");
 export import Arguments = require("./Arguments");
 export import ArgumentsDefinition = require("./ArgumentsDefinition");
 export import Macro = require("./Macro");
+export import SourceLocation = require("./SourceLocation");
 
 export import Statement = require("./statements/Statement");
 export import ClassStatement = require("./statements/ClassStatement");

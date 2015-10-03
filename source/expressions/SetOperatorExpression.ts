@@ -5,6 +5,7 @@ import Value = require('../values/Value');
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import _ = require("../utilities");
+import SourceLocation = require("../SourceLocation");
 
 class SetOperatorExpression extends Expression {
 
@@ -13,7 +14,9 @@ class SetOperatorExpression extends Expression {
     "!in": (needle, haystack) => { return !_.contains(haystack, needle) }
   }
 
-  constructor(public needle:Expression, public operator:string, public haystack:Expression) { super() }
+  constructor(public needle:Expression, public operator:string, public haystack:Expression, location:SourceLocation) {
+    super(location)
+  }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var needle = this.needle.evaluateToIntermediate(scope, stack);

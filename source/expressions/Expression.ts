@@ -1,6 +1,12 @@
-import Value = require('../values/Value')
+import Value = require('../values/Value');
+import SourceLocation = require('../SourceLocation');
+import assert = require('assert');
 
 class Expression {
+
+  constructor(public location:SourceLocation) {
+    assert(this.location);
+  }
 
   evaluateToIntermediate(scope, stack):any {
     throw new Error("Abstract method");

@@ -1,10 +1,13 @@
 import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
+import SourceLocation = require("../SourceLocation");
 
 class TernaryExpression extends Expression {
 
-  constructor(public conditionExpression:Expression, public trueExpression:Expression, public falseExpression:Expression) { super(); }
+  constructor(public conditionExpression:Expression, public trueExpression:Expression, public falseExpression:Expression, location:SourceLocation) {
+    super(location);
+  }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var conditionValue = this.conditionExpression.evaluate(scope, stack);
@@ -21,4 +24,3 @@ class TernaryExpression extends Expression {
 }
 
 export = TernaryExpression;
-

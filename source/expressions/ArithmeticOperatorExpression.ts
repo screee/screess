@@ -4,11 +4,12 @@ import Scope = require("../Scope");
 import Stack = require("../Stack");
 import FunctionValue = require("../values/FunctionValue")
 import _ = require("../utilities");
+import SourceLocation = require("../SourceLocation");
 
 class ArithmeticOperatorExpression extends Expression {
 
-  constructor(public left:Expression, public operator:string, public right:Expression) {
-    super();
+  constructor(public left:Expression, public operator:string, public right:Expression, location:SourceLocation) {
+    super(location);
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {

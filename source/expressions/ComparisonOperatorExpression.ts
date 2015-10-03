@@ -5,6 +5,7 @@ import Value = require('../values/Value');
 import _ = require("../utilities");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
+import SourceLocation = require("../SourceLocation");
 
 class ComparisonOperatorExpression extends Expression {
 
@@ -26,7 +27,9 @@ class ComparisonOperatorExpression extends Expression {
     "!=": "!="
   }
 
-  constructor(public left, public operator, public right) { super() }
+  constructor(public left, public operator, public right, location:SourceLocation) {
+    super(location)
+  }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
     var left = this.left.evaluateToIntermediate(scope, stack);

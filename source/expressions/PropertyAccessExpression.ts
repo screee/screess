@@ -4,11 +4,12 @@ import Stack = require("../Stack");
 import assert = require('assert');
 import _ = require("underscore");
 import ScopeValue = require('../values/ScopeValue');
+import SourceLocation = require("../SourceLocation");
 
 class PropertyAccessExpression extends Expression {
 
-  constructor(public baseExpression:Expression, public propertyExpression:Expression) {
-    super()
+  constructor(public baseExpression:Expression, public propertyExpression:Expression, location:SourceLocation) {
+    super(location)
     assert(this.baseExpression instanceof Expression);
     assert(this.propertyExpression instanceof Expression);
   }

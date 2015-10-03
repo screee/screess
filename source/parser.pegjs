@@ -3,6 +3,12 @@
   var assert = require('assert');
   var ScreeSS = require("./index");
 
+  var file = null;
+  if (this && this.file) {
+    file = this.file;
+    this.file = null;
+  }
+
   // UNEXPECTED GLOBAL VARS
   var scope = null;
   var globalScope = null;
@@ -115,7 +121,7 @@ conditionalStatementElseIf =
   "else if" whitespace+ condition:expression whitespace* scope:scope { return {condition: condition, scope: scope}; }
 
 conditionalStatementElse =
-  "else" whitespace* scope:scope { return {condition: new ScreeSS.LiteralExpression(true), scope: scope} }
+  "else" whitespace* scope:scope { return {condition: new ScreeSS.LiteralExpression(true, ScreeSS.SourceLocation.UNKNOWN), scope: scope} }
 
 layerStatement =
   "#" name:identifier? whitespace* body:scope { return new ScreeSS.LayerStatement(name, body) }
@@ -146,10 +152,10 @@ filterExpression =
   filterStrongExpression
 
 booleanLogicExpression =
-  left:filterStrongExpression whitespace* operator:("||" / "&&") whitespace* right:expression { return new ScreeSS.BooleanLogicExpression(operator, [left, right]) }
+  left:filterStrongExpression whitespace* operator:("||" / "&&") whitespace* right:expression { return new ScreeSS.BooleanLogicExpression(operator, [left, right], new ScreeSS.SourceLocation(file, location())) }
 
 notOperatorExpression =
-  "!" whitespace* expression:expression { return new ScreeSS.NotOperatorExpression(expression) }
+  "!" whitespace* expression:expression { return new ScreeSS.NotOperatorExpression(expression, new ScreeSS.SourceLocation(file, location())) }
 
 /////////////////////////////////////////////
 //         Filter Weak Expression          //
@@ -165,24 +171,24 @@ groupExpression =
   whitespace* "(" expression:expression ")" { return expression }
 
 typeCheckOperatorExpression =
-  whitespace* "is" whitespace* type:arithmeticExpression { return new ScreeSS.TypeCheckOperatorExpression(type) }
+  whitespace* "is" whitespace* type:arithmeticExpression { return new ScreeSS.TypeCheckOperatorExpression(type, new ScreeSS.SourceLocation(file, location())) }
 
 comparisonOperatorExpression =
-  whitespace* left:arithmeticExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticExpression { return new ScreeSS.ComparisonOperatorExpression(left, operator, right) }
+  whitespace* left:arithmeticExpression whitespace* operator:("==" / ">=" / "<=" / "<" / ">" / "!=") whitespace* right:arithmeticExpression { return new ScreeSS.ComparisonOperatorExpression(left, operator, right, new ScreeSS.SourceLocation(file, location())) }
 
 setOperatorExpression =
-  whitespace* left:arithmeticExpression whitespace+ operator:("in" / "!in") whitespace+ right:arithmeticExpression { return new ScreeSS.SetOperatorExpression(left, operator, right) }
+  whitespace* left:arithmeticExpression whitespace+ operator:("in" / "!in") whitespace+ right:arithmeticExpression { return new ScreeSS.SetOperatorExpression(left, operator, right, new ScreeSS.SourceLocation(file, location())) }
 
 /////////////////////////////////////////////
 //     Arithmetic Operator Expression      //
 /////////////////////////////////////////////
 
 arithmeticExpression =
-  left:arithmeticStrongExpression whitespaceWeak* operator:("+" / "-") whitespaceWeak* right:arithmeticExpression { return new ScreeSS.ArithmeticOperatorExpression(left, operator, right) } /
+  left:arithmeticStrongExpression whitespaceWeak* operator:("+" / "-") whitespaceWeak* right:arithmeticExpression { return new ScreeSS.ArithmeticOperatorExpression(left, operator, right, new ScreeSS.SourceLocation(file, location())) } /
   arithmeticStrongExpression
 
 arithmeticStrongExpression =
-  left:propertyAccessExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { return new ScreeSS.ArithmeticOperatorExpression(left, operator, right) } /
+  left:propertyAccessExpression whitespaceWeak* operator:("/" / "*") whitespaceWeak* right:arithmeticStrongExpression { return new ScreeSS.ArithmeticOperatorExpression(left, operator, right, new ScreeSS.SourceLocation(file, location())) } /
   "(" whitespace* expression:arithmeticExpression whitespace* ")" { return expression } /
   conditionalExpression
 
@@ -191,8 +197,8 @@ arithmeticStrongExpression =
 /////////////////////////////////////////////
 
 conditionalExpression =
-  head:propertyAccessExpression whitespaceWeak* '??' whitespaceWeak* tail:conditionalExpression { return new ScreeSS.NullCoalescingExpression(head, tail) } /
-  condition:propertyAccessExpression whitespaceWeak* '?' whitespaceWeak* trueExpression:conditionalExpression whitespaceWeak* ':' whitespaceWeak* falseExpression:conditionalExpression { return new ScreeSS.TernaryExpression(condition, trueExpression, falseExpression) } /
+  head:propertyAccessExpression whitespaceWeak* '??' whitespaceWeak* tail:conditionalExpression { return new ScreeSS.NullCoalescingExpression(head, tail, new ScreeSS.SourceLocation(file, location())) } /
+  condition:propertyAccessExpression whitespaceWeak* '?' whitespaceWeak* trueExpression:conditionalExpression whitespaceWeak* ':' whitespaceWeak* falseExpression:conditionalExpression { return new ScreeSS.TernaryExpression(condition, trueExpression, falseExpression, new ScreeSS.SourceLocation(file, location())) } /
   propertyAccessExpression
 
 /////////////////////////////////////////////
@@ -209,9 +215,9 @@ propertyAccessExpression =
     for (var i = 0; i < accesses.length; i++) {
       var access = accesses[i];
       if (access[0] == ".") {
-        output = new ScreeSS.PropertyAccessExpression(output, new ScreeSS.LiteralExpression(access[1]));
+        output = new ScreeSS.PropertyAccessExpression(output, new ScreeSS.LiteralExpression(access[1], new ScreeSS.SourceLocation(file, location())), new ScreeSS.SourceLocation(file, location()));
       } else if (access[0] == "[") {
-        output = new ScreeSS.PropertyAccessExpression(output, access[1]);
+        output = new ScreeSS.PropertyAccessExpression(output, access[1], new ScreeSS.SourceLocation(file, location()));
       }
     }
 
@@ -231,24 +237,24 @@ atomicExpression =
   arrayExpression
 
 literalExpression =
-  value:value { return new ScreeSS.LiteralExpression(value) }
+  value:value { return new ScreeSS.LiteralExpression(value, new ScreeSS.SourceLocation(file, location())) }
 
 macroReferenceExpression =
-  name:namespacedIdentifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { return new ScreeSS.MacroReferenceExpression(name, expressions) } /
-  name:namespacedIdentifier (whitespace* "(" whitespace* ")")? { return new ScreeSS.MacroReferenceExpression(name, ScreeSS.ExpressionSet.ZERO) }
+  name:namespacedIdentifier whitespace* "(" whitespace* expressions:arguments whitespace* ")" { return new ScreeSS.MacroReferenceExpression(name, expressions, new ScreeSS.SourceLocation(file, location())) } /
+  name:namespacedIdentifier (whitespace* "(" whitespace* ")")? { return new ScreeSS.MacroReferenceExpression(name, ScreeSS.ExpressionSet.ZERO, new ScreeSS.SourceLocation(file, location())) }
 
 stringExpression =
-  "\"" body:[^\"]* "\"" { return new ScreeSS.StringExpression(body.join("")) } /
-  "'" body:[^\']* "'" { return new ScreeSS.StringExpression(body.join("")) }
+  "\"" body:[^\"]* "\"" { return new ScreeSS.StringExpression(body.join(""), new ScreeSS.SourceLocation(file, location())) } /
+  "'" body:[^\']* "'" { return new ScreeSS.StringExpression(body.join(""), new ScreeSS.SourceLocation(file, location())) }
 
 arrayExpression =
-  "[" whitespace* head:expression tail:(expressionSeperator expression)* whitespace* "]" { return new ScreeSS.ArrayExpression(_.map(rehead(head, tail))) }
+  "[" whitespace* head:expression tail:(expressionSeperator expression)* whitespace* "]" { return new ScreeSS.ArrayExpression(_.map(rehead(head, tail)), new ScreeSS.SourceLocation(file, location())) }
 
 scopeExpression =
-  body:scope { return new ScreeSS.ScopeExpression(body) }
+  body:scope { return new ScreeSS.ScopeExpression(body, new ScreeSS.SourceLocation(file, location())) }
 
 javascriptExpression =
-  "`" body:[^\`]* "`" { return new ScreeSS.JavascriptExpression(body.join("")) }
+  "`" body:[^\`]* "`" { return new ScreeSS.JavascriptExpression(body.join(""), new ScreeSS.SourceLocation(file, location())) }
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

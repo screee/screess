@@ -6,6 +6,7 @@ import LiteralExpression = require('./expressions/LiteralExpression')
 import assert = require('assert')
 import Stack = require('./Stack')
 import _ = require("./utilities")
+import SourceLocation = require('./SourceLocation');
 
 class Macro {
 
@@ -22,7 +23,7 @@ class Macro {
 
     var argsObject = args.toObject(this.argsDefinition, stack);
     scope.addLiteralMacros(argsObject);
-    scope.addLiteralMacros({arguments: argsObject});
+    scope.addLiteralMacro('arguments', argsObject, SourceLocation.UNKNOWN);
 
     stack.scope.push(scope);
     var evaluated = this.body.evaluateToIntermediate(scope, stack);

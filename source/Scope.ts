@@ -16,6 +16,8 @@ import formatGlobalScope = require('./scopes/global');
 import formatLayerScope = require('./scopes/layer');
 import formatClassScope = require('./scopes/class');
 import formatObjectScope = require('./scopes/object');
+import SourceLocation = require('./SourceLocation');
+
 var Parser = require("./parser");
 
 class Scope {
@@ -23,7 +25,10 @@ class Scope {
   private static coreLibrary:Scope = null;
 
   static createFromFile(file) {
+    var oldFile = Parser.file;
+    Parser.file = Path.resolve(file);
     return Parser.parse(FS.readFileSync(file, "utf8"));
+    Parser.file = oldFile;
   }
 
   static createCoreLibrary():Scope {
@@ -82,15 +87,16 @@ class Scope {
   //////////////////////////////////////////////////////////////////////////////
   // Macro Construction
 
+  // TODO deprecate this method
   addLiteralMacros(macros:{[name:string]:any}):void {
     for (var identifier in macros) {
       var value = macros[identifier];
-      this.addLiteralMacro(identifier, value);
+      this.addLiteralMacro(identifier, value, SourceLocation.UNKNOWN);
     }
   }
 
-  addLiteralMacro(identifier:string, value:any) {
-    this.addMacro(identifier, ArgumentsDefinition.ZERO, new LiteralExpression(value));
+  addLiteralMacro(identifier:string, value:any, location:SourceLocation) {
+    this.addMacro(identifier, ArgumentsDefinition.ZERO, new LiteralExpression(value, location));
   }
 
   addMacro(name:String, argsDefinition:ArgumentsDefinition, body:Expression) {

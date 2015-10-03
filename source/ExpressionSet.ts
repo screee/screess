@@ -5,7 +5,7 @@ import Stack = require("./Stack");
 import _ = require('./utilities');
 import Expression = require('./expressions/Expression');
 import LiteralExpression = require('./expressions/LiteralExpression');
-
+import SourceLocation = require('./SourceLocation');
 
 interface Item {
   name?:string;
@@ -22,7 +22,8 @@ class ExpressionSet {
 
   static fromPositionalValues(values:any[]):ExpressionSet {
     return new ExpressionSet(<Item[]> _.map(values, (value:any):Item  => {
-      return {expression: new LiteralExpression(value)};
+      // TODO provide real source location here
+      return {expression: new LiteralExpression(value, SourceLocation.UNKNOWN)};
     }));
   }
 

@@ -6,11 +6,12 @@ import Arguments = require('../Arguments');
 import Stack = require("../Stack");
 import _ = require("../utilities");
 import assert = require("assert");
+import SourceLocation = require("../SourceLocation");
 
 class MacroReferenceExpression extends Expression {
 
-  constructor(public name:string, public argExpressions:ExpressionSet) {
-    super();
+  constructor(public name:string, public argExpressions:ExpressionSet, location:SourceLocation) {
+    super(location);
   }
 
   evaluateToIntermediate(argsScope:Scope, stack:Stack):any {

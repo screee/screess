@@ -4,13 +4,14 @@ import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import eval = require("../eval");
+import SourceLocation = require("../SourceLocation");
 
 var parse = require("../parser").parse;
 
 class JavascriptExpression extends Expression {
 
-  constructor(public source:string) {
-    super()
+  constructor(public source:string, location:SourceLocation) {
+    super(location)
   }
 
   evaluateToIntermediate(scope: Scope, stack: Stack):any {

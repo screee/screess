@@ -4,6 +4,7 @@ import Expression = require("./Expression");
 import Scope = require("../Scope");
 import Stack = require("../Stack");
 import _ = require("../utilities");
+import SourceLocation = require("../SourceLocation");
 
 function isFalse(value:any):boolean { return value === false }
 function isTrue(value:any):boolean { return value === true }
@@ -15,8 +16,8 @@ class BooleanLogicExpression extends Expression {
     "&&": "all"
   };
 
-  constructor(public operator:string, public expressions:Expression[]) {
-    super();
+  constructor(public operator:string, public expressions:Expression[], location:SourceLocation) {
+    super(location);
   }
 
   evaluateToIntermediate(scope:Scope, stack:Stack):any {
